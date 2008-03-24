@@ -9,6 +9,8 @@ public:
 	/** display the image and save it when press ctrl+s */
 	static void displayImage(const IplImage* image, int wait = 0);
 
+	static void displayManyImage(char* title, int nArgs, ...);
+
 	/** display a region of the grey image and save it when press ctrl+s */
 	static void displayGreyImage(const char* imageData, int iWidth, int x, int y, int pW, int pH, int wait = 0);
 

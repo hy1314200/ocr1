@@ -1,5 +1,5 @@
 #include "DebugToolkit.h"
-#include "CharDivider.h"
+#include "OCRToolkit.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -196,8 +196,8 @@ void DebugToolkit::saveGreyImage(const char* imageData, int width, int height, c
 }
 
 bool DebugToolkit::isBinarized(const char* imageData, int width, int height){
-	char charColor = divide::CharDivider::s_CHARACTERCOLOR;
-	char backColor = divide::CharDivider::s_BACKGROUNDCOLOR;
+	char charColor = OCRToolkit::s_CHARACTERCOLOR;
+	char backColor = OCRToolkit::s_BACKGROUNDCOLOR;
 	bool isBinarized = true;
 
 	for(int i = 0; i<height; i++){
@@ -214,8 +214,8 @@ bool DebugToolkit::isBinarized(const char* imageData, int width, int height){
 }
 
 bool DebugToolkit::isBinarized(IplImage* image){
-	char charColor = divide::CharDivider::s_CHARACTERCOLOR;
-	char backColor = divide::CharDivider::s_BACKGROUNDCOLOR;
+	char charColor = OCRToolkit::s_CHARACTERCOLOR;
+	char backColor = OCRToolkit::s_BACKGROUNDCOLOR;
 
 	int width = image->width, height = image->height;
 	char* data = image->imageData;

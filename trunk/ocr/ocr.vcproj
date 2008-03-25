@@ -166,6 +166,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FontGen.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
 				>
 			</File>
@@ -193,6 +197,10 @@
 			</File>
 			<File
 				RelativePath=".\FeatureExtracter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FontGen.h"
 				>
 			</File>
 			<File

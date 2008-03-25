@@ -1,5 +1,5 @@
 #include "FeatureExtracter.h"
-#include "CharDivider.h"
+#include "OCRToolkit.h"
 #include "DebugToolkit.h"
 
 #include <iostream>
@@ -22,8 +22,8 @@ FeatureExtracter::Feature* FeatureExtracter::extractFeature(const char* imageDat
 void FeatureExtracter::calcStrokeWidthAndLen(const char* imageData, int* strokeWidth, int* totalStrokeLen)
 {
 	int charPixCount, hit;
-	int charColor = divide::CharDivider::s_CHARACTERCOLOR;
-	int backColor = divide::CharDivider::s_BACKGROUNDCOLOR;
+	int charColor = OCRToolkit::s_CHARACTERCOLOR;
+	int backColor = OCRToolkit::s_BACKGROUNDCOLOR;
 
 	charPixCount = hit = 0;
 
@@ -44,7 +44,7 @@ void FeatureExtracter::calcStrokeWidthAndLen(const char* imageData, int* strokeW
 					hit++;
 				}
 			}else if(*(imageData + s_NORMSIZE*i + j) != backColor){ // need modified
-				std::cout << "*(imageData + size*i + j) == " << (int)*(imageData + s_NORMSIZE*i + j) << endl; 
+				std::cout << "FeatureExtracter::calcStrokeWidthAndLen:\n\t*(imageData + size*i + j) == " << (int)*(imageData + s_NORMSIZE*i + j) << std::endl; 
 			}
 		}
 	}
@@ -69,7 +69,7 @@ void FeatureExtracter::calcStrokeWidthAndLen(const char* imageData, int* strokeW
 
 void FeatureExtracter::calcProjHist(const char* imageData, int projHist[][s_NORMSIZE])
 {
-	int charColor = divide::CharDivider::s_CHARACTERCOLOR;
+	int charColor = OCRToolkit::s_CHARACTERCOLOR;
 
 	memset(projHist, 0, 2*s_NORMSIZE*sizeof(int));
 
@@ -85,8 +85,8 @@ void FeatureExtracter::calcProjHist(const char* imageData, int projHist[][s_NORM
 
 void FeatureExtracter::calcTransDensAndPeri(const char* imageData, int* transitions, int strokeDensity[][s_STRIPESIZE], int peripheral[][s_STRIPESIZE][2])
 {
-	int charColor = divide::CharDivider::s_CHARACTERCOLOR;
-	int backColor = divide::CharDivider::s_BACKGROUNDCOLOR;
+	int charColor = OCRToolkit::s_CHARACTERCOLOR;
+	int backColor = OCRToolkit::s_BACKGROUNDCOLOR;
 	bool isFirst[4][s_NORMSIZE];
 
 	enum Order{ FIRST = 0, SECOND };
@@ -182,8 +182,8 @@ void FeatureExtracter::calcTransDensAndPeri(const char* imageData, int* transiti
 
 void FeatureExtracter::calcLocDirPropAndMaxLocDir(const char* imageData, int locDir[][s_GRIDSIZE][4], float strokeProp[][s_GRIDSIZE][4], int maxLocDirCtr[][s_GRIDSIZE][4])
 {
-	int charColor = divide::CharDivider::s_CHARACTERCOLOR;
-	int backColor = divide::CharDivider::s_BACKGROUNDCOLOR;
+	int charColor = OCRToolkit::s_CHARACTERCOLOR;
+	int backColor = OCRToolkit::s_BACKGROUNDCOLOR;
 	int count = 0, record[s_NORMSIZE][s_NORMSIZE][4];
 
 	memset(record, 0, 4*s_NORMSIZE*s_NORMSIZE*sizeof(int));
@@ -362,8 +362,8 @@ void FeatureExtracter::calcBlackJump(const char* imageData, int totalBlackJump[]
 		}
 	}
 
-	int charColor = divide::CharDivider::s_CHARACTERCOLOR;
-	int backColor = divide::CharDivider::s_BACKGROUNDCOLOR;
+	int charColor = OCRToolkit::s_CHARACTERCOLOR;
+	int backColor = OCRToolkit::s_BACKGROUNDCOLOR;
 
 	memset(totalBlackJump, 0, 2*s_SUBVCOUNT*sizeof(int));
 

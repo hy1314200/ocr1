@@ -12,9 +12,6 @@ namespace divide{
 	class CharDivider
 	{
 	public:
-		static const char s_CHARACTERCOLOR;
-		static const char s_BACKGROUNDCOLOR;
-
 		/** return false is character image has more than one line characters or has no one, else true */
 		static bool divideChar(char* greys, int iWidth, int iHeight, vector<char*>* picList, vector<int>* widthList, vector<int>* heightList);
 

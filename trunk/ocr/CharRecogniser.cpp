@@ -1,7 +1,7 @@
 #include "CharRecogniser.h"
 #include "FeatureExtracter.h"
 #include "DebugToolkit.h"
-#include "CharDivider.h"
+#include "OCRToolkit.h"
 
 #include <iostream>
 
@@ -35,7 +35,7 @@ float CharRecogniser::recogniseChar(const char* greys, int iWidth, int iHeight, 
 char* CharRecogniser::normalize(const char* greys, int iWidth, int iHeight)
 {
 	int normSize = FeatureExtracter::s_NORMSIZE;
-	int backColor = divide::CharDivider::s_BACKGROUNDCOLOR;
+	int backColor = OCRToolkit::s_BACKGROUNDCOLOR;
 	float multiple;
 	IplImage* dst = 0;
 

@@ -1,13 +1,11 @@
 #ifndef _OCRTOOLKIT_H
 #define _OCRTOOLKIT_H
 
-#include <vector>
-
-using namespace std;
-
 class OCRToolkit
 {
 public:
+	static const char s_CHARACTERCOLOR = (char)255;
+	static const char s_BACKGROUNDCOLOR = 0;
 
 	/**
 	 * Recognize the single line characters embedded in the grey picture array

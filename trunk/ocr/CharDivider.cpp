@@ -1,5 +1,6 @@
 #include "CharDivider.h"
 #include "DebugToolkit.h"
+#include "OCRToolkit.h"
 
 #include <iostream>
 #include <algorithm>
@@ -10,11 +11,10 @@
 using namespace std;
 using namespace divide;
 
-const char CharDivider::s_CHARACTERCOLOR = (char)255;
-const char CharDivider::s_BACKGROUNDCOLOR = 0;
-
 bool CharDivider::divideChar(char* greys, int iWidth, int iHeight, vector<char*>* picList, vector<int>* widthList, vector<int>* heightList)
 {
+	char charColor = OCRToolkit::s_CHARACTERCOLOR;
+
 	int upside, downside;
 	if(preProcess(greys, iWidth, iHeight, &upside, &downside) == false){
 		return false;
@@ -34,7 +34,7 @@ bool CharDivider::divideChar(char* greys, int iWidth, int iHeight, vector<char*>
 
 	for(int i = upside; i<=downside; i++){
 		for(int j = 0; j<iWidth; j++){
-			if(*(greys + iWidth*i + j) == s_CHARACTERCOLOR){
+			if(*(greys + iWidth*i + j) == charColor){
 				histgram[j]++;
 			}
 		}
@@ -96,7 +96,7 @@ bool CharDivider::divideChar(char* greys, int iWidth, int iHeight, vector<char*>
 
 					for(int i = 0; i<cHt; i++){
 						for(int j = 0; j<cWt; j++){
-							if(*(greys + iWidth*(y + i) + x + j) == s_CHARACTERCOLOR){
+							if(*(greys + iWidth*(y + i) + x + j) == charColor){
 								temp[j]++;
 							}
 						}
@@ -218,6 +218,8 @@ bool CharDivider::preProcess(const char* greys, int iWidth, int iHeight, int* up
 }
 
 bool CharDivider::horizontalRejectCalc(const char* greys, int iWidth, int iHeight, int* upside, int* downside, int threshold){
+	char charColor = OCRToolkit::s_CHARACTERCOLOR;
+	
 	int* histagram = new int[iHeight];
 	for(int i = 0; i<iHeight; i++){
 		histagram[i] = 0;
@@ -225,7 +227,7 @@ bool CharDivider::horizontalRejectCalc(const char* greys, int iWidth, int iHeigh
 
 	for(int i = 0; i<iHeight; i++){
 		for(int j = 0; j<iWidth; j++){
-			if(*(greys + iWidth*i + j) == s_CHARACTERCOLOR){
+			if(*(greys + iWidth*i + j) == charColor){
 				histagram[i]++;
 			}
 		}
@@ -262,6 +264,9 @@ bool CharDivider::horizontalRejectCalc(const char* greys, int iWidth, int iHeigh
 }
 
 char* CharDivider::removeBigConnectedComp(const char* greys, int iWidth, int upside, int downside){
+	char charColor = OCRToolkit::s_CHARACTERCOLOR;
+	char backColor = OCRToolkit::s_BACKGROUNDCOLOR;
+
 	int cH = downside - upside + 1;
 	IplImage* imageErode = cvCreateImage(cvSize(iWidth, cH), 8, 1);
 	int widthStep = imageErode->widthStep;
@@ -294,11 +299,11 @@ char* CharDivider::removeBigConnectedComp(const char* greys, int iWidth, int ups
 	bool found = true;
 	for(int i = 0; i<cH ; i++){
 		for(int j = 0; j<iWidth; j++){
-			if(*(dataErode + iWidth*i + j) == s_CHARACTERCOLOR){
+			if(*(dataErode + iWidth*i + j) == charColor){
 
-				cvFloodFill(imageErode, cvPoint(j, i), cvScalarAll(s_BACKGROUNDCOLOR));
-				if(*(dataConn + iWidth*i + j) == s_CHARACTERCOLOR){
-					cvFloodFill(imageConnected, cvPoint(j, i), cvScalarAll(s_BACKGROUNDCOLOR));
+				cvFloodFill(imageErode, cvPoint(j, i), cvScalarAll(backColor));
+				if(*(dataConn + iWidth*i + j) == charColor){
+					cvFloodFill(imageConnected, cvPoint(j, i), cvScalarAll(backColor));
 
 					//OCRToolkit::DEBUG_displayImage(imageConnected);
 				}
@@ -374,11 +379,13 @@ CharDivider::Scale CharDivider::scale(int fist, int second, InputType type)
 
 void CharDivider::findUpAndDown(const char* greys, int iWidth, int* X, int* Y, int* cWidth, int* cHeight)
 {
+	char charColor = OCRToolkit::s_CHARACTERCOLOR;
+
 	int xoff = *X, yoff = *Y, i;
 	bool isBreak = false;
 	for(i = 0; i < *cHeight; i++){
 		for(int j = 0; j < *cWidth; j++){
-			if(*(greys + iWidth*(i + yoff) + j + xoff) == s_CHARACTERCOLOR){
+			if(*(greys + iWidth*(i + yoff) + j + xoff) == charColor){
 				isBreak = true;
 
 				break;
@@ -394,7 +401,7 @@ void CharDivider::findUpAndDown(const char* greys, int iWidth, int* X, int* Y, i
 	isBreak = false;
 	for(i = *cHeight - 1; i>=0; i--){
 		for(int j = 0; j < *cWidth; j++){
-			if(*(greys + iWidth*(i + yoff) + j + xoff) == s_CHARACTERCOLOR){
+			if(*(greys + iWidth*(i + yoff) + j + xoff) == charColor){
 				isBreak = true;
 
 				break;
@@ -522,29 +529,35 @@ void CharDivider::copyArea(char* dest, const char* src, int iWidth, int x, int y
 }
 
 void CharDivider::DEBUG_markChar(char* greys, int iWidth, int iHeight, int x, int y, int w, int h){
+	char charColor = OCRToolkit::s_CHARACTERCOLOR;
+	char backColor = OCRToolkit::s_BACKGROUNDCOLOR;
+
 	for(int i = 0; i<w; i++){
-		*(greys + iWidth*y + x + i) = s_CHARACTERCOLOR;
-		*(greys + iWidth*(y+h-1) + x + i) = s_CHARACTERCOLOR;
+		*(greys + iWidth*y + x + i) = charColor;
+		*(greys + iWidth*(y+h-1) + x + i) = backColor;
 	}
 	for(int i = 0; i<h; i++){
-		*(greys + iWidth*(y+i) + x) = s_CHARACTERCOLOR;
-		*(greys + iWidth*(y+i) + x + w - 1) = s_CHARACTERCOLOR;
+		*(greys + iWidth*(y+i) + x) = charColor;
+		*(greys + iWidth*(y+i) + x + w - 1) = backColor;
 	}
 }
 
 void divide::CharDivider::filterNoise(char* greys, int iWidth, int upside, int downside, bool strict)
 {
+	char charColor = OCRToolkit::s_CHARACTERCOLOR;
+	char backColor = OCRToolkit::s_BACKGROUNDCOLOR;
+
 	int tw = iWidth + 4, iHeight = downside-upside+1, th = iHeight + 4;
 	char *pix = NULL, *buff = new char[tw*th];
 
 	for(int i = 0; i<2; i++){
-		memset(buff + tw*i, s_BACKGROUNDCOLOR, tw);
-		memset(buff + tw*(th-i-1), s_BACKGROUNDCOLOR, tw);
+		memset(buff + tw*i, backColor, tw);
+		memset(buff + tw*(th-i-1), backColor, tw);
 	}
 	for(int j = 0; j<2; j++){
 		for(int i = 0; i<iHeight; i++){
-			*(buff + tw*(i+2) + j) = s_BACKGROUNDCOLOR;
-			*(buff + tw*(i+2) + tw-j-1) = s_BACKGROUNDCOLOR;
+			*(buff + tw*(i+2) + j) = backColor;
+			*(buff + tw*(i+2) + tw-j-1) = backColor;
 		}
 	}
 
@@ -558,18 +571,18 @@ void divide::CharDivider::filterNoise(char* greys, int iWidth, int upside, int d
 			count = 0;
 			pix = buff + tw*(i+2) + j+2;
 
-			if(*pix == s_CHARACTERCOLOR){
+			if(*pix == charColor){
 				// check four corners
-				if(*(pix-1-tw) == s_CHARACTERCOLOR){
+				if(*(pix-1-tw) == charColor){
 					count++;
 				}
-				if(*(pix+1-tw) == s_CHARACTERCOLOR){
+				if(*(pix+1-tw) == charColor){
 					count++;
 				}
-				if(*(pix+1+tw) == s_CHARACTERCOLOR){
+				if(*(pix+1+tw) == charColor){
 					count++;
 				}
-				if(*(pix-1+tw) == s_CHARACTERCOLOR){
+				if(*(pix-1+tw) == charColor){
 					count++;
 				}
 
@@ -581,21 +594,21 @@ void divide::CharDivider::filterNoise(char* greys, int iWidth, int upside, int d
 					// * * *
 					// * 1 *
 					// * * *
-					if(*(pix-tw) == s_CHARACTERCOLOR){
+					if(*(pix-tw) == charColor){
 						count++;
 					}
-					if(*(pix-1) == s_CHARACTERCOLOR){
+					if(*(pix-1) == charColor){
 						count++;
 					}
-					if(*(pix+tw) == s_CHARACTERCOLOR){
+					if(*(pix+tw) == charColor){
 						count++;
 					}
-					if(*(pix+1) == s_CHARACTERCOLOR){
+					if(*(pix+1) == charColor){
 						count++;
 					}
 
 					if(count == 0){
-						*(greys + iWidth*(i+upside) + j) = *pix = s_BACKGROUNDCOLOR;
+						*(greys + iWidth*(i+upside) + j) = *pix = backColor;
 						noiseCount++;
 
 						continue;
@@ -609,17 +622,17 @@ void divide::CharDivider::filterNoise(char* greys, int iWidth, int upside, int d
 						count = 0;
 
 						for(int k = 0; k<4; k++){
-							if(*(pix-2-tw+k) == s_CHARACTERCOLOR){
+							if(*(pix-2-tw+k) == charColor){
 								count++;
 							}
-							if(*(pix-2+tw+k) == s_CHARACTERCOLOR){
+							if(*(pix-2+tw+k) == charColor){
 								count++;
 							}
 						}
-						if((*(pix-2) == s_CHARACTERCOLOR)){
+						if((*(pix-2) == charColor)){
 							count++;
 						}
-						if(*(pix+1) == s_CHARACTERCOLOR){
+						if(*(pix+1) == charColor){
 							count++;
 						}
 
@@ -634,17 +647,17 @@ void divide::CharDivider::filterNoise(char* greys, int iWidth, int upside, int d
 						count = 0;
 
 						for(int k = 0; k<4; k++){
-							if(*(pix-1+tw*(k-1)) == s_CHARACTERCOLOR){
+							if(*(pix-1+tw*(k-1)) == charColor){
 								count++;
 							}
-							if(*(pix+1+tw*(k-1)) == s_CHARACTERCOLOR){
+							if(*(pix+1+tw*(k-1)) == charColor){
 								count++;
 							}
 						}
-						if((*(pix-tw) == s_CHARACTERCOLOR)){
+						if((*(pix-tw) == charColor)){
 							count++;
 						}
-						if(*(pix+tw*2) == s_CHARACTERCOLOR){
+						if(*(pix+tw*2) == charColor){
 							count++;
 						}
 
@@ -659,17 +672,17 @@ void divide::CharDivider::filterNoise(char* greys, int iWidth, int upside, int d
 						count = 0;
 
 						for(int k = 0; k<4; k++){
-							if(*(pix-1-tw+k) == s_CHARACTERCOLOR){
+							if(*(pix-1-tw+k) == charColor){
 								count++;
 							}
-							if(*(pix-1+tw+k) == s_CHARACTERCOLOR){
+							if(*(pix-1+tw+k) == charColor){
 								count++;
 							}
 						}
-						if((*(pix-1) == s_CHARACTERCOLOR)){
+						if((*(pix-1) == charColor)){
 							count++;
 						}
-						if(*(pix+2) == s_CHARACTERCOLOR){
+						if(*(pix+2) == charColor){
 							count++;
 						}
 
@@ -686,10 +699,10 @@ void divide::CharDivider::filterNoise(char* greys, int iWidth, int upside, int d
 				count = 0;
 
 				for(int k = 0; k<4; k++){
-					if(*(pix-1-tw+k) == s_CHARACTERCOLOR){
+					if(*(pix-1-tw+k) == charColor){
 						count++;
 					}
-					if(*(pix-1+tw*2+k) == s_CHARACTERCOLOR){
+					if(*(pix-1+tw*2+k) == charColor){
 						count++;
 					}
 				}
@@ -699,10 +712,10 @@ void divide::CharDivider::filterNoise(char* greys, int iWidth, int upside, int d
 				}
 
 				for(int k = 0; k<2; k++){
-					if(*(pix-1+tw*k) == s_CHARACTERCOLOR){
+					if(*(pix-1+tw*k) == charColor){
 						count++;
 					}
-					if(*(pix+2+tw*k) == s_CHARACTERCOLOR){
+					if(*(pix+2+tw*k) == charColor){
 						count++;
 					}
 				}
@@ -718,10 +731,10 @@ void divide::CharDivider::filterNoise(char* greys, int iWidth, int upside, int d
 				count = 0;
 
 				for(int k = 0; k<4; k++){
-					if(*(pix-2-tw+k) == s_CHARACTERCOLOR){
+					if(*(pix-2-tw+k) == charColor){
 						count++;
 					}
-					if(*(pix-2+tw*2+k) == s_CHARACTERCOLOR){
+					if(*(pix-2+tw*2+k) == charColor){
 						count++;
 					}
 				}
@@ -731,32 +744,32 @@ void divide::CharDivider::filterNoise(char* greys, int iWidth, int upside, int d
 				}
 
 				for(int k = 0; k<2; k++){
-					if(*(pix-2+tw*k) == s_CHARACTERCOLOR){
+					if(*(pix-2+tw*k) == charColor){
 						count++;
 					}
-					if(*(pix+1+tw*k) == s_CHARACTERCOLOR){
+					if(*(pix+1+tw*k) == charColor){
 						count++;
 					}
 				}
 
 				if(count < 2){
-					*(greys + iWidth*(i+upside) + j) = *pix = s_BACKGROUNDCOLOR;
+					*(greys + iWidth*(i+upside) + j) = *pix = backColor;
 					noiseCount++;
 
-					if(*(pix+1) == s_CHARACTERCOLOR){
-						*(greys + iWidth*(i+upside) + j+1) = *(pix+1) = s_BACKGROUNDCOLOR;
+					if(*(pix+1) == charColor){
+						*(greys + iWidth*(i+upside) + j+1) = *(pix+1) = backColor;
 						noiseCount++;
 
 						continue;
 					}
-					if(*(pix-1+tw) == s_CHARACTERCOLOR){
-						*(greys + iWidth*(i+1+upside) + j-1) = *(pix-1+tw) = s_BACKGROUNDCOLOR;
+					if(*(pix-1+tw) == charColor){
+						*(greys + iWidth*(i+1+upside) + j-1) = *(pix-1+tw) = backColor;
 						noiseCount++;
 
 						continue;
 					}
-					if(*(pix+tw) == s_CHARACTERCOLOR){
-						*(greys + iWidth*(i+1+upside) + j) = *(pix+tw) = s_BACKGROUNDCOLOR;
+					if(*(pix+tw) == charColor){
+						*(greys + iWidth*(i+1+upside) + j) = *(pix+tw) = backColor;
 						noiseCount++;
 					}
 				}

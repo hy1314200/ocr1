@@ -102,13 +102,28 @@ void testFilterNoise(){
 	DebugToolkit::printGreyImage(data, 8, 8);
 }
 
+void testWChar(){
+	setlocale(LC_ALL, "");
+	wchar_t str[10];
+	str[0] = L'中';
+	str[1] = L'国';
+	str[2] = 0x0032;
+	str[3] = 0x0030;
+	str[4] = 0x0030;
+	str[5] = 0x0038;
+	str[6] = L'\0';
+
+	wprintf(L"%s\n", str);
+}
+
 int main(int argc, char** argv){
 	char path[20];
   	sprintf_s(path, "image/(%d).bmp", 3);
+	testWChar();
 //	testFeature2();
 // 	testFilterNoise();
 
- 	testRecognise(path);
+//	testRecognise(path);
 //	testFeature1(path);
 
 // 	for(int i = 1; i<=9; i++){
@@ -116,18 +131,6 @@ int main(int argc, char** argv){
 // 		cout << path << endl;
 // 		testRecognise(path);
 // 	}
-
-
-/*
-	setlocale(LC_ALL, "");
-	wchar_t str[4];
-	str[0] = L'中';
-	str[1] = L'国';
-	str[2] = L'1';
-	str[3] = L'\0';
-
-	wprintf(L"%s\n", str);
-	*/
 
 	return 0;
 }

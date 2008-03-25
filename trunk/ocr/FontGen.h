@@ -1,8 +1,8 @@
 #ifndef _FONTGEN_H
 #define _FONTGEN_H
 
-#include <cxcore.h>
 #include <stdio.h>
+#include <cxcore.h>
 
 namespace generate{
 
@@ -14,40 +14,16 @@ namespace generate{
 		/** now, Fang Song, Song, Kai Ti, Hei Ti, Li Shu is supported */
 		static const int TYPEKIND = 5;
 		enum Typeface{
-			FANGSONG = 0,
-			SONGTI,
+			SONGTI = 0,
+			FANGSONG,
 			KAITI,
 			HEITI,
 			LISHU
 		};
 
-		static FontGen* getInstance();
-
-		static void release(){
-			if(s_instance != NULL){
-				delete s_instance;
-
-				s_instance = NULL;
-			}
-		}
-
-		bool genFont(IplImage* image, wchar_t code, Typeface typeface);
-
-		bool genFont(IplImage* image, int index, Typeface typeface);
-
-		bool genFontLib(Typeface typeface);
-
-		void genFontLibAll();
-
-	private:
-		static FontGen* s_instance;
-
 		typedef struct _Char {
 			/** the unicode value of this item */
-			int value;
-
-			/** compacted 01 pixel data */
-			char* data;
+			wchar_t value;
 
 			/** the binary grey data of this item */
 			IplImage* image;
@@ -61,6 +37,9 @@ namespace generate{
 		}CharArray;
 
 		typedef struct _FontLib {
+
+			Typeface typeface;
+
 			/** thin_font_data: font data of ASCII chars */
 			CharArray* thinCharArray;
 
@@ -68,18 +47,25 @@ namespace generate{
 			CharArray* wideCharArray;
 		}FontLib;
 
-		FontLib* fontLib[TYPEKIND];	// 仿宋、宋体、楷体、黑体、隶书
+		static bool genExtFontLib(FontLib* fontLib, FILE* file);
 
-		FontGen(void);
-		~FontGen(void);
+		static bool genFontLib(FontLib* fontLib, FILE* file);
 
-		void installFont(FILE* file, Typeface typeface);
+		static bool storeFontLib(const char* path, const FontLib* fontLib);
 
-		bool isThinChar(wchar_t code){
+		static void releaseFontLib(FontLib* fontLib);
+
+	private:
+		FontGen(void){ };
+		~FontGen(void){ };
+
+		static bool isThinChar(wchar_t code){
 			return code < 128;
 		}
 
-		int findCharIndex(CharArray* fontData, wchar_t code);
+		static int findCharIndex(CharArray* fontData, wchar_t code);
+		
+		static void releaseCharArray(CharArray* charArray);
 	};
 
 }

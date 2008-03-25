@@ -10,6 +10,7 @@
 #include "CharRecogniser.h"
 #include "FeatureExtracter.h"
 #include "DebugToolkit.h"
+#include "FontGen.h"
 
 using namespace std;
 
@@ -116,10 +117,27 @@ void testWChar(){
 	wprintf(L"%s\n", str);
 }
 
+void testFontGen(){
+	using namespace generate;
+
+	FontGen::FontLib* lib = new FontGen::FontLib;
+	lib->typeface = FontGen::SONGTI;
+
+	FILE* file = fopen("extfile", "r");
+	FontGen::genExtFontLib(lib, file);
+	fclose(file);
+
+	DebugToolkit::displayImage(lib->wideCharArray->items->image);
+
+	delete lib;
+}
+
 int main(int argc, char** argv){
 	char path[20];
   	sprintf_s(path, "image/(%d).bmp", 3);
-	testWChar();
+
+	testFontGen();
+//	testWChar();
 //	testFeature2();
 // 	testFilterNoise();
 

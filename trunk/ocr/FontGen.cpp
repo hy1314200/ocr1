@@ -5,189 +5,133 @@
 
 using namespace generate;
 
-FontGen* FontGen::s_instance = NULL;
-
-FontGen::FontGen(void)
+bool FontGen::genExtFontLib(FontLib* fontLib, FILE* file)
 {
-	fontLib[FANGSONG] = NULL;
-	fontLib[SONGTI] =  NULL;
-	fontLib[KAITI] = NULL;
-	fontLib[HEITI] = NULL;
-	fontLib[LISHU] = NULL;
-}
-
-FontGen::~FontGen(void)
-{
-	char* data = NULL;
-	Char* temp = NULL;
-	CharArray* arr = NULL;
-
-	for(int i = 0; i<TYPEKIND; i++){
-		if(fontLib[i] != NULL){
-
-			for(int j = 0; j<2; j++){
-				if(j == 0){
-					arr = fontLib[i]->thinCharArray;
-				}else{
-					arr = fontLib[i]->wideCharArray;
-				}
-
-				if(arr != NULL){
-					int size = arr->size;
-
-					for(int k = 0; k<size; k++){
-						temp = arr->items + k;
-
-						if(temp->data != NULL){
-							delete[] temp->data;
-						}
-
-						if(temp->image != NULL){
-							cvReleaseImage(&(temp->image));
-						}
-
-						delete temp;
-					}
-
-					delete arr;
-				}
-			}
-
-			delete fontLib[i];
-		}
-	}
-}
-
-FontGen* FontGen::getInstance()
-{
-	if(s_instance == 0){
-		s_instance = new FontGen;
-
-		FILE* file = fopen("data/font/fangsong", "r");
-		if(file != NULL){
-			s_instance->installFont(file, SONGTI);
-			fclose(file);
-		}
-
-		file = fopen("data/font/songti", "r");
-		if(file != NULL){
-			s_instance->installFont(file, SONGTI);
-			fclose(file);
-		}
-
-		file = fopen("data/font/kaishu", "r");
-		if(file != NULL){
-			s_instance->installFont(file, SONGTI);
-			fclose(file);
-		}
-
-		file = fopen("data/font/heiti", "r");
-		if(file != NULL){
-			s_instance->installFont(file, SONGTI);
-			fclose(file);
-		}
-
-		file = fopen("data/font/lishu", "r");
-		if(file != NULL){
-			s_instance->installFont(file, SONGTI);
-			fclose(file);
-		}
-	}
-
-	return s_instance;
-}
-
-bool FontGen::genFont(IplImage* image, wchar_t code, Typeface typeface)
-{
-	int index;
-	if(isThinChar(code)){
-		index = findCharIndex(fontLib[typeface]->thinCharArray, code);
-	}else{
-		index = findCharIndex(fontLib[typeface]->wideCharArray, code);
-	}
-
-	return genFont(image, index, typeface);
-}
-
-bool FontGen::genFont(IplImage* image, int index, Typeface typeface)
-{
-	if(image->width != image->height || image->width != s_CHARSIZE || image->imageData == NULL){
+	if(fontLib == NULL || file == NULL){
 		return false;
 	}
 
+	fontLib->thinCharArray = new CharArray;
+	fontLib->wideCharArray = new CharArray;
 
-	return false;
-}
+	char charColor = OCRToolkit::s_CHARACTERCOLOR;
+	char backColor = OCRToolkit::s_BACKGROUNDCOLOR;
 
-bool FontGen::genFontLib(Typeface typeface){
-
-	return false;
-}
-
-void FontGen::genFontLibAll()
-{
-	for(int i = 0; i<TYPEKIND; i++){
-		if(fontLib[i]){
-			genFontLib((Typeface)i);
-		}
-	}
-}
-
-void FontGen::installFont(FILE* file, Typeface typeface)
-{
-	const char* offset = NULL;
-	const int thinW = 4, wideW = 8;
-	char temp[50];
-	int value, width, len = strlen("EX_FONT_UNICODE_VAL(0x0000)");
+	char c, temp[50];
+	int t, width, count;
 	CharArray* carray = NULL;
+	Char* item = NULL;
+	IplImage* image = NULL;
 
-	fontLib[typeface] = new FontLib;
-	fontLib[typeface]->thinCharArray = new CharArray;
-	fontLib[typeface]->wideCharArray = new CharArray;
+	while(fscanf(file, "%s", temp) != EOF){
 
-	while(true){
-		int res = fscanf(file, "%s", temp);
+		if(strcmp(temp, "struct") == 0){
 
-		if(res == EOF){
-			break;
-		}						
-		
-		if(strlen(temp) == len){	// len = strlen("EX_FONT_UNICODE_VAL(0x0000)")
-			offset = temp + 20;
-			temp[len - 1] = '\0';
-
-			value = atoi(offset);
-
-			if(isThinChar(value)){
-				width = thinW;
-
-				carray = fontLib[typeface]->thinFontData;
+			fscanf(file, "%s", temp);
+			if(temp[1] == 't'){
+				width = 4;	// thin compacted 01 data with 4 elements in a line
+				carray = fontLib->thinCharArray;
 			}else{
-				width = wideW;
+				assert(temp[1] == 'w');
 
-				carray = fontLib[typeface]->wideFontData;
+				width = 8;	//wide compacted 01 data with 8 elements in a line
+				carray = fontLib->wideCharArray;
 			}
 
-			char c;
-			fscanf(file, "%c", &c);
-			assert(c == '{');
+			for(int i = 0; i<3; i++){
+				while((c = fgetc(file)) != '['){  }
+			}
 
-			int t;
-			for(int i = 0; i<s_CHARSIZE; i++){
-				for(int j = 0; j<width; j++){
-					fscanf(file, "%d", &t);
+			fscanf(file, "%d", &count);
+			carray->size = count;
+			carray->items = new Char[count];
 
+			for(int i = 0; i<count; i++){
+				image = (carray->items + i)->image;
 
+				image = cvCreateImage(cvSize(s_CHARSIZE, s_CHARSIZE), 8, 1);
+				cvSet(image, cvScalar(backColor));
+			}
+
+			for(int i = 0; i<count; i++){
+				item = carray->items + count;
+
+				while((c = fgetc(file)) != 'x'){  }	// EX_FONT_UNICODE_VAL(0x0000)
+
+				fscanf(file, "%xd", &(item->value));
+
+				char* data = item->image->imageData;
+				int widthStep = item->image->widthStep;
+
+				for(int j = 0; j<s_CHARSIZE; j++){
+					for(int k = 0; k<width; k++){
+
+						while((c = fgetc(file)) != 'x'){  }
+
+						fscanf(file, "%xd", &t);
+
+						if(t != 0x00){
+							int s = 0x80;
+
+							for(int l = 0; l<8; l++, s >> 1){
+								if(t & s != 0){
+									*(data + widthStep*i + 8*k + l) = charColor;
+								}
+							}
+						}
+					}
 				}
-
-				fscanf(file, "%c", c);
-				assert(c == ',' || c == '}');
 			}
 		}
 	}
+
+	return true;
 }
 
-int generate::FontGen::findCharIndex(CharArray* charArray, wchar_t code)
+bool FontGen::genFontLib(FontLib* fontLib, FILE* file)
+{
+	return false;
+}
+
+bool FontGen::storeFontLib(const char* path, const FontLib* fontLib)
+{
+	return false;
+}
+
+void FontGen::releaseFontLib(FontLib* fontLib)
+{
+	if(fontLib->thinCharArray != NULL){
+		releaseCharArray(fontLib->thinCharArray);
+	}
+
+	if(fontLib->wideCharArray != NULL){
+		releaseCharArray(fontLib->wideCharArray);
+	}
+
+	delete fontLib;
+}
+
+void FontGen::releaseCharArray(CharArray* charArray)
+{
+	if(charArray->size > 0){
+		assert(charArray->items != NULL);
+
+		Char* temp = charArray->items;
+		int size = charArray->size;
+
+		for(int i = 0; i<size; i++){
+			cvReleaseImage(&((temp + i)->image));
+
+			(temp + i)->image = NULL;
+
+			delete temp;
+		}
+	}
+
+	delete charArray;
+}
+
+int FontGen::findCharIndex(CharArray* charArray, wchar_t code)
 {
 	int low = 0;
 	int hign = charArray->size;

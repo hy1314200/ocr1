@@ -79,14 +79,14 @@ FontGen::_Char* FontGen::_Char::parseIntFile(FILE* file)
 	int charSize = 8, offset = 0, count = image->imageSize/charSize;
 	char temp, *data = image->imageData;
 	for(int i = 0; i<count; i++){
-		fread(&temp, charSize, 1, file);
+		fread(&temp, sizeof(char), 1, file);
 
 		if(temp != 0x00){
 			int s = 0x80;
 
 			for(int j = 0; j<charSize; j++, s = s >> 1){
 				if((temp & s) != 0){
-					*(data + charSize*count + j) = charColor;
+					*(data + charSize*i + j) = charColor;
 				}
 			}
 		}
@@ -108,13 +108,17 @@ void FontGen::_Char::storeData(FILE* file)
 	char temp, *data = m_image->imageData;
 
 	for(int i = 0; i<count; i++){
-		for(int j = 0, temp = 0; j < charSize; j++, offset++, temp = temp << 1){
+		temp = 0;
+
+		for(int j = 0; j < charSize; j++, offset++){
+			temp = temp << 1;
+
 			if(*(data + offset) == charColor){
 				temp |= 1;
 			}
 		}
 
-		fwrite(&temp, charSize, 1, file);
+		fwrite(&temp, sizeof(char), 1, file);
 	}
 
 	//fwrite(m_image->imageData, sizeof(char), m_image->imageSize, file);

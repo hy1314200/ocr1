@@ -120,14 +120,17 @@ void testWChar(){
 void testFontGen(){
 	using namespace generate;
 
-	FontGen::FontLib* lib = new FontGen::FontLib;
-	lib->typeface = FontGen::SONGTI;
+	//FILE* file = fopen("data/font/songti.ext", "r");
+	FILE* file = fopen("data/font/songti.int", "r");
+	assert(file != NULL);
 
-	FILE* file = fopen("extfile", "r");
-	FontGen::genExtFontLib(lib, file);
+	//FontLib* lib = FontGen::genExtFontLib(file, SONGTI);
+	FontLib* lib = FontGen::genIntFontLib(file);
+
 	fclose(file);
 
-	DebugToolkit::displayImage(lib->wideCharArray->items->image);
+	//lib->storeData("data/font/songti.int");
+	DebugToolkit::displayImage(lib->wideCharArray()->at(13)->image());
 
 	delete lib;
 }

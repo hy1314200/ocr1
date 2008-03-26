@@ -2,58 +2,126 @@
 #define _FONTGEN_H
 
 #include <stdio.h>
+#include <vector>
 #include <cxcore.h>
 
+using namespace std;
+
 namespace generate{
+
+	const int CHARSIZE = 64;
+
+	/** now, Fang Song, Song, Kai Ti, Hei Ti, Li Shu is supported */
+	static const int TYPEKIND = 5;
+	enum Typeface{
+		SONGTI = 0,
+		FANGSONG,
+		KAITI,
+		HEITI,
+		LISHU
+	};
+
+	class Char {
+	public:
+		wchar_t value(){
+			return m_value;
+		}
+
+		IplImage* image(){
+			return m_image;
+		}
+
+		virtual void storeData(FILE* file) = 0;
+
+		virtual ~Char(){
+			if(m_image != NULL){
+				cvReleaseImage(&m_image);
+			}
+		}
+
+	protected:
+		/** the unicode value of this item */
+		wchar_t m_value;
+
+		/** the binary grey data of this item */
+		IplImage* m_image;
+
+		Char(wchar_t value, IplImage* image){
+			m_value = value;
+			m_image = image;
+		};
+	};
+
+	class FontLib {
+	public:
+		Typeface typeface(){
+			return m_typeface;
+		}
+
+		vector<Char*>* thinCharArray(){
+			return m_thinCharArray;
+		}
+
+		vector<Char*>* wideCharArray(){
+			return m_wideCharArray;
+		}
+
+		virtual void storeData(const char* filepath) = 0;
+
+		virtual ~FontLib();
+
+	protected:
+		Typeface m_typeface;
+
+		/** thin font data: font data of ASCII chars */
+		vector<Char*>* m_thinCharArray;
+
+		/** wide font data: font data of multibytes chars */
+		vector<Char*>* m_wideCharArray;
+
+		FontLib(Typeface typeface, vector<Char*>* thinCharArray, vector<Char*>* wideCharArray){
+			m_typeface = typeface;
+			m_thinCharArray = thinCharArray;
+			m_wideCharArray = wideCharArray;
+		}
+	};
 
 	class FontGen
 	{
 	public:
-		static const int s_CHARSIZE = 64;
+		class _Char: public Char
+		{
+		public:
+			static _Char* parseExtFile(FILE* file, int widthOfLine);
 
-		/** now, Fang Song, Song, Kai Ti, Hei Ti, Li Shu is supported */
-		static const int TYPEKIND = 5;
-		enum Typeface{
-			SONGTI = 0,
-			FANGSONG,
-			KAITI,
-			HEITI,
-			LISHU
+			static _Char* parseIntFile(FILE* file);
+
+			void storeData(FILE* file);
+
+		private:
+			_Char(wchar_t value, IplImage* image): Char(value, image){  };
+
 		};
 
-		typedef struct _Char {
-			/** the unicode value of this item */
-			wchar_t value;
+		class _FontLib: public FontLib
+		{
+		public:
+			static _FontLib* parseExtFile(FILE* file, Typeface typeface);
 
-			/** the binary grey data of this item */
-			IplImage* image;
-		}Char;
+			static _FontLib* parseIntFile(FILE* file);
 
-		typedef struct _CharArray {
-			/** the total number of all items */
-			int size;
+			void storeData(const char* filepath);
 
-			Char* items;
-		}CharArray;
+		private:
+			_FontLib(Typeface typeface, vector<Char*>* thinCharArray, vector<Char*>* wideCharArray): FontLib(typeface, thinCharArray, wideCharArray){  };
 
-		typedef struct _FontLib {
+		};
 
-			Typeface typeface;
+		static FontLib* genExtFontLib(FILE* file, Typeface typeface);
 
-			/** thin_font_data: font data of ASCII chars */
-			CharArray* thinCharArray;
-
-			/** wide_font_data: font data of multibytes chars */
-			CharArray* wideCharArray;
-		}FontLib;
-
-		static bool genExtFontLib(FontLib* fontLib, FILE* file);
-
-		static bool genFontLib(FontLib* fontLib, FILE* file);
+		static FontLib* genIntFontLib(FILE* file);
 
 		static bool storeFontLib(const char* path, const FontLib* fontLib);
-
-		static void releaseFontLib(FontLib* fontLib);
 
 	private:
 		FontGen(void){ };
@@ -63,9 +131,7 @@ namespace generate{
 			return code < 128;
 		}
 
-		static int findCharIndex(CharArray* fontData, wchar_t code);
-		
-		static void releaseCharArray(CharArray* charArray);
+		static int findCharIndex(vector<Char*>* charArray, wchar_t code);
 	};
 
 }

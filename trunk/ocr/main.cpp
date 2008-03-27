@@ -20,6 +20,8 @@ void testRecognise(char* path){
 	const char* imagePath = path;
 	IplImage* image = cvLoadImage(imagePath, CV_LOAD_IMAGE_GRAYSCALE);
 
+	DebugToolkit::displayImage(image);
+
 	char* data = image->imageData;
 	int width = image->width, height = image->height;
 
@@ -150,15 +152,15 @@ void testFontStore(){
 
 int main(int argc, char** argv){
 	char path[20];
-  	sprintf_s(path, "image/(%d).bmp", 3);
+  	sprintf_s(path, "image/test/(%d).bmp", 8);
 
-	testFontGen();
+//	testFontGen();
 //	testFontStore();
 //	testWChar();
 //	testFeature2();
 // 	testFilterNoise();
 
-//	testRecognise(path);
+	testRecognise(path);
 //	testFeature1(path);
 
 // 	for(int i = 1; i<=9; i++){

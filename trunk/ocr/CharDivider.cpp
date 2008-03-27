@@ -1,4 +1,5 @@
 #include "CharDivider.h"
+#include "stdafx.h"
 #include "DebugToolkit.h"
 #include "OCRToolkit.h"
 
@@ -20,7 +21,10 @@ bool CharDivider::divideChar(char* greys, int iWidth, int iHeight, vector<char*>
 		return false;
 	}
 
+#ifdef FILTER_NOISE
+	//filterNoise(greys, iWidth, upside, downside, true);
 	filterNoise(greys, iWidth, upside, downside, false);
+#endif
 
 	int cWidth, cHeight;
 	cHeight = downside - upside + 1;
@@ -83,7 +87,10 @@ bool CharDivider::divideChar(char* greys, int iWidth, int iHeight, vector<char*>
 				needBreak = true;
 
 				DEBUG_markChar(greys, iWidth, iHeight, x, y, cWt, cHt);
-				//DebugToolkit::DEBUG_displayImage(alloc, cWt, cHt);
+
+#ifdef DISPLAY_DIVIDED_CHAR
+				DebugToolkit::displayGreyImage(alloc, cWt, cHt);
+#endif
 
 				break;
 
@@ -120,7 +127,10 @@ bool CharDivider::divideChar(char* greys, int iWidth, int iHeight, vector<char*>
 					(*heightList).push_back(cHt);
 
 					DEBUG_markChar(greys, iWidth, iHeight, x, y, cWidth, cHt);
-					//DebugToolkit::DEBUG_displayImage(alloc, cWidth, cHt);
+
+#ifdef DISPLAY_DIVIDED_CHAR
+					DebugToolkit::displayGreyImage(alloc, cWidth, cHt);
+#endif
 
 					alloc = new char[cWidth*cHt];
 					copyArea(alloc, greys, iWidth, x + cWt - cWidth, y, cWidth, cHt);
@@ -130,7 +140,10 @@ bool CharDivider::divideChar(char* greys, int iWidth, int iHeight, vector<char*>
 					(*heightList).push_back(cHt);
 
 					DEBUG_markChar(greys, iWidth, iHeight, x + cWt - cWidth, y, cWidth, cHt);
-					//DebugToolkit::DEBUG_displayImage(alloc, cWidth, cHt);
+
+#ifdef DISPLAY_DIVIDED_CHAR
+					DebugToolkit::displayGreyImage(alloc, cWidth, cHt);
+#endif
 
 					needBreak = true;
 				}
@@ -170,7 +183,11 @@ bool CharDivider::divideChar(char* greys, int iWidth, int iHeight, vector<char*>
 						(*heightList).push_back(cHt);
 
 						DEBUG_markChar(greys, iWidth, iHeight, x, y, cWt, cHt);
-						//DebugToolkit::DEBUG_displayImage(alloc, cWt, cHt);
+
+#ifdef DISPLAY_DIVIDED_CHAR
+						DebugToolkit::displayGreyImage(alloc, cWt, cHt);
+#endif
+
 					}else{
 						// 想想怎么处理
 					}
@@ -292,7 +309,8 @@ char* CharDivider::removeBigConnectedComp(const char* greys, int iWidth, int ups
 	IplConvKernel* element = cvCreateStructuringElementEx( anchor*2+1, anchor*2+1, anchor, anchor, CV_SHAPE_ELLIPSE, 0 );
 
 	cvErode(imageErode, imageErode, element, 1);
-	//OCRToolkit::DEBUG_displayImage(imageErode);
+
+	//DebugToolkit::displayImage(imageErode);
 
 	char* dataErode = imageErode->imageData;
 	char* dataConn = imageConnected->imageData;
@@ -304,14 +322,16 @@ char* CharDivider::removeBigConnectedComp(const char* greys, int iWidth, int ups
 				cvFloodFill(imageErode, cvPoint(j, i), cvScalarAll(backColor));
 				if(*(dataConn + iWidth*i + j) == charColor){
 					cvFloodFill(imageConnected, cvPoint(j, i), cvScalarAll(backColor));
-
-					//OCRToolkit::DEBUG_displayImage(imageConnected);
 				}
 
 				found = true;
 			}
 		}
 	}
+
+#ifdef DISPLAY_CONNECTED_IMAGE
+	DebugToolkit::displayImage(imageConnected);
+#endif
 
 	if(!found){
 		return NULL;
@@ -534,11 +554,11 @@ void CharDivider::DEBUG_markChar(char* greys, int iWidth, int iHeight, int x, in
 
 	for(int i = 0; i<w; i++){
 		*(greys + iWidth*y + x + i) = charColor;
-		*(greys + iWidth*(y+h-1) + x + i) = backColor;
+		*(greys + iWidth*(y+h-1) + x + i) = charColor;
 	}
 	for(int i = 0; i<h; i++){
 		*(greys + iWidth*(y+i) + x) = charColor;
-		*(greys + iWidth*(y+i) + x + w - 1) = backColor;
+		*(greys + iWidth*(y+i) + x + w - 1) = charColor;
 	}
 }
 

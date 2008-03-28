@@ -193,9 +193,11 @@ FontGen::_FontLib* FontGen::_FontLib::parseIntFile(FILE* file)
 	return new _FontLib(typeface, cTArray, cWArray);
 }
 
-void FontGen::_FontLib::storeData(const char* filepath){
+bool FontGen::_FontLib::storeData(const char* filepath){
 	FILE* file = fopen(filepath, "wb");
-	assert(file != NULL);
+	if(file == NULL){
+		return false;
+	}
 
 	fwrite(&m_typeface, sizeof(Typeface), 1, file);
 
@@ -214,6 +216,8 @@ void FontGen::_FontLib::storeData(const char* filepath){
 	}
 
 	fclose(file);
+
+	return true;
 }
 
 FontLib* FontGen::genExtFontLib(FILE* file, Typeface typeface)
@@ -228,7 +232,7 @@ FontLib* FontGen::genIntFontLib(FILE* file)
 
 bool FontGen::storeFontLib(const char* path, const FontLib* fontLib)
 {
-	return false;
+	return fontLib->storeData(path);
 }
 
 int FontGen::findCharIndex(vector<Char*>* charArray, wchar_t code)

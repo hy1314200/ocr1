@@ -110,7 +110,7 @@ namespace generate{
 
 			static _FontLib* parseIntFile(FILE* file);
 
-			void storeData(const char* filepath);
+			bool storeData(const char* filepath);
 
 		private:
 			_FontLib(Typeface typeface, vector<Char*>* thinCharArray, vector<Char*>* wideCharArray): FontLib(typeface, thinCharArray, wideCharArray){  };

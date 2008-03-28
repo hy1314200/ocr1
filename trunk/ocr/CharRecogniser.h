@@ -1,6 +1,8 @@
 #ifndef _CHARRECOGNISER_H
 #define _CHARRECOGNISER_H
 
+#include "FontGen.h"
+
 namespace recognise{
 
 	class CharRecogniser
@@ -24,13 +26,23 @@ namespace recognise{
 		/** @return Reliably, from 0% to 100% */
 		float recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res);
 
+		void buildFeatureLib(generate::FontLib* fontLib, int size);
+
+		void DEBUG_testDistorte(char** samples, char* prototype, int sampleSize){
+			distorte(samples, prototype, sampleSize);
+		}
+
 	private:
 		static CharRecogniser* s_instance;
 
 		CharRecogniser(void);
 		~CharRecogniser(void);
 
-		char* normalize(const char* greys, int iWidth, int iHeight);
+		void normalize(char* dst, const char* greys, int iWidth, int iHeight);
+		
+		/** used to generate many distorted samples for training */
+		void distorte(char** samples, char* prototype, int sampleSize);
+
 	};
 
 }

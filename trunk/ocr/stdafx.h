@@ -1,6 +1,10 @@
 #ifndef _STDAFX_H
 #define  _STDAFX_H
 
+#ifndef DEBUG
+#define DEBUG
+#endif
+
 // display define
 #ifndef DISPLAY_DIVIDED_CHAR
 //#define DISPLAY_DIVIDED_CHAR

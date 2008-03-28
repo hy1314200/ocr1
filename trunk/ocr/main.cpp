@@ -129,7 +129,7 @@ void testFontGen(){
 
 	fclose(file);
 
-	DebugToolkit::displayImage(lib->thinCharArray()->at(0)->image());
+	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(15)->imageData(), generate::Char.s_CHARSIZE, generate::Char.s_CHARSIZE);
 
 	delete lib;
 }
@@ -145,22 +145,39 @@ void testFontStore(){
 	fclose(file);
 
 	lib->storeData("data/font/songti.int");
-	DebugToolkit::displayImage(lib->thinCharArray()->at(0)->image());
+	DebugToolkit::displayGreyImage(lib->thinCharArray()->at(0)->imageData(), Char.s_CHARSIZE, Char.s_CHARSIZE);
 
 	delete lib;
+}
+
+void testDistorte(){
+	using namespace recognise;
+
+	IplImage* image = cvLoadImage("ctrl_s.bmp", 0);
+
+	char b[64*64], *a = new char[64*64];
+
+	for(int i = 0; i<64; i++){
+		memcpy(b+64*i, image->imageData + image->widthStep*i, 64);
+	}
+
+	CharRecogniser::getInstance()->DEBUG_testDistorte(&a, b, 1);
+
+	cvReleaseImage(&image);
 }
 
 int main(int argc, char** argv){
 	char path[20];
   	sprintf_s(path, "image/test/(%d).bmp", 8);
 
+	testDistorte();
 //	testFontGen();
 //	testFontStore();
 //	testWChar();
 //	testFeature2();
 // 	testFilterNoise();
 
-	testRecognise(path);
+//	testRecognise(path);
 //	testFeature1(path);
 
 // 	for(int i = 1; i<=9; i++){

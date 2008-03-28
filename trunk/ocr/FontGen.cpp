@@ -30,18 +30,13 @@ FontGen::_Char* FontGen::_Char::parseExtFile(FILE* file, int widthOfLine)
 
 	char c;
 	wchar_t value;
-	IplImage* image = cvCreateImage(cvSize(CHARSIZE, CHARSIZE), 8, 1);
-
-	cvSet(image, cvScalar(backColor));
+	char* data = new char[s_CHARSIZE*s_CHARSIZE];
 
 	while((c = fgetc(file)) != 'x'){  }	// EX_FONT_UNICODE_VAL(0x0000)
 
 	fscanf(file, "%xd", &value);
 
-	char* data = image->imageData;
-	int widthStep = image->widthStep;
-
-	for(int i = 0; i<CHARSIZE; i++){
+	for(int i = 0; i<s_CHARSIZE; i++){
 		for(int j = 0; j<widthOfLine; j++){
 
 			while((c = fgetc(file)) != 'x'){  }
@@ -54,14 +49,14 @@ FontGen::_Char* FontGen::_Char::parseExtFile(FILE* file, int widthOfLine)
 
 				for(int k = 0; k<8; k++, s = s >> 1){
 					if((t & s) != 0){
-						*(data + widthStep*i + 8*j + k) = charColor;
+						*(data + s_CHARSIZE*i + 8*j + k) = charColor;
 					}
 				}
 			}
 		}
 	}
 
-	return new _Char(value, image);
+	return new _Char(value, data);
 }
 
 FontGen::_Char* FontGen::_Char::parseIntFile(FILE* file)
@@ -70,23 +65,21 @@ FontGen::_Char* FontGen::_Char::parseIntFile(FILE* file)
 	char backColor = OCRToolkit::s_BACKGROUNDCOLOR;
 
 	wchar_t value;
-	IplImage* image = cvCreateImage(cvSize(CHARSIZE, CHARSIZE), 8, 1);
+	char* data = new char[s_CHARSIZE*s_CHARSIZE];
 
 	fread(&value, sizeof(wchar_t), 1, file);
 
-	cvSet(image, cvScalar(backColor));
-
-	int charSize = 8, offset = 0, count = image->imageSize/charSize;
-	char temp, *data = image->imageData;
+	int offset = 0, count = s_CHARSIZE*s_CHARSIZE/8;
+	char temp;
 	for(int i = 0; i<count; i++){
 		fread(&temp, sizeof(char), 1, file);
 
 		if(temp != 0x00){
 			int s = 0x80;
 
-			for(int j = 0; j<charSize; j++, s = s >> 1){
+			for(int j = 0; j<8; j++, s = s >> 1){
 				if((temp & s) != 0){
-					*(data + charSize*i + j) = charColor;
+					*(data + 8*i + j) = charColor;
 				}
 			}
 		}
@@ -94,7 +87,7 @@ FontGen::_Char* FontGen::_Char::parseIntFile(FILE* file)
 
 	//fread(image->imageData, sizeof(char), image->imageSize, file);
 
-	return new _Char(value, image);
+	return new _Char(value, data);
 }
 
 void FontGen::_Char::storeData(FILE* file)
@@ -104,16 +97,16 @@ void FontGen::_Char::storeData(FILE* file)
 
 	fwrite(&m_value, sizeof(wchar_t), 1, file);
 
-	int charSize = 8, offset = 0, count = m_image->imageSize/charSize;
-	char temp, *data = m_image->imageData;
+	int offset = 0, count = s_CHARSIZE*s_CHARSIZE/8;
+	char temp;
 
 	for(int i = 0; i<count; i++){
 		temp = 0;
 
-		for(int j = 0; j < charSize; j++, offset++){
+		for(int j = 0; j < 8; j++, offset++){
 			temp = temp << 1;
 
-			if(*(data + offset) == charColor){
+			if(*(m_imageData + offset) == charColor){
 				temp |= 1;
 			}
 		}
@@ -228,11 +221,6 @@ FontLib* FontGen::genExtFontLib(FILE* file, Typeface typeface)
 FontLib* FontGen::genIntFontLib(FILE* file)
 {
 	return FontGen::_FontLib::parseIntFile(file);
-}
-
-bool FontGen::storeFontLib(const char* path, const FontLib* fontLib)
-{
-	return fontLib->storeData(path);
 }
 
 int FontGen::findCharIndex(vector<Char*>* charArray, wchar_t code)

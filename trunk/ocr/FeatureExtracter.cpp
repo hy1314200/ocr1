@@ -6,17 +6,104 @@
 
 using namespace recognise;
 
-FeatureExtracter::Feature* FeatureExtracter::extractFeature(const char* imageData)
+void FeatureExtracter::extractFeature(CvMat* feature, const char* imageData)
 {
-	Feature* feature = new Feature;
+	// the feature describes a character image 
+	int strokeWidth;								// stroke width
+	int totalStrokeLen;								// total stroke length
+	int projHist[2][s_NORMSIZE];					// projection histogram in two directions
+	int transitions[2];								// number of transitions in two directions
+	int strokeDensity[2][s_STRIPESIZE];				// stroke density in two directions
+	int peripheral[4][s_STRIPESIZE][2];				// two peripheral features with four directions
+	int locDir[s_GRIDSIZE][s_GRIDSIZE][4];			// local direction contributivity with four regions and four directions
+	double strokeProp[2][s_GRIDSIZE][4];				// stroke proportion in two directions  
+	int maxLocDirCtr[s_GRIDSIZE][s_GRIDSIZE][4];	// maximum local direction contributivity
+	int totalBlackJump[2][s_SUBVCOUNT];				// black jump distribution in each balanced subvectors  
+	double divBlackJump[2][s_SUBVCOUNT];				// black jump distribution in each balanced subvectors divided by the total 
 
-	calcStrokeWidthAndLen(imageData, &(feature->strokeWidth), &(feature->totalStrokeLen));
-	calcProjHist(imageData, feature->projHist);
-	calcTransDensAndPeri(imageData, feature->transitions, feature->strokeDensity, feature->peripheral);
-	calcLocDirPropAndMaxLocDir(imageData, feature->locDir, feature->strokeProp, feature->maxLocDirCtr);
-	calcBlackJump(imageData, feature->totalBlackJump, feature->divBlackJump);
+	calcStrokeWidthAndLen(imageData, &strokeWidth, &totalStrokeLen);
+	calcProjHist(imageData, projHist);
+	calcTransDensAndPeri(imageData, transitions, strokeDensity, peripheral);
+	calcLocDirPropAndMaxLocDir(imageData, locDir, strokeProp, maxLocDirCtr);
+	calcBlackJump(imageData, totalBlackJump, divBlackJump);
 
-	return feature;
+	double* data = feature->data.db;
+	int count = 0;
+
+	// int strokeWidth;
+	data[count++] = strokeWidth;
+
+	//int totalStrokeLen;
+	data[count++] = totalStrokeLen;
+
+	// int projHist[2][s_NORMSIZE];
+	for(int i = 0; i<2; i++){
+		for(int j = 0; j<s_NORMSIZE; j++){
+			data[count++] = projHist[i][j];
+		}
+	}
+
+	// int transitions[2];
+	data[count++] = transitions[0];
+	data[count++] = transitions[1];
+
+	// int strokeDensity[2][s_STRIPESIZE];
+	for(int i = 0; i<2; i++){
+		for(int j = 0; j<s_STRIPESIZE; j++){
+			data[count++] = strokeDensity[i][j];
+		}
+	}
+
+	// int peripheral[4][s_STRIPESIZE][2];
+	for(int i = 0; i<4; i++){
+		for(int j = 0; j<s_STRIPESIZE; j++){
+			for(int k = 0; k<2; k++){
+				data[count++] = peripheral[i][j][k];
+			}
+		}
+	}
+
+	// int locDir[s_GRIDSIZE][s_GRIDSIZE][4];
+	for(int i = 0; i<s_GRIDSIZE; i++){
+		for(int j = 0; j<s_GRIDSIZE; j++){
+			for(int k = 0; k<4; k++){
+				data[count++] = locDir[i][j][k];
+			}
+		}
+	}
+
+	// double strokeProp[2][s_GRIDSIZE][4];
+	for(int i = 0; i<2; i++){
+		for(int j = 0; j<s_GRIDSIZE; j++){
+			for(int k = 0; k<4; k++){
+				data[count++] = strokeProp[i][j][k];
+			}
+		}
+	}
+
+	// int maxLocDirCtr[s_GRIDSIZE][s_GRIDSIZE][4]
+	for(int i = 0; i<s_GRIDSIZE; i++){
+		for(int j = 0; j<s_GRIDSIZE; j++){
+			for(int k = 0; k<4; k++){
+				data[count++] = maxLocDirCtr[i][j][k];
+			}
+		}
+	}
+
+	// int totalBlackJump[2][s_SUBVCOUNT];
+	for(int i = 0; i<2; i++){
+		for(int j = 0; j<s_SUBVCOUNT; j++){
+			data[count++] = totalBlackJump[i][j];
+		}
+	}
+
+	// double divBlackJump[2][s_SUBVCOUNT];
+	for(int i = 0; i<2; i++){
+		for(int j = 0; j<s_SUBVCOUNT; j++){
+			data[count++] = divBlackJump[i][j];
+		}
+	}
+	assert(count == 405);
 }
 
 void FeatureExtracter::calcStrokeWidthAndLen(const char* imageData, int* strokeWidth, int* totalStrokeLen)
@@ -180,7 +267,7 @@ void FeatureExtracter::calcTransDensAndPeri(const char* imageData, int* transiti
 	}
 }
 
-void FeatureExtracter::calcLocDirPropAndMaxLocDir(const char* imageData, int locDir[][s_GRIDSIZE][4], float strokeProp[][s_GRIDSIZE][4], int maxLocDirCtr[][s_GRIDSIZE][4])
+void FeatureExtracter::calcLocDirPropAndMaxLocDir(const char* imageData, int locDir[][s_GRIDSIZE][4], double strokeProp[][s_GRIDSIZE][4], int maxLocDirCtr[][s_GRIDSIZE][4])
 {
 	int charColor = OCRToolkit::s_CHARACTERCOLOR;
 	int backColor = OCRToolkit::s_BACKGROUNDCOLOR;
@@ -325,7 +412,7 @@ void FeatureExtracter::calcLocDirPropAndMaxLocDir(const char* imageData, int loc
 		}
 	}
 
-	float *fp = NULL;
+	double *fp = NULL;
 	for(int i = 0; i<s_GRIDSIZE; i++){
 		temp = pixs[i][0] + pixs[i][1] + pixs[i][2] + pixs[i][3];
 		fp = &(strokeProp[HORIZONTAL][i][0]);
@@ -343,7 +430,7 @@ void FeatureExtracter::calcLocDirPropAndMaxLocDir(const char* imageData, int loc
 	}
 }
 
-void FeatureExtracter::calcBlackJump(const char* imageData, int totalBlackJump[][s_SUBVCOUNT], float divBlackJump[][s_SUBVCOUNT]){
+void FeatureExtracter::calcBlackJump(const char* imageData, int totalBlackJump[][s_SUBVCOUNT], double divBlackJump[][s_SUBVCOUNT]){
 	char slantingData[s_NORMSIZE*s_NORMSIZE];
 	int sum, temp;
 
@@ -385,8 +472,8 @@ void FeatureExtracter::calcBlackJump(const char* imageData, int totalBlackJump[]
 	}
 
 	for(int i = 0; i<s_SUBVCOUNT; i++){
-		divBlackJump[HORIZONTAL][i] = totalBlackJump[HORIZONTAL][i]*1.0f / totalH;
+		divBlackJump[HORIZONTAL][i] = totalBlackJump[HORIZONTAL][i]*1.0 / totalH;
 
-		divBlackJump[SLANTING][i] = totalBlackJump[SLANTING][i]*1.0f / totalS;
+		divBlackJump[SLANTING][i] = totalBlackJump[SLANTING][i]*1.0 / totalS;
 	}
 }

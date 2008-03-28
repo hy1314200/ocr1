@@ -9,8 +9,6 @@ using namespace std;
 
 namespace generate{
 
-	const int CHARSIZE = 64;
-
 	/** now, Fang Song, Song, Kai Ti, Hei Ti, Li Shu is supported */
 	static const int TYPEKIND = 5;
 	enum Typeface{
@@ -23,20 +21,20 @@ namespace generate{
 
 	class Char {
 	public:
+		static  const int s_CHARSIZE = 64;
+
 		wchar_t value(){
 			return m_value;
 		}
 
-		IplImage* image(){
-			return m_image;
+		char* imageData(){
+			return m_imageData;
 		}
 
 		virtual void storeData(FILE* file) = 0;
 
 		virtual ~Char(){
-			if(m_image != NULL){
-				cvReleaseImage(&m_image);
-			}
+			delete m_imageData;
 		}
 
 	protected:
@@ -44,16 +42,20 @@ namespace generate{
 		wchar_t m_value;
 
 		/** the binary grey data of this item */
-		IplImage* m_image;
+		char* m_imageData;
 
-		Char(wchar_t value, IplImage* image){
+		Char(wchar_t value, char* imageData){
 			m_value = value;
-			m_image = image;
+			m_imageData = imageData;
 		};
 	};
 
 	class FontLib {
 	public:
+		int size(){
+			return m_thinCharArray->size() + m_wideCharArray->size();
+		}
+
 		Typeface typeface(){
 			return m_typeface;
 		}
@@ -66,7 +68,7 @@ namespace generate{
 			return m_wideCharArray;
 		}
 
-		virtual void storeData(const char* filepath) = 0;
+		virtual bool storeData(const char* filepath) = 0;
 
 		virtual ~FontLib();
 
@@ -99,7 +101,7 @@ namespace generate{
 			void storeData(FILE* file);
 
 		private:
-			_Char(wchar_t value, IplImage* image): Char(value, image){  };
+			_Char(wchar_t value, char* imageData): Char(value, imageData){  };
 
 		};
 
@@ -120,8 +122,6 @@ namespace generate{
 		static FontLib* genExtFontLib(FILE* file, Typeface typeface);
 
 		static FontLib* genIntFontLib(FILE* file);
-
-		static bool storeFontLib(const char* path, const FontLib* fontLib);
 
 	private:
 		FontGen(void){ };

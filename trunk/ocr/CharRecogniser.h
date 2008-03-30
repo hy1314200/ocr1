@@ -29,7 +29,7 @@ namespace recognise{
 		void buildFeatureLib(generate::FontLib* fontLib, int size);
 
 		void DEBUG_testDistorte(char** samples, char* prototype, int sampleSize){
-			distorte(samples, prototype, sampleSize);
+			distorteAndNorm(samples, prototype, sampleSize);
 		}
 
 	private:
@@ -38,10 +38,12 @@ namespace recognise{
 		CharRecogniser(void);
 		~CharRecogniser(void);
 
-		void normalize(char* dst, const char* greys, int iWidth, int iHeight);
+		void normalize(char* res, const char* greys, int iWidth, int x, int y, int width, int height);
 		
 		/** used to generate many distorted samples for training */
-		void distorte(char** samples, char* prototype, int sampleSize);
+		void distorteAndNorm(char** samples, char* prototype, int sampleSize);
+
+		void findXYWH(char* data, int* x, int* y, int* width, int* height);
 
 	};
 

@@ -6,7 +6,7 @@
 
 using namespace recognise;
 
-void FeatureExtracter::extractFeature(CvMat* feature, const char* imageData)
+void FeatureExtracter::extractFeature(double* data, const char* imageData)
 {
 	// the feature describes a character image 
 	int strokeWidth;								// stroke width
@@ -27,7 +27,6 @@ void FeatureExtracter::extractFeature(CvMat* feature, const char* imageData)
 	calcLocDirPropAndMaxLocDir(imageData, locDir, strokeProp, maxLocDirCtr);
 	calcBlackJump(imageData, totalBlackJump, divBlackJump);
 
-	double* data = feature->data.db;
 	int count = 0;
 
 	// int strokeWidth;
@@ -103,7 +102,7 @@ void FeatureExtracter::extractFeature(CvMat* feature, const char* imageData)
 			data[count++] = divBlackJump[i][j];
 		}
 	}
-	assert(count == 405);
+	assert(count == s_FEATURESIZE + 1);
 }
 
 void FeatureExtracter::calcStrokeWidthAndLen(const char* imageData, int* strokeWidth, int* totalStrokeLen)

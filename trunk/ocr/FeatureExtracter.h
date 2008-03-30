@@ -12,6 +12,8 @@ namespace recognise{
 
 		static const int s_FEATURESIZE = 404;
 
+		static void extractFeature(double* data, const char* imageData);
+
 	private:
 		static const int s_STRIPESIZE = 8;
 
@@ -29,8 +31,6 @@ namespace recognise{
 
 		FeatureExtracter(void){ };
 		~FeatureExtracter(void){ };
-
-		static void extractFeature(CvMat* feature, const char* imageData);
 
 		static void calcStrokeWidthAndLen(const char* imageData, int* strokeWidth, int* totalStrokeLen);
 

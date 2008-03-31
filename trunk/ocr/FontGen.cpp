@@ -121,7 +121,7 @@ FontGen::_FontLib* FontGen::_FontLib::parseExtFile(FILE* file, Typeface typeface
 {
 	char c, temp[50];
 	int t, width, count;
-	vector<Char*> *cTArray = NULL, *cWArray = NULL, *cArray = NULL;
+	vector<Char*> *cTArray = new vector<Char*>, *cWArray = new vector<Char*>, *cArray = NULL;
 	Char* item = NULL;
 
 	while(true){
@@ -137,13 +137,13 @@ FontGen::_FontLib* FontGen::_FontLib::parseExtFile(FILE* file, Typeface typeface
 			if(temp[1] == 't'){
 				width = 4;	// thin compacted 01 data with 4 elements in a line
 
-				cArray = cTArray = new vector<Char*>;
+				cArray = cTArray;
 			}else{
 				assert(temp[1] == 'w');
 
 				width = 8;	//wide compacted 01 data with 8 elements in a line
 
-				cArray = cWArray = new vector<Char*>;
+				cArray = cWArray;
 			}
 
 			for(int i = 0; i<3; i++){

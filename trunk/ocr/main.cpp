@@ -148,7 +148,7 @@ void testFontStore(){
 	fclose(file);
 
 	lib->storeData("data/font/songti.int");
-	DebugToolkit::displayGreyImage(lib->thinCharArray()->at(0)->imageData(), Char.s_CHARSIZE, Char.s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(0)->imageData(), Char.s_CHARSIZE, Char.s_CHARSIZE);
 
 	delete lib;
 }
@@ -184,12 +184,12 @@ int main(int argc, char** argv){
 
 //	testDistorte();
 //	testFontGen();
-//	testFontStore();
+	testFontStore();
 //	testWChar();
 //	testFeature2();
 // 	testFilterNoise();
 
-	testRecognise(path);
+// 	testRecognise(path);
 //	testFeature1(path);
 
 // 	for(int i = 1; i<=9; i++){

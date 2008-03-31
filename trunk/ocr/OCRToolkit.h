@@ -1,6 +1,10 @@
 #ifndef _OCRTOOLKIT_H
 #define _OCRTOOLKIT_H
 
+#include <vector>
+
+using namespace std;
+
 class OCRToolkit
 {
 public:
@@ -8,7 +12,7 @@ public:
 	static const char s_BACKGROUNDCOLOR = 0;
 
 	/**
-	 * Recognize the single line characters embedded in the grey picture array
+	 * Recognize the single line characters embedded in the binary grey picture array
 	 * NOTICE: Manually release the space located to wchar_t** res
 	 * 
 	 * @param greys Binary grey picture
@@ -18,7 +22,7 @@ public:
 	 *
 	 * @return the length of the recognized character array
 	 */
-	static int recognise(char* greys, int iWidth, int iHeight, wchar_t** res);
+	static int recognise(char* greys, int iWidth, int iHeight, vector<wchar_t>* res);
 
 private:
 	static const float s_SCALETHRESHOLD;

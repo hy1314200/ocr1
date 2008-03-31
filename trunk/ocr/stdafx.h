@@ -10,6 +10,10 @@
 //#define DISPLAY_DIVIDED_CHAR
 #endif
 
+#ifndef DISPLAY_DISTORTION
+//#define DISPLAY_DISTORTION
+#endif
+
 #ifndef DISPLAY_CONNECTED_IMAGE
 #define DISPLAY_CONNECTED_IMAGE
 #endif

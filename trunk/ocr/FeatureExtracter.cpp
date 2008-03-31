@@ -30,7 +30,7 @@ void FeatureExtracter::extractFeature(double* data, const char* imageData)
 	int count = 0;
 
 	// int strokeWidth;
-	data[count++] = strokeWidth;
+	//data[count++] = strokeWidth;	// ignore this feature
 
 	//int totalStrokeLen;
 	data[count++] = totalStrokeLen;
@@ -102,6 +102,7 @@ void FeatureExtracter::extractFeature(double* data, const char* imageData)
 			data[count++] = divBlackJump[i][j];
 		}
 	}
+
 	assert(count == s_FEATURESIZE + 1);
 }
 

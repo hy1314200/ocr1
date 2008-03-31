@@ -3,19 +3,33 @@
 #include "FeatureExtracter.h"
 #include "DebugToolkit.h"
 #include "OCRToolkit.h"
+#include "FontGen.h"
 
 #include <iostream>
-
 #include <cxcore.h>
-#include <cv.h>
 
 using namespace recognise;
 
 CharRecogniser* CharRecogniser::s_instance = 0;
+const char CharRecogniser::s_SVMDATAPATH[20] = "data/classifier/svm";
 
-CharRecogniser::CharRecogniser(void)
+CharRecogniser* CharRecogniser::getInstance(){
+	if(s_instance == 0){
+		FILE* file = fopen(s_SVMDATAPATH, "r");
+
+		if(file != NULL){
+			s_instance = new CharRecogniser(file);
+		}else{
+			return NULL;
+		}
+	}
+
+	return s_instance;
+}
+
+CharRecogniser::CharRecogniser(FILE* file)
 {
-	// load the character library
+	
 }
 
 CharRecogniser::~CharRecogniser(void)
@@ -26,12 +40,31 @@ CharRecogniser::~CharRecogniser(void)
 float CharRecogniser::recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res)
 {
 	int normSize = FeatureExtracter::s_NORMSIZE;
+	int featureSize = FeatureExtracter::s_FEATURESIZE;
 	char* normChar = new char[normSize*normSize];
 
 	normalize(normChar, greys, iWidth, 0, 0, iWidth, iHeight);
 
+	double *feature = new double[featureSize];
+	FeatureExtracter::extractFeature(feature, normChar);
+
+	CvMat* header = cvCreateMatHeader(1, featureSize, CV_64FC1);
+	cvSetData(header, feature, featureSize);
+
+	CvMat* y = cvCreateMat(1, W->cols, CV_64FC1);
+
+	cvGEMM(W, header, 1, NULL, 0, y, CV_GEMM_B_T);
+
+	int index = 0;// 对y进行分类
+
+	*res = m_indexMapping.at(index);
+
+	cvReleaseMatHeader(&header);
+	cvReleaseMat(&y);
 	delete[] normChar;
-	return 0;
+	delete[] feature;
+
+	return 1;
 }
 
 void CharRecogniser::normalize(char* res, const char* greys, int iWidth, int x, int y, int width, int height)
@@ -113,6 +146,11 @@ void CharRecogniser::buildFeatureLib(generate::FontLib* fontLib, const int libSi
 	}
 #endif
 
+	int size = fontLib[0].size();
+	for(int i = 0; i<size; i++){
+		m_indexMapping.push_back(fontLib->wideCharArray()->at(i)->value());
+	}
+
 	const int sampleSize = 16;
 	const int normSize = FeatureExtracter::s_NORMSIZE;
 	const int featureSize = FeatureExtracter::s_FEATURESIZE;
@@ -181,8 +219,9 @@ void CharRecogniser::buildFeatureLib(generate::FontLib* fontLib, const int libSi
 
 	cvMul(m, temp, m);
 
-	cvReleaseMat(&temp);
 
+
+	cvReleaseMat(&temp);
 	cvReleaseMat(&src);
 	cvReleaseMat(&mi);
 	cvReleaseMat(&m);
@@ -198,25 +237,19 @@ void CharRecogniser::buildFeatureLib(generate::FontLib* fontLib, const int libSi
 	delete[] imageData;
 }
 
-void CharRecogniser::distorteAndNorm(char** samples, char* prototype, int sampleSize)
+void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin, int sampleSize)
 {
 	int normSize = FeatureExtracter::s_NORMSIZE, count = 0;
 	int x, y, width, height;
-	char* data = new char[normSize*normSize];
+	char* data = new char[normSize*normSize], *prototype = new char[normSize*normSize];
+	memcpy(prototype, prototypeOrigin, normSize*normSize);
 
 	IplImage* src = cvCreateImageHeader(cvSize(normSize, normSize), 8, 1);
 	IplImage* dst = cvCreateImageHeader(cvSize(normSize, normSize), 8, 1);
-
-	IplImage* scale[4];
-	scale[0] = cvCreateImage(cvSize(48, 48), 8, 1);
-	scale[1] = cvCreateImage(cvSize(32, 32), 8, 1);
-	scale[2] = cvCreateImage(cvSize(24, 24), 8, 1);
-	scale[3] = cvCreateImage(cvSize(16, 16), 8, 1);
-
-	cvSetData(src, prototype, normSize);	
+	cvSetData(src, prototype, normSize);
 	cvSetData(dst, data, normSize);
 
-	DebugToolkit::displayImage(src);
+	IplImage* temp = cvCreateImage(cvSize(normSize, normSize), 8, 1);
 
 	/*
 	CV_SHAPE_RECT, a rectangular element; 
@@ -225,62 +258,207 @@ void CharRecogniser::distorteAndNorm(char** samples, char* prototype, int sample
 	*/
 	IplConvKernel* element = cvCreateStructuringElementEx( 2, 2, 0, 0, CV_SHAPE_ELLIPSE, 0 );
 
-	cvErode(src, dst, element, 1);
-
-	//findXYWH(data, &x, &y, &width, &height);
-	//normalize(samples[count++], data, normSize, x, y, width, height);
-
-	//DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
-
-
-	cvDilate(src, dst, element, 1);
-
-	cvResize(src, scale[0]);
-	cvResize(scale[0], src, CV_INTER_NN);
-	DebugToolkit::binarize(src, 128);
-	//DebugToolkit::displayImage(scale[0]);
+#ifdef DISPLAY_DISTORTION
 	DebugToolkit::displayImage(src);
+#endif
+
+	/************************************************************************/
+	/* the first group                                                      */
+	/************************************************************************/
+	cvErode(src, dst, element, 1);
+	cvCopyImage(dst, temp);
+
+	// normal
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	// scale 1, CV_INTER_NN, threshold 128
+	cvCopyImage(temp, dst);
+	reduceResolution(dst, 1);
 
 	findXYWH(data, &x, &y, &width, &height);
 	normalize(samples[count++], data, normSize, x, y, width, height);
 
-	cvReleaseStructuringElement(&element);
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
 
-	//DebugToolkit::displayImage(src);
-	//DebugToolkit::displayImage(dst);
+	// scale 2, CV_INTER_NN, threshold 128
+	cvCopyImage(temp, dst);
+	reduceResolution(dst, 2);
 
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	/************************************************************************/
+	/* the second group                                                     */
+	/************************************************************************/
+	cvDilate(src, dst, element, 1);
+	cvCopyImage(dst, temp);
+	
+	// normal
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	// scale 1, CV_INTER_NN, threshold 128
+	cvCopyImage(temp, dst);
+	reduceResolution(dst, 1);
+
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	// scale 2, CV_INTER_NN, threshold 128
+	cvCopyImage(temp, dst);
+	reduceResolution(dst, 2);
+
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	// scale 3, CV_INTER_NN, threshold 128
+	cvCopyImage(temp, dst);
+	reduceResolution(dst, 3);
+
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	// scale 4, CV_INTER_LINEAR, threshold 110
+	cvCopyImage(temp, dst);
+	reduceResolution(dst, 4, CV_INTER_LINEAR, 110);
+
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	/************************************************************************/
+	/* the third group                                                      */
+	/************************************************************************/
 	cvDilate(src, dst);
+	cvCopyImage(dst, temp);
 
-	//findXYWH(data, &x, &y, &width, &height);
-	//normalize(samples[count++], data, normSize, x, y, width, height);
+	// normal
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
 
-	//DebugToolkit::displayImage(dst);
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
 
-	//findXYWH(data, &x, &y, &width, &height);
-	//normalize(samples[count++], data, normSize, x, y, width, height);
-// 	int multiple = 4;
-// 	char value;
-// 	for(int i = 0; i<64/multiple; i++){
-// 		for(int j = 0;j<64/multiple; j++){
-// 			value = *(temp->imageData + temp->widthStep*(multiple*i) + multiple*j); 
-// 
-// 			for(int k = 0; k<multiple; k++){
-// 				for(int l = 0; l<multiple; l++){
-// 					*(temp->imageData + temp->widthStep*(multiple*i+l) + multiple*j+k) = value; 
-// 				}
-// 			}
-// 		}
-// 	}
+	// scale 2, CV_INTER_NN, threshold 128
+	cvCopyImage(temp, dst);
+	reduceResolution(dst, 2);
 
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	// scale 3, CV_INTER_NN, threshold 128
+	cvCopyImage(temp, dst);
+	reduceResolution(dst, 3);
+
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	// scale 4, CV_INTER_NN, threshold 128
+	cvCopyImage(temp, dst);
+	reduceResolution(dst, 4, CV_INTER_LINEAR);
+
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	/************************************************************************/
+	/* the fourth group                                                     */
+	/************************************************************************/
+	cvCopyImage(src, temp);
+
+	// normal
+	findXYWH(prototype, &x, &y, &width, &height);
+	normalize(samples[count++], prototype, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	// scale 1, CV_INTER_NN, threshold 128
+	cvCopyImage(temp, dst);
+	reduceResolution(dst, 1);
+
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	// scale 2, CV_INTER_NN, threshold 128
+	cvCopyImage(temp, dst);
+	reduceResolution(dst, 2);
+
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+
+	// scale 3, CV_INTER_NN, threshold 128
+	cvCopyImage(temp, dst);
+	reduceResolution(dst, 3, CV_INTER_LINEAR, 100);
+
+	findXYWH(data, &x, &y, &width, &height);
+	normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
 
 	cvReleaseImageHeader(&src);
 	cvReleaseImageHeader(&dst);
-	for(int i = 0; i<4; i++){
-		cvReleaseImageHeader(&scale[i]);
-	}
-	
+	cvReleaseImage(&temp);
 
-	//assert(count == sampleSize+1);
+	cvReleaseStructuringElement(&element);
+
+	delete[] data;	
+	delete[] prototype;
+
+	assert(count == sampleSize);
 }
 
 void CharRecogniser::findXYWH(char* data, int* x, int* y, int* width, int* height){
@@ -350,4 +528,36 @@ void CharRecogniser::findXYWH(char* data, int* x, int* y, int* width, int* heigh
 			break;
 		}
 	}
+}
+
+void CharRecogniser::reduceResolution(IplImage* image, int scale, int type, int threshold){
+	IplImage* temp;
+
+	switch(scale){
+	case 1:
+		temp = cvCreateImage(cvSize(48, 48), 8, 1);
+		break;
+
+	case 2:
+		temp = cvCreateImage(cvSize(32, 32), 8, 1);
+		break;
+
+	case 3:
+		temp = cvCreateImage(cvSize(24, 24), 8, 1);
+		break;
+
+	case 4:
+		temp = cvCreateImage(cvSize(16, 16), 8, 1);
+		break;
+
+	default:
+		assert(false);
+
+	}
+
+	cvResize(image, temp);
+	cvResize(temp, image, type);
+	DebugToolkit::binarize(image, threshold);
+
+	cvReleaseImage(&temp);
 }

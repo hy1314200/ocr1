@@ -11,7 +11,7 @@ const float OCRToolkit::s_SCALETHRESHOLD = 0.85f;
 using namespace divide;
 using namespace recognise;
 
-int OCRToolkit::recognise(char* greys, int iWidth, int iHeight, wchar_t** res)
+int OCRToolkit::recognise(char* greys, int iWidth, int iHeight, vector<wchar_t>* res)
 {
 	vector<char*> picList;
 	vector<int> widthList, heightList;
@@ -26,23 +26,27 @@ int OCRToolkit::recognise(char* greys, int iWidth, int iHeight, wchar_t** res)
 		return 0;
 	}
 
-	*res = new wchar_t[len];
-
 	float reliably = 0;
 	int resIndex = 0;
 	CharRecogniser* recogniser = CharRecogniser::getInstance();
+
+	if(recogniser == NULL){
+		cerr << "Fail to initialize CharRecogniser: Can not find classifier data file!" << endl;
+
+		return 0;
+	}
+
+	wchar_t temp;
 	for(int offset = 0; offset<len; offset++){
-		reliably = recogniser->recogniseChar(picList[offset], widthList[offset], heightList[offset], *res + resIndex);
+		reliably = recogniser->recogniseChar(picList[offset], widthList[offset], heightList[offset], &temp);
 
 		// DebugToolkit::saveGreyImage(picList[offset], widthList[offset], heightList[offset], "image/(16).bmp");
 
 		if(reliably > s_SCALETHRESHOLD){
 			resIndex++;
-		}
-	}
 
-	if(resIndex != len){
-		delete[] (*res + resIndex);
+			res->push_back(temp);
+		}
 	}
 
 	return resIndex;

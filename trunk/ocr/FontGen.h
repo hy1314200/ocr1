@@ -53,7 +53,7 @@ namespace generate{
 	class FontLib {
 	public:
 		int size(){
-			return m_thinCharArray->size() + m_wideCharArray->size();
+			return m_wideCharArray->size();
 		}
 
 		Typeface typeface(){

@@ -3,19 +3,16 @@
 
 #include "FontGen.h"
 
+#include <stdio.h>
+#include <cv.h>
+
 namespace recognise{
 
 	class CharRecogniser
 	{
 	public:
 		/** The entrance of getting an instance of the OCRToolkit */
-		static CharRecogniser* getInstance(){
-			if(s_instance == 0){
-				s_instance = new CharRecogniser();
-			}
-
-			return s_instance;
-		}
+		static CharRecogniser* getInstance();
 		static void  release(){
 			if(s_instance != 0){
 				delete s_instance;
@@ -35,15 +32,23 @@ namespace recognise{
 	private:
 		static CharRecogniser* s_instance;
 
-		CharRecogniser(void);
+		static const char s_SVMDATAPATH[20];
+
+		CvMat* W;
+
+		vector<wchar_t> m_indexMapping;
+
+		CharRecogniser(FILE* file);
 		~CharRecogniser(void);
 
 		void normalize(char* res, const char* greys, int iWidth, int x, int y, int width, int height);
 		
 		/** used to generate many distorted samples for training */
-		void distorteAndNorm(char** samples, char* prototype, int sampleSize);
+		void distorteAndNorm(char** samples, const char* prototype, int sampleSize);
 
 		void findXYWH(char* data, int* x, int* y, int* width, int* height);
+
+		void reduceResolution(IplImage* image, int scale, int type = CV_INTER_NN, int threshold = 128);
 
 	};
 

@@ -38,11 +38,14 @@ void testRecognise(char* path){
 		}
 	}
 
-	wchar_t* wordList;
+	vector<wchar_t> wordList;
 	int len = OCRToolkit::recognise(data, image->width, image->height, &wordList);
-	if(len == 0){
-		cout << "识别出 0 个汉字\n";
+	
+	cout << "识别出 " << len << " 个汉字\n";
+	for(int i = 0; i<len; i++){
+		cout << wordList.at(len) << " ";
 	}
+	cout << endl;
 
 	DebugToolkit::displayImage(image);
 }
@@ -155,29 +158,38 @@ void testDistorte(){
 
 	IplImage* image = cvLoadImage("ctrl_s.bmp", 0);
 
-	char b[64*64], *a = new char[64*64];
+	char b[64*64], **a = new char*[16];
+
+	for(int i = 0; i<16; i++){
+		a[i] = new char[64*64];
+	}
 
 	for(int i = 0; i<64; i++){
 		memcpy(b+64*i, image->imageData + image->widthStep*i, 64);
 	}
 
-	CharRecogniser::getInstance()->DEBUG_testDistorte(&a, b, 1);
+	CharRecogniser::getInstance()->DEBUG_testDistorte(a, b, 16);
 
 	cvReleaseImage(&image);
+
+	for(int i = 0; i<16; i++){
+		delete[] a[i];
+	}
+	delete[] a;
 }
 
 int main(int argc, char** argv){
 	char path[20];
   	sprintf_s(path, "image/test/(%d).bmp", 8);
 
-	testDistorte();
+//	testDistorte();
 //	testFontGen();
 //	testFontStore();
 //	testWChar();
 //	testFeature2();
 // 	testFilterNoise();
 
-//	testRecognise(path);
+	testRecognise(path);
 //	testFeature1(path);
 
 // 	for(int i = 1; i<=9; i++){

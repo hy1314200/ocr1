@@ -10,7 +10,7 @@ namespace recognise{
 	public:
 		static const int s_NORMSIZE = 64;
 
-		static const int s_FEATURESIZE = 404;
+		static const int s_FEATURESIZE = 403;
 
 		static void extractFeature(double* data, const char* imageData);
 

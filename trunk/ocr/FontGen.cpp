@@ -67,6 +67,8 @@ FontGen::_Char* FontGen::_Char::parseIntFile(FILE* file)
 	wchar_t value;
 	char* data = new char[s_CHARSIZE*s_CHARSIZE];
 
+	memset(data, backColor, s_CHARSIZE*s_CHARSIZE);
+
 	fread(&value, sizeof(wchar_t), 1, file);
 
 	int offset = 0, count = s_CHARSIZE*s_CHARSIZE/8;
@@ -84,8 +86,6 @@ FontGen::_Char* FontGen::_Char::parseIntFile(FILE* file)
 			}
 		}
 	}
-
-	//fread(image->imageData, sizeof(char), image->imageSize, file);
 
 	return new _Char(value, data);
 }

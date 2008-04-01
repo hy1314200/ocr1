@@ -6,7 +6,39 @@
 
 using namespace recognise;
 
-void FeatureExtracter::extractFeature(double* data, const char* imageData)
+FeatureExtracter* FeatureExtracter::s_instance = NULL;
+const char* FeatureExtracter::s_filepath = "data/classifier/feature";
+
+FeatureExtracter::FeatureExtracter(FILE *file){
+	if(file == NULL){
+		for(int i = 0; i<s_FEATURESIZE; i++){
+			m_max[i] = 0;
+			m_min[i] = 1000; // max number
+		}
+	}else{
+		for(int i = 0; i<s_FEATURESIZE; i++){
+			fscanf(file, "%lf %lf", m_max+i, m_min+i);
+		}
+	}
+}
+
+FeatureExtracter* FeatureExtracter::getInstance(){
+	if(s_instance == 0){
+		FILE* file = fopen(s_filepath, "r");
+
+		if(file != NULL){
+			s_instance = new FeatureExtracter(file);
+
+			fclose(file);
+		}else{
+			s_instance = new FeatureExtracter(NULL);
+		}
+	}
+
+	return s_instance;
+}
+
+void FeatureExtracter::extractFeature(double* data, const char* imageData, bool updateMaxMin)
 {
 	// the feature describes a character image 
 	int strokeWidth;								// stroke width
@@ -16,10 +48,10 @@ void FeatureExtracter::extractFeature(double* data, const char* imageData)
 	int strokeDensity[2][s_STRIPESIZE];				// stroke density in two directions
 	int peripheral[4][s_STRIPESIZE][2];				// two peripheral features with four directions
 	int locDir[s_GRIDSIZE][s_GRIDSIZE][4];			// local direction contributivity with four regions and four directions
-	double strokeProp[2][s_GRIDSIZE][4];				// stroke proportion in two directions  
+	double strokeProp[2][s_GRIDSIZE][4];			// stroke proportion in two directions  
 	int maxLocDirCtr[s_GRIDSIZE][s_GRIDSIZE][4];	// maximum local direction contributivity
 	int totalBlackJump[2][s_SUBVCOUNT];				// black jump distribution in each balanced subvectors  
-	double divBlackJump[2][s_SUBVCOUNT];				// black jump distribution in each balanced subvectors divided by the total 
+	double divBlackJump[2][s_SUBVCOUNT];			// black jump distribution in each balanced subvectors divided by the total 
 
 	calcStrokeWidthAndLen(imageData, &strokeWidth, &totalStrokeLen);
 	calcProjHist(imageData, projHist);
@@ -27,29 +59,75 @@ void FeatureExtracter::extractFeature(double* data, const char* imageData)
 	calcLocDirPropAndMaxLocDir(imageData, locDir, strokeProp, maxLocDirCtr);
 	calcBlackJump(imageData, totalBlackJump, divBlackJump);
 
-	int count = 0;
+	int count = 0, tempInt;
+	double tempDouble;
 
 	// int strokeWidth;
 	//data[count++] = strokeWidth;	// ignore this feature
 
 	//int totalStrokeLen;
+	if(updateMaxMin){
+		if(m_max[count] < totalStrokeLen){
+			m_max[count] = totalStrokeLen;
+		}
+		if(m_min[count] > totalStrokeLen){
+			m_min[count] = totalStrokeLen;
+		}
+	}
 	data[count++] = totalStrokeLen;
 
 	// int projHist[2][s_NORMSIZE];
 	for(int i = 0; i<2; i++){
 		for(int j = 0; j<s_NORMSIZE; j++){
-			data[count++] = projHist[i][j];
+			tempInt = projHist[i][j];
+
+			if(updateMaxMin){
+				if(m_max[count] < tempInt){
+					m_max[count] = tempInt;
+				}
+				if(m_min[count] > tempInt){
+					m_min[count] = tempInt;
+				}
+			}
+			data[count++] = tempInt;
 		}
 	}
 
 	// int transitions[2];
+	if(updateMaxMin){
+		if(m_max[count] < transitions[0]){
+			m_max[count] = transitions[0];
+		}
+		if(m_min[count] > transitions[0]){
+			m_min[count] = transitions[0];
+		}
+	}
 	data[count++] = transitions[0];
+
+	if(updateMaxMin){
+		if(m_max[count] < transitions[1]){
+			m_max[count] = transitions[1];
+		}
+		if(m_min[count] > transitions[1]){
+			m_min[count] = transitions[1];
+		}
+	}
 	data[count++] = transitions[1];
 
 	// int strokeDensity[2][s_STRIPESIZE];
 	for(int i = 0; i<2; i++){
 		for(int j = 0; j<s_STRIPESIZE; j++){
-			data[count++] = strokeDensity[i][j];
+			tempInt = strokeDensity[i][j];
+
+			if(updateMaxMin){
+				if(m_max[count] < tempInt){
+					m_max[count] = tempInt;
+				}
+				if(m_min[count] > tempInt){
+					m_min[count] = tempInt;
+				}
+			}
+			data[count++] = tempInt;
 		}
 	}
 
@@ -57,7 +135,17 @@ void FeatureExtracter::extractFeature(double* data, const char* imageData)
 	for(int i = 0; i<4; i++){
 		for(int j = 0; j<s_STRIPESIZE; j++){
 			for(int k = 0; k<2; k++){
-				data[count++] = peripheral[i][j][k];
+				tempInt = peripheral[i][j][k];
+
+				if(updateMaxMin){
+					if(m_max[count] < tempInt){
+						m_max[count] = tempInt;
+					}
+					if(m_min[count] > tempInt){
+						m_min[count] = tempInt;
+					}
+				}
+				data[count++] = tempInt;
 			}
 		}
 	}
@@ -66,7 +154,17 @@ void FeatureExtracter::extractFeature(double* data, const char* imageData)
 	for(int i = 0; i<s_GRIDSIZE; i++){
 		for(int j = 0; j<s_GRIDSIZE; j++){
 			for(int k = 0; k<4; k++){
-				data[count++] = locDir[i][j][k];
+				tempInt = locDir[i][j][k];
+
+				if(updateMaxMin){
+					if(m_max[count] < tempInt){
+						m_max[count] = tempInt;
+					}
+					if(m_min[count] > tempInt){
+						m_min[count] = tempInt;
+					}
+				}
+				data[count++] = tempInt;
 			}
 		}
 	}
@@ -75,7 +173,17 @@ void FeatureExtracter::extractFeature(double* data, const char* imageData)
 	for(int i = 0; i<2; i++){
 		for(int j = 0; j<s_GRIDSIZE; j++){
 			for(int k = 0; k<4; k++){
-				data[count++] = strokeProp[i][j][k];
+				tempDouble = strokeProp[i][j][k];
+
+				if(updateMaxMin){
+					if(m_max[count] < tempDouble){
+						m_max[count] = tempDouble;
+					}
+					if(m_min[count] > tempDouble){
+						m_min[count] = tempDouble;
+					}
+				}
+				data[count++] = tempDouble;
 			}
 		}
 	}
@@ -84,7 +192,17 @@ void FeatureExtracter::extractFeature(double* data, const char* imageData)
 	for(int i = 0; i<s_GRIDSIZE; i++){
 		for(int j = 0; j<s_GRIDSIZE; j++){
 			for(int k = 0; k<4; k++){
-				data[count++] = maxLocDirCtr[i][j][k];
+				tempInt = maxLocDirCtr[i][j][k];
+
+				if(updateMaxMin){
+					if(m_max[count] < tempInt){
+						m_max[count] = tempInt;
+					}
+					if(m_min[count] > tempInt){
+						m_min[count] = tempInt;
+					}
+				}
+				data[count++] =tempInt;
 			}
 		}
 	}
@@ -92,18 +210,49 @@ void FeatureExtracter::extractFeature(double* data, const char* imageData)
 	// int totalBlackJump[2][s_SUBVCOUNT];
 	for(int i = 0; i<2; i++){
 		for(int j = 0; j<s_SUBVCOUNT; j++){
-			data[count++] = totalBlackJump[i][j];
+			tempInt = totalBlackJump[i][j];
+
+			if(updateMaxMin){
+				if(m_max[count] < tempInt){
+					m_max[count] = tempInt;
+				}
+				if(m_min[count] > tempInt){
+					m_min[count] = tempInt;
+				}
+			}
+			data[count++] = tempInt;
 		}
 	}
 
 	// double divBlackJump[2][s_SUBVCOUNT];
 	for(int i = 0; i<2; i++){
 		for(int j = 0; j<s_SUBVCOUNT; j++){
-			data[count++] = divBlackJump[i][j];
+			tempDouble = divBlackJump[i][j];
+
+			if(updateMaxMin){
+				if(m_max[count] < tempDouble){
+					m_max[count] = tempDouble;
+				}
+				if(m_min[count] > tempDouble){
+					m_min[count] = tempDouble;
+				}
+			}
+			data[count++] = tempDouble;
 		}
 	}
 
-	assert(count == s_FEATURESIZE + 1);
+	assert(count == s_FEATURESIZE);
+}
+
+void FeatureExtracter::extractScaledFeature(double* data, const char* imageData){
+	extractFeature(data, imageData);
+	scaleFeature(data);
+}
+
+void FeatureExtracter::scaleFeature(double* feature){
+	for(int i = 0; i<s_FEATURESIZE; i++){
+		feature[i] = (feature[i] - m_min[i]) / (m_max[i] - m_min[i]);
+	}
 }
 
 void FeatureExtracter::calcStrokeWidthAndLen(const char* imageData, int* strokeWidth, int* totalStrokeLen)
@@ -368,10 +517,10 @@ void FeatureExtracter::calcLocDirPropAndMaxLocDir(const char* imageData, int loc
 			if(tag){
 				pixs[i/multiple][j/multiple]++;
 
-				int max = 0, offset = 0;
+				int m_max = 0, offset = 0;
 				for(int k = 0; k<4; k++){
-					if(max < record[i][j][k]){
-						max = record[i][j][k];
+					if(m_max < record[i][j][k]){
+						m_max = record[i][j][k];
 
 						offset = k;
 					}
@@ -476,4 +625,14 @@ void FeatureExtracter::calcBlackJump(const char* imageData, int totalBlackJump[]
 
 		divBlackJump[SLANTING][i] = totalBlackJump[SLANTING][i]*1.0 / totalS;
 	}
+}
+
+void FeatureExtracter::saveData(){
+	FILE* file = fopen(s_filepath, "w");
+
+	for(int i = 0; i < s_FEATURESIZE; i++){
+		fprintf(file, "%lf %lf\n", m_max[i], m_min[i]);
+	}
+
+	fclose(file);
 }

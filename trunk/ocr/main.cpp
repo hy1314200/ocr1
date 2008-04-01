@@ -8,13 +8,15 @@
 #include "OCRToolkit.h"
 #include "CharDivider.h"
 #include "CharRecogniser.h"
+#include "OCRToolkit.h"
 #include "FeatureExtracter.h"
 #include "DebugToolkit.h"
 #include "FontGen.h"
 
 using namespace std;
-
-#include "OCRToolkit.h"
+using namespace recognise;
+using namespace divide;
+using namespace generate;
 
 void testRecognise(char* path){
 	const char* imagePath = path;
@@ -43,7 +45,7 @@ void testRecognise(char* path){
 	
 	cout << "识别出 " << len << " 个汉字\n";
 	for(int i = 0; i<len; i++){
-		cout << wordList.at(len) << " ";
+		wcout << wordList.at(len) << " ";
 	}
 	cout << endl;
 
@@ -72,8 +74,6 @@ void testFeature1(char* path){
 		memcpy(data + image->width*i, image->imageData + image->widthStep*i, image->width);
 	}
 
-	using namespace recognise;
-
 	CharRecogniser* rec = CharRecogniser::getInstance();
 	rec->recogniseChar(data, image->width, image->height, NULL);
 
@@ -86,7 +86,6 @@ void testFeature2(){
 
 	DebugToolkit::readGreyData((uchar*)data, "image.data");
 
-	using namespace recognise;
 	//FeatureExtracter::Feature f;
 	//FeatureExtracter::calcBlackJump(data, f.totalBlackJump, f.divBlackJump);
 
@@ -103,7 +102,6 @@ void testFilterNoise(){
 	char* data = new char[64];
 
 	DebugToolkit::readGreyData((uchar*)data, "image.data");
-	using namespace divide;
 	CharDivider::filterNoise(data, 8, 1, 6);
 	DebugToolkit::printGreyImage(data, 8, 8);
 }
@@ -123,23 +121,18 @@ void testWChar(){
 }
 
 void testFontGen(){
-	using namespace generate;
-
 	FILE* file = fopen("data/font/songti.int", "r");
 	assert(file != NULL);
 
 	FontLib* lib = FontGen::genIntFontLib(file);
 
 	fclose(file);
-
-	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(15)->imageData(), generate::Char.s_CHARSIZE, generate::Char.s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(15)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 
 	delete lib;
 }
 
 void testFontStore(){
-	using namespace generate;
-
 	FILE* file = fopen("data/font/songti.ext", "r");
 	assert(file != NULL);
 
@@ -148,14 +141,12 @@ void testFontStore(){
 	fclose(file);
 
 	lib->storeData("data/font/songti.int");
-	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(0)->imageData(), Char.s_CHARSIZE, Char.s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(0)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 
 	delete lib;
 }
 
 void testDistorte(){
-	using namespace recognise;
-
 	IplImage* image = cvLoadImage("ctrl_s.bmp", 0);
 
 	char b[64*64], **a = new char*[16];
@@ -178,25 +169,39 @@ void testDistorte(){
 	delete[] a;
 }
 
-int main(int argc, char** argv){
+void unitTest(){
 	char path[20];
-  	sprintf_s(path, "image/test/(%d).bmp", 8);
+	sprintf_s(path, "image/test/(%d).bmp", 8);
 
-//	testDistorte();
-//	testFontGen();
-	testFontStore();
-//	testWChar();
-//	testFeature2();
-// 	testFilterNoise();
+	//	testDistorte();
+	//	testFontGen();
+	//	testFontStore();
+	//	testWChar();
+	//	testFeature2();
+	// 	testFilterNoise();
 
-// 	testRecognise(path);
-//	testFeature1(path);
+	// 	testRecognise(path);
+	//	testFeature1(path);
 
-// 	for(int i = 1; i<=9; i++){
-// 		sprintf_s(path, "image/(%d).bmp", i);
-// 		cout << path << endl;
-// 		testRecognise(path);
-// 	}
+	// 	for(int i = 1; i<=9; i++){
+	// 		sprintf_s(path, "image/(%d).bmp", i);
+	// 		cout << path << endl;
+	// 		testRecognise(path);
+	// 	}
+}
 
+void testApp(){
+// 	FILE* file = fopen("data/font/songti.int", "r");
+// 	FontLib* lib = FontGen::genIntFontLib(file);
+// 	fclose(file);
+// 
+// 	CharRecogniser::buildFeatureLib(lib, 1);
+// 	delete lib;
+
+	testRecognise("image/(1).bmp");
+}
+
+int main(int argc, char** argv){
+	testApp();
 	return 0;
 }

@@ -1,6 +1,7 @@
 #ifndef _FEATUREEXTRACTER_H
 #define _FEATUREEXTRACTER_H
 
+#include <stdio.h>
 #include <cxcore.h>
 
 namespace recognise{
@@ -12,14 +13,19 @@ namespace recognise{
 
 		static const int s_FEATURESIZE = 403;
 
-		static void extractFeature(double* data, const char* imageData);
+		static FeatureExtracter* getInstance();
+
+		/** this method can update the max/min value of each dim in feature */
+		void extractFeature(double* data, const char* imageData, bool updateMaxMin = false);
+
+		void extractScaledFeature(double* data, const char* imageData);
+
+		void scaleFeature(double* feature);
+
+		void saveData();
 
 	private:
-		static const int s_STRIPESIZE = 8;
-
-		static const int s_GRIDSIZE = 4;
-
-		static const int s_SUBVCOUNT = 8;
+		static const char* s_filepath;
 
 		enum Direction{ NORTH = 0, SOUTH, WEST, EAST };
 
@@ -29,18 +35,30 @@ namespace recognise{
 
 		enum HV{ HORIZONTAL = 0, VERTICAL, SLANTING = VERTICAL };
 
-		FeatureExtracter(void){ };
-		~FeatureExtracter(void){ };
+		static const int s_STRIPESIZE = 8;
 
-		static void calcStrokeWidthAndLen(const char* imageData, int* strokeWidth, int* totalStrokeLen);
+		static const int s_GRIDSIZE = 4;
 
-		static void calcProjHist(const char* imageData, int projHist[][s_NORMSIZE]);
+		static const int s_SUBVCOUNT = 8;
 
-		static void calcTransDensAndPeri(const char* imageData, int* transitions, int strokeDensity[][s_STRIPESIZE], int peripheral[][s_STRIPESIZE][2]);
+		static FeatureExtracter* s_instance;
+
+		double m_max[s_FEATURESIZE];
+		double m_min[s_FEATURESIZE];
+
+		FeatureExtracter(FILE *file);
+		~FeatureExtracter(void){  };
+
+		void calcStrokeWidthAndLen(const char* imageData, int* strokeWidth, int* totalStrokeLen);
+
+		void calcProjHist(const char* imageData, int projHist[][s_NORMSIZE]);
+
+		void calcTransDensAndPeri(const char* imageData, int* transitions, int strokeDensity[][s_STRIPESIZE], int peripheral[][s_STRIPESIZE][2]);
 	
-		static void calcLocDirPropAndMaxLocDir(const char* imageData, int locDir[][s_GRIDSIZE][4], double strokeProp[][s_GRIDSIZE][4], int maxLocDirCtr[][s_GRIDSIZE][4]);
+		void calcLocDirPropAndMaxLocDir(const char* imageData, int locDir[][s_GRIDSIZE][4], double strokeProp[][s_GRIDSIZE][4], int maxLocDirCtr[][s_GRIDSIZE][4]);
 	
-		static void calcBlackJump(const char* imageData, int totalBlackJump[][s_SUBVCOUNT], double divBlackJump[][s_SUBVCOUNT]);
+		void calcBlackJump(const char* imageData, int totalBlackJump[][s_SUBVCOUNT], double divBlackJump[][s_SUBVCOUNT]);
+
 	};
 
 }

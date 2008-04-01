@@ -11,33 +11,37 @@
 using namespace recognise;
 
 CharRecogniser* CharRecogniser::s_instance = 0;
-const char CharRecogniser::s_SVMDATAPATH[20] = "data/classifier/svm";
+const char* CharRecogniser::s_FILEPATH = "data/classifier/svm.model";
 
 CharRecogniser* CharRecogniser::getInstance(){
 	if(s_instance == 0){
-		FILE* file = fopen(s_SVMDATAPATH, "r");
+		FILE* file = fopen(s_FILEPATH, "r");
 
 		if(file != NULL){
-			s_instance = new CharRecogniser(file);
+			s_instance = new CharRecogniser(s_FILEPATH);
 		}else{
-			return NULL;
+			s_instance = new CharRecogniser(NULL);
 		}
 	}
 
 	return s_instance;
 }
 
-CharRecogniser::CharRecogniser(FILE* file)
+CharRecogniser::CharRecogniser(const char* modelFilepath)
 {
-	
+	if(modelFilepath == NULL){
+
+	}else{
+		m_model = svm_load_model(modelFilepath);
+	}
 }
 
 CharRecogniser::~CharRecogniser(void)
 {
-	// release the character library
+	svm_destroy_model(m_model);
 }
 
-float CharRecogniser::recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res)
+double CharRecogniser::recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res)
 {
 	int normSize = FeatureExtracter::s_NORMSIZE;
 	int featureSize = FeatureExtracter::s_FEATURESIZE;
@@ -45,26 +49,44 @@ float CharRecogniser::recogniseChar(const char* greys, int iWidth, int iHeight, 
 
 	normalize(normChar, greys, iWidth, 0, 0, iWidth, iHeight);
 
-	double *feature = new double[featureSize];
-	FeatureExtracter::extractFeature(feature, normChar);
+	// reduce classifier platform dependence
+	double *scaledFeature = new double[featureSize];
+	FeatureExtracter::getInstance()->extractScaledFeature(scaledFeature, normChar);
 
-	CvMat* header = cvCreateMatHeader(1, featureSize, CV_64FC1);
-	cvSetData(header, feature, featureSize);
+	// used for MDA
+// 	CvMat* header = cvCreateMatHeader(1, featureSize, CV_64FC1);
+// 	cvSetData(header, feature, featureSize);
+// 
+// 	CvMat* y = cvCreateMat(1, W->cols, CV_64FC1);
+// 
+// 	cvGEMM(W, header, 1, NULL, 0, y, CV_GEMM_B_T);
 
-	CvMat* y = cvCreateMat(1, W->cols, CV_64FC1);
+	struct svm_node *node = new struct svm_node[featureSize+1];
+	for(int i = 0; i<featureSize; i++){
+		node[i].index = i;
+		node[i].value = scaledFeature[i];
+	}
+	node[featureSize].index = -1;
 
-	cvGEMM(W, header, 1, NULL, 0, y, CV_GEMM_B_T);
+	int size = svm_get_nr_class(m_model);
+	double *probability = new double[size];
+	*res = (wchar_t)svm_predict_probability(m_model, node, probability);
 
-	int index = 0;// 对y进行分类
+	double maxProb = 0;
+	for(int i = 0; i<size; i++){
+		if(maxProb < probability[i]){
+			maxProb = probability[i];
+		}
+	}
 
-	*res = m_indexMapping.at(index);
-
-	cvReleaseMatHeader(&header);
-	cvReleaseMat(&y);
+	//cvReleaseMatHeader(&header);
+	//cvReleaseMat(&y);
 	delete[] normChar;
-	delete[] feature;
+	delete[] scaledFeature;
+	delete[] node;
+	delete[] probability;
 
-	return 1;
+	return maxProb;
 }
 
 void CharRecogniser::normalize(char* res, const char* greys, int iWidth, int x, int y, int width, int height)
@@ -137,7 +159,6 @@ void CharRecogniser::normalize(char* res, const char* greys, int iWidth, int x, 
 
 void CharRecogniser::buildFeatureLib(generate::FontLib* fontLib, const int libSize)
 {
-
 	const int charCount = fontLib[0].size();
 
 #ifdef DEBUG
@@ -146,95 +167,68 @@ void CharRecogniser::buildFeatureLib(generate::FontLib* fontLib, const int libSi
 	}
 #endif
 
-	int size = fontLib[0].size();
-	for(int i = 0; i<size; i++){
-		m_indexMapping.push_back(fontLib->wideCharArray()->at(i)->value());
-	}
-
 	const int sampleSize = 16;
 	const int normSize = FeatureExtracter::s_NORMSIZE;
 	const int featureSize = FeatureExtracter::s_FEATURESIZE;
 
-	char** imageData = new char*[libSize];
-	for(int i = 0; i<charCount; i++){
+	char** imageData = new char*[sampleSize];
+	for(int i = 0; i<sampleSize; i++){
 		imageData[i] = new char[normSize*normSize];
 	}
 
-	CvMat* src = cvCreateMat(sampleSize*libSize, featureSize, CV_64FC1);
-	CvMat* mi = cvCreateMat(charCount, featureSize, CV_64FC1);
-	CvMat* header1 = cvCreateMatHeader(1, featureSize, CV_64FC1);
-	CvMat* header2 = cvCreateMatHeader(1, featureSize, CV_64FC1);
+	double *featureData = new double[charCount*libSize*sampleSize*featureSize], *tempData = featureData;
+	FeatureExtracter* extracter = FeatureExtracter::getInstance();
 
-	double* featureData = NULL;
 	for(int i = 0; i<charCount; i++){
 		for(int j = 0; j<libSize; j++){
 			distorteAndNorm(imageData, fontLib[j].wideCharArray()->at(i)->imageData(), sampleSize);
 
-			featureData = src->data.db + src->step*sampleSize*j;
-			for(int k = 0; k<sampleSize; k++){
-				FeatureExtracter::extractFeature(featureData + src->step*k, imageData[k]);
+			for(int k = 0; k<sampleSize; k++, tempData += featureSize){
+				extracter->extractFeature(tempData, imageData[k], true);
 			}
 		}
-
-		cvReduce(src, cvGetRow(mi, header1, i), 0);
 	}
 
-	CvMat* res = cvCreateMat(featureSize, featureSize, CV_64FC1);
-	CvMat* Si = cvCreateMat(featureSize, featureSize, CV_64FC1);
-	cvSetZero(Si);
+	extracter->saveData();
 
-	CvMat* Sw = cvCloneMat(Si);
-	CvMat* Sb = cvCloneMat(Si);
+	int count = charCount*libSize*sampleSize;
+	struct svm_problem *problem = new struct svm_problem;
+	problem->l = count;
+	problem->y = new double[count];
+	problem->x = new struct svm_node*[count];
 
-	int srcInter = sampleSize*libSize;
-	for(int i = 0; i<charCount; i++){
-		for(int j = 0; j<srcInter; j++){
-			cvMulTransposed(cvGetRow(src, header1, srcInter*i + j), res, 1, cvGetRow(mi, header2, i));
+	for(int i = 0; i<count; i++){
+		problem->x[i] = new struct svm_node[count*(featureSize + 1)];
+	}
 
-			cvAdd(res, Si, Si);
+	tempData = featureData;
+	for(int i = 0; i<count; i++, tempData += featureSize){
+		extracter->scaleFeature(tempData);
+
+		problem->y[i] = fontLib[0].wideCharArray()->at(i/(libSize*sampleSize))->value();
+		for(int j = 0; j<featureSize; j++){
+			problem->x[i][j].index = j;
+			problem->x[i][j].value= tempData[j]; 
 		}
 
-		cvAdd(Si, Sw, Sw);
+		problem->x[i][featureSize].index = -1;
 	}
 
-	CvMat* m = cvCreateMat(1, featureSize, CV_64FC1);
-	cvSetZero(m);
+	trainAndSaveClassifier(problem);
 
-	for(int i = 0; i<charCount; i++){
-		cvAdd(m, cvGetRow(mi, header1, i), m);
+	for(int i = 0; i<count; i++){
+		delete[] problem->x[i];
 	}
-	
-	CvMat* temp = cvCloneMat(m);
-	cvSet(temp, cvScalar(1.0/charCount));
+	delete[] problem->x;
+	delete[] problem->y;
+	delete problem;
 
-	cvMul(m, temp, m);
-
-	for(int i = 0; i<charCount; i++){
-		cvMulTransposed(cvGetRow(mi, header1, i), res, 1, m);
-
-		cvAdd(res, Sb, Sb);
-	}
-
-	cvSet(temp, cvScalar(srcInter));
-
-	cvMul(m, temp, m);
-
-
-
-	cvReleaseMat(&temp);
-	cvReleaseMat(&src);
-	cvReleaseMat(&mi);
-	cvReleaseMat(&m);
-	cvReleaseMatHeader(&header1);
-	cvReleaseMatHeader(&header2);
-	cvReleaseMat(&res);
-	cvReleaseMat(&Si);
-	cvReleaseMat(&Sb);
-
-	for(int i = 0; i<charCount; i++){
+	for(int i = 0; i<sampleSize; i++){
 		delete[] imageData[i];
 	}
 	delete[] imageData;
+
+	delete[] featureData;
 }
 
 void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin, int sampleSize)
@@ -561,3 +555,38 @@ void CharRecogniser::reduceResolution(IplImage* image, int scale, int type, int 
 
 	cvReleaseImage(&temp);
 }
+
+void CharRecogniser::trainAndSaveClassifier(struct svm_problem *prob){
+	if(prob == NULL){
+		cout << "m_problem == NULL" << endl;
+
+		exit(-1);
+	}
+
+	struct svm_parameter *param = new struct svm_parameter;
+
+	param->svm_type = C_SVC;
+	param->kernel_type = RBF;
+	param->gamma = 0.5;
+	param->cache_size = 10;
+	param->eps = 0.001;
+	param->C = 500;
+	param->nr_weight = 0;
+	param->shrinking = 1;
+	param->probability = 1;
+
+	const char *error = svm_check_parameter(prob, param);
+	if(error != NULL){
+		cerr << error << endl;
+
+		exit(-1);
+	}
+
+	struct svm_model *model = svm_train(prob, param);
+
+	svm_save_model(s_FILEPATH, model);
+
+	svm_destroy_model(model);
+
+	delete param;
+}	

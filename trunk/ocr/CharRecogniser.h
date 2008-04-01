@@ -2,6 +2,7 @@
 #define _CHARRECOGNISER_H
 
 #include "FontGen.h"
+#include "libsvm-2.85/svm.h"
 
 #include <stdio.h>
 #include <cv.h>
@@ -21,9 +22,9 @@ namespace recognise{
 		}
 
 		/** @return Reliably, from 0% to 100% */
-		float recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res);
+		double recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res);
 
-		void buildFeatureLib(generate::FontLib* fontLib, int size);
+		static void buildFeatureLib(generate::FontLib* fontLib, int size);
 
 		void DEBUG_testDistorte(char** samples, char* prototype, int sampleSize){
 			distorteAndNorm(samples, prototype, sampleSize);
@@ -32,23 +33,25 @@ namespace recognise{
 	private:
 		static CharRecogniser* s_instance;
 
-		static const char s_SVMDATAPATH[20];
+		static const char* s_FILEPATH;
 
-		CvMat* W;
+		// CvMat* W; used for MDA
 
-		vector<wchar_t> m_indexMapping;
+		struct svm_model* m_model;
 
-		CharRecogniser(FILE* file);
+		CharRecogniser(const char* modelFilepath);
 		~CharRecogniser(void);
 
-		void normalize(char* res, const char* greys, int iWidth, int x, int y, int width, int height);
+		static void normalize(char* res, const char* greys, int iWidth, int x, int y, int width, int height);
 		
 		/** used to generate many distorted samples for training */
-		void distorteAndNorm(char** samples, const char* prototype, int sampleSize);
+		static void distorteAndNorm(char** samples, const char* prototype, int sampleSize);
 
-		void findXYWH(char* data, int* x, int* y, int* width, int* height);
+		static void findXYWH(char* data, int* x, int* y, int* width, int* height);
 
-		void reduceResolution(IplImage* image, int scale, int type = CV_INTER_NN, int threshold = 128);
+		static void reduceResolution(IplImage* image, int scale, int type = CV_INTER_NN, int threshold = 128);
+
+		static void trainAndSaveClassifier(struct svm_problem *prob);
 
 	};
 

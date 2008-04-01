@@ -177,6 +177,10 @@
 				RelativePath=".\OCRToolkit.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\libsvm-2.85\svm.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -209,6 +213,10 @@
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\libsvm-2.85\svm.h"
 				>
 			</File>
 		</Filter>

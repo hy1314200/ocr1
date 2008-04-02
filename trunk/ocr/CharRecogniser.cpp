@@ -1,5 +1,4 @@
 #include "CharRecogniser.h"
-#include "stdafx.h"
 #include "FeatureExtracter.h"
 #include "DebugToolkit.h"
 #include "OCRToolkit.h"
@@ -11,7 +10,7 @@
 using namespace recognise;
 
 CharRecogniser* CharRecogniser::s_instance = 0;
-const char* CharRecogniser::s_FILEPATH = "data/classifier/svm.model";
+const char* CharRecogniser::s_FILEPATH = "data/classify/svm.model";
 
 CharRecogniser* CharRecogniser::getInstance(){
 	if(s_instance == 0){
@@ -49,17 +48,8 @@ double CharRecogniser::recogniseChar(const char* greys, int iWidth, int iHeight,
 
 	normalize(normChar, greys, iWidth, 0, 0, iWidth, iHeight);
 
-	// reduce classifier platform dependence
 	double *scaledFeature = new double[featureSize];
 	FeatureExtracter::getInstance()->extractScaledFeature(scaledFeature, normChar);
-
-	// used for MDA
-// 	CvMat* header = cvCreateMatHeader(1, featureSize, CV_64FC1);
-// 	cvSetData(header, feature, featureSize);
-// 
-// 	CvMat* y = cvCreateMat(1, W->cols, CV_64FC1);
-// 
-// 	cvGEMM(W, header, 1, NULL, 0, y, CV_GEMM_B_T);
 
 	struct svm_node *node = new struct svm_node[featureSize+1];
 	for(int i = 0; i<featureSize; i++){
@@ -70,17 +60,23 @@ double CharRecogniser::recogniseChar(const char* greys, int iWidth, int iHeight,
 
 	int size = svm_get_nr_class(m_model);
 	double *probability = new double[size];
-	*res = (wchar_t)svm_predict_probability(m_model, node, probability);
 
-	double maxProb = 0;
-	for(int i = 0; i<size; i++){
-		if(maxProb < probability[i]){
-			maxProb = probability[i];
+	double maxProb;
+	if(svm_check_probability_model(m_model)){
+		*res = (wchar_t)svm_predict_probability(m_model, node, probability);
+
+		maxProb = 0;
+		for(int i = 0; i<size; i++){
+			if(maxProb < probability[i]){
+				maxProb = probability[i];
+			}
 		}
+	}else{
+		*res = (wchar_t)svm_predict(m_model, node);
+		
+		maxProb = 1;
 	}
 
-	//cvReleaseMatHeader(&header);
-	//cvReleaseMat(&y);
 	delete[] normChar;
 	delete[] scaledFeature;
 	delete[] node;
@@ -197,22 +193,56 @@ void CharRecogniser::buildFeatureLib(generate::FontLib* fontLib, const int libSi
 	problem->y = new double[count];
 	problem->x = new struct svm_node*[count];
 
-	for(int i = 0; i<count; i++){
-		problem->x[i] = new struct svm_node[count*(featureSize + 1)];
-	}
+	// 	for(int i = 0; i<count; i++){
+	// 		problem->x[i] = new struct svm_node[count*(featureSize + 1)];
+	// 	}
+	// 
+	// 	tempData = featureData;
+	// 	for(int i = 0; i<count; i++, tempData += featureSize){
+	// 		extracter->scaleFeature(tempData);
+	// 
+	// 		problem->y[i] = fontLib[0].wideCharArray()->at(i/(libSize*sampleSize))->value();
+	// 		for(int j = 0; j<featureSize; j++){
+	// 			problem->x[i][j].index = j;
+	// 			problem->x[i][j].value= tempData[j]; 
+	// 		}
+	// 
+	// 		problem->x[i][featureSize].index = -1;
+	// 	}
 
-	tempData = featureData;
-	for(int i = 0; i<count; i++, tempData += featureSize){
-		extracter->scaleFeature(tempData);
+	assert(false);
+	FILE* file = fopen("data/classify/problem", "w");
+ 	tempData = featureData;
+ 	for(int i = 0; i<count; i++, tempData += featureSize){
+ 		extracter->scaleFeature(tempData);
+  
+  		fprintf(file, "%d", (int)fontLib[0].wideCharArray()->at(i/(libSize*sampleSize))->value());
+  		for(int j = 0; j<featureSize; j++){
+			fprintf(file, " %d:%lf", j, tempData[j]);
+  		}
 
-		problem->y[i] = fontLib[0].wideCharArray()->at(i/(libSize*sampleSize))->value();
-		for(int j = 0; j<featureSize; j++){
-			problem->x[i][j].index = j;
-			problem->x[i][j].value= tempData[j]; 
-		}
+		fprintf(file, "\n");
+ 	}
+	fclose(file);
 
-		problem->x[i][featureSize].index = -1;
-	}
+// #ifdef SAVE_PROBLEM
+// 
+// 	FILE* file = fopen("data/test/problem", "w");
+// 	assert(file != NULL);
+// 
+// 	for(int i = 0; i<problem->l; i++){
+// 		fprintf(file, "%d", (int)problem->y[i]);
+// 
+// 		for(int j = 0; problem->x[i][j].index != -1; j++){
+// 			fprintf(file, " %d:%lf", problem->x[i][j].index, problem->x[i][j].value);
+// 		}
+// 
+// 		fprintf(file, "\n");
+// 	}
+// 
+// 	fclose(file);
+// 
+// #endif
 
 	trainAndSaveClassifier(problem);
 
@@ -565,6 +595,7 @@ void CharRecogniser::trainAndSaveClassifier(struct svm_problem *prob){
 
 	struct svm_parameter *param = new struct svm_parameter;
 
+	/*
 	param->svm_type = C_SVC;
 	param->kernel_type = RBF;
 	param->gamma = 0.5;
@@ -574,6 +605,23 @@ void CharRecogniser::trainAndSaveClassifier(struct svm_problem *prob){
 	param->nr_weight = 0;
 	param->shrinking = 1;
 	param->probability = 1;
+	*/
+	
+	param->svm_type = C_SVC;
+	param->kernel_type = RBF;
+	param->degree = 3;
+	param->gamma = 1.0;	// 1/k
+	param->coef0 = 0;
+	param->nu = 0.5;
+	param->cache_size = 100;
+	param->C = 0.001;
+	param->eps = 1e-3;
+	param->p = 0.1;
+	param->shrinking = 1;
+	param->probability = 1;
+	//param->nr_weight = 2;
+	//param->weight_label = weight_label;
+	//param->weight = weight;
 
 	const char *error = svm_check_parameter(prob, param);
 	if(error != NULL){
@@ -589,4 +637,4 @@ void CharRecogniser::trainAndSaveClassifier(struct svm_problem *prob){
 	svm_destroy_model(model);
 
 	delete param;
-}	
+}

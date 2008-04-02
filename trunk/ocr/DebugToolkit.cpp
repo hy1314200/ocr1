@@ -181,6 +181,7 @@ void DebugToolkit::displayGreyImage(const char* iData, int iWidth, int x, int y,
 	}
 
 	displayImage(image, wait);
+	cvReleaseImage(&image);
 }
 
 void DebugToolkit::saveGreyImage(const char* imageData, int width, int height, const char* filename){
@@ -269,10 +270,13 @@ void DebugToolkit::readGreyData(uchar* data, const char *name){
 	FILE *file = fopen(name, "r");
 
 	fscanf(file, "%d %d", &width, &height);
-		
+	
+	int temp;
 	for(int i = 0; i<height; i++){
 		for(int j = 0; j<width; j++){
-			fscanf(file, "%d", data + i*width + j);
+			fscanf(file, "%d", &temp);
+
+			*(data + i*width + j) = (uchar)temp;
 		}
 	}
 

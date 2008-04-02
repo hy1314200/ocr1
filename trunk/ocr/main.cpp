@@ -22,7 +22,7 @@ void testRecognise(char* path){
 	const char* imagePath = path;
 	IplImage* image = cvLoadImage(imagePath, CV_LOAD_IMAGE_GRAYSCALE);
 
-	DebugToolkit::displayImage(image);
+	//DebugToolkit::displayImage(image);
 
 	char* data = image->imageData;
 	int width = image->width, height = image->height;
@@ -44,8 +44,10 @@ void testRecognise(char* path){
 	int len = OCRToolkit::recognise(data, image->width, image->height, &wordList);
 	
 	cout << "识别出 " << len << " 个汉字\n";
+
+	setlocale(LC_ALL, "");
 	for(int i = 0; i<len; i++){
-		wcout << wordList.at(len) << " ";
+		wprintf(L"%c\n", wordList.at(i));
 	}
 	cout << endl;
 
@@ -82,16 +84,47 @@ void testFeature1(char* path){
 }
 
 void testFeature2(){
-	char* data = new char[64];
+	const int dim = 16;
 
-	DebugToolkit::readGreyData((uchar*)data, "image.data");
+	char* data = new char[dim*dim];
 
-	//FeatureExtracter::Feature f;
-	//FeatureExtracter::calcBlackJump(data, f.totalBlackJump, f.divBlackJump);
+	DebugToolkit::readGreyData((uchar*)data, "data/test/image2.data");
+	
+	// the feature describes a character image 
+	int strokeWidth;			// stroke width
+	int totalStrokeLen;			// total stroke length
+	int projHist[2][dim];		// projection histogram in two directions
+	int transitions[2];			// number of transitions in two directions
+	int strokeDensity[2][8];	// stroke density in two directions
+	int peripheral[4][8][2];	// two peripheral features with four directions
+	int locDir[4][4][4];		// local direction contributivity with four regions and four directions
+	double strokeProp[2][4][4];	// stroke proportion in two directions  
+	int maxLocDirCtr[4][4][4];	// maximum local direction contributivity
+	int totalBlackJump[2][8];	// black jump distribution in each balanced subvectors  
+	double divBlackJump[2][8];	// black jump distribution in each balanced subvectors divided by the total 
 
-// 	for(int i = 0; i<8; i++){
-// 		cout << f.peripheral[2][i][1] << " ";
-// 	}
+	FeatureExtracter* ext = FeatureExtracter::getInstance();
+	//ext->TEST_calcStrokeWidthAndLen(data, &strokeWidth, &totalStrokeLen);
+	//ext->TEST_calcTransDensAndPeri(data, transitions, strokeDensity, peripheral);
+	ext->TEST_calcLocDirPropAndMaxLocDir(data, locDir, strokeProp, maxLocDirCtr);
+
+	//cout << transitions[0] << " " << transitions[1] << endl;
+	cout << strokeProp[1][2][3] << " ";
+//  	for(int i = 0; i<2; i++){
+// 		for(int j = 0; j<4; j++){
+// 			for(int k = 0; k<4; k++){
+// 				cout << strokeProp[i][j][k] << " ";
+// 			}
+// 			cout << endl;
+// 		}
+// 		cout << endl;
+//  	}
+
+//	FeatureExtracter::TEST_calcBlackJump(data, &totalBlackJump, &divBlackJump);
+
+//  	for(int i = 0; i<8; i++){
+//  		cout << peripheral[2][i][1] << " ";
+//  	}
 
 	//DebugToolkit::normalizeAndShowHist(f.strokeDensity[0], 8);
 
@@ -159,7 +192,7 @@ void testDistorte(){
 		memcpy(b+64*i, image->imageData + image->widthStep*i, 64);
 	}
 
-	CharRecogniser::getInstance()->DEBUG_testDistorte(a, b, 16);
+	CharRecogniser::getInstance()->TEST_distorteAndNorm(a, b, 16);
 
 	cvReleaseImage(&image);
 
@@ -177,7 +210,7 @@ void unitTest(){
 	//	testFontGen();
 	//	testFontStore();
 	//	testWChar();
-	//	testFeature2();
+	testFeature2();
 	// 	testFilterNoise();
 
 	// 	testRecognise(path);
@@ -191,17 +224,19 @@ void unitTest(){
 }
 
 void testApp(){
-// 	FILE* file = fopen("data/font/songti.int", "r");
-// 	FontLib* lib = FontGen::genIntFontLib(file);
+// 	FILE* file = fopen("data/font/st.c", "r");
+// 	FontLib* lib = FontGen::genExtFontLib(file, SONGTI);
+// 	//DebugToolkit::displayGreyImage(lib->wideCharArray()->at(0)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 // 	fclose(file);
 // 
 // 	CharRecogniser::buildFeatureLib(lib, 1);
 // 	delete lib;
 
-	testRecognise("image/(1).bmp");
+	testRecognise("image/(9).bmp");
 }
 
 int main(int argc, char** argv){
 	testApp();
+//	unitTest();
 	return 0;
 }

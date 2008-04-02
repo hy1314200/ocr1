@@ -1,8 +1,9 @@
 #ifndef _CHARDIVIDER_H
 #define _CHARDIVIDER_H
 
-#include <vector>
+#include "stdafx.h"
 
+#include <vector>
 #include <cxcore.h>
 
 using namespace std;
@@ -77,7 +78,10 @@ namespace divide{
 
 		static void copyArea(char* dest, const char* src, int iWidth, int x, int y, int cW, int cH);
 
+#ifdef DEBUG
 		static void DEBUG_markChar(char* greys, int iWidth, int iHeight, int x, int y, int w, int h);
+#endif
+
 	};
 
 }

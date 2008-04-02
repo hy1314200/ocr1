@@ -36,6 +36,8 @@ FontGen::_Char* FontGen::_Char::parseExtFile(FILE* file, int widthOfLine)
 
 	fscanf(file, "%xd", &value);
 
+	memset(data, backColor, s_CHARSIZE*s_CHARSIZE);
+
 	for(int i = 0; i<s_CHARSIZE; i++){
 		for(int j = 0; j<widthOfLine; j++){
 
@@ -135,6 +137,8 @@ FontGen::_FontLib* FontGen::_FontLib::parseExtFile(FILE* file, Typeface typeface
 
 			fscanf(file, "%s", temp);
 			if(temp[1] == 't'){
+				assert(false);	// ÔÝ²»Ö§³Ö
+
 				width = 4;	// thin compacted 01 data with 4 elements in a line
 
 				cArray = cTArray;

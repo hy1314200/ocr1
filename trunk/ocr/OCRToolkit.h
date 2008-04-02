@@ -25,7 +25,7 @@ public:
 	static int recognise(char* greys, int iWidth, int iHeight, vector<wchar_t>* res);
 
 private:
-	static const float s_SCALETHRESHOLD;
+	static const double s_SCALETHRESHOLD;
 
 	OCRToolkit(){ }
 	~OCRToolkit(){ }

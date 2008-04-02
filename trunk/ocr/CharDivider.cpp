@@ -1,5 +1,4 @@
 #include "CharDivider.h"
-#include "stdafx.h"
 #include "DebugToolkit.h"
 #include "OCRToolkit.h"
 
@@ -297,7 +296,6 @@ char* CharDivider::removeBigConnectedComp(const char* greys, int iWidth, int ups
 	// need modified: change parameter, looser condition allowed
 	int anchor = (cH + 1)/7;
 	cout << "cH: " << cH << " anchor: " << anchor << endl;
-	//DebugToolkit::DEBUG_displayImage(greys, iWidth, 0, upside, iWidth, downside - upside + 1);
 
 	anchor = (anchor < 2)? 2: anchor;
 
@@ -548,6 +546,7 @@ void CharDivider::copyArea(char* dest, const char* src, int iWidth, int x, int y
 	}
 }
 
+#ifdef DEBUG
 void CharDivider::DEBUG_markChar(char* greys, int iWidth, int iHeight, int x, int y, int w, int h){
 	char charColor = OCRToolkit::s_CHARACTERCOLOR;
 	char backColor = OCRToolkit::s_BACKGROUNDCOLOR;
@@ -561,6 +560,7 @@ void CharDivider::DEBUG_markChar(char* greys, int iWidth, int iHeight, int x, in
 		*(greys + iWidth*(y+i) + x + w - 1) = charColor;
 	}
 }
+#endif
 
 void divide::CharDivider::filterNoise(char* greys, int iWidth, int upside, int downside, bool strict)
 {

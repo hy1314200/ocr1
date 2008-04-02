@@ -5,6 +5,10 @@
 #define DEBUG
 #endif
 
+#ifndef TEST
+#define TEST
+#endif
+
 // display define
 #ifndef DISPLAY_DIVIDED_CHAR
 //#define DISPLAY_DIVIDED_CHAR
@@ -15,13 +19,17 @@
 #endif
 
 #ifndef DISPLAY_CONNECTED_IMAGE
-#define DISPLAY_CONNECTED_IMAGE
+//#define DISPLAY_CONNECTED_IMAGE
 #endif
 
 
 // method related define
 #ifndef FILTER_NOISE
 #define FILTER_NOISE
+#endif
+
+#ifndef SAVE_PROBLEM
+//#define SAVE_PROBLEM
 #endif
 
 #endif

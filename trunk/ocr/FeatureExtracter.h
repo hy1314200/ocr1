@@ -24,6 +24,28 @@ namespace recognise{
 
 		void saveData();
 
+#ifdef TEST
+		void TEST_calcStrokeWidthAndLen(const char* imageData, int* strokeWidth, int* totalStrokeLen){
+			calcStrokeWidthAndLen(imageData, strokeWidth, totalStrokeLen);
+		}
+
+		void TEST_calcProjHist(const char* imageData, int projHist[][s_NORMSIZE]){
+			calcProjHist(imageData, projHist);
+		}
+
+		void TEST_calcTransDensAndPeri(const char* imageData, int* transitions, int strokeDensity[][8], int peripheral[][8][2]){
+			calcTransDensAndPeri(imageData, transitions, strokeDensity, peripheral);
+		}
+
+		void TEST_calcLocDirPropAndMaxLocDir(const char* imageData, int locDir[][4][4], double strokeProp[][4][4], int maxLocDirCtr[][4][4]){
+			calcLocDirPropAndMaxLocDir(imageData, locDir, strokeProp, maxLocDirCtr);
+		}
+
+		void TEST_calcBlackJump(const char* imageData, int totalBlackJump[][8], double divBlackJump[][8]){
+			calcBlackJump(imageData, totalBlackJump, divBlackJump);
+		}
+#endif
+
 	private:
 		static const char* s_filepath;
 

@@ -7,7 +7,7 @@
 using namespace recognise;
 
 FeatureExtracter* FeatureExtracter::s_instance = NULL;
-const char* FeatureExtracter::s_filepath = "data/classifier/feature";
+const char* FeatureExtracter::s_filepath = "data/classify/feature.maxmin";
 
 FeatureExtracter::FeatureExtracter(FILE *file){
 	if(file == NULL){
@@ -295,7 +295,7 @@ void FeatureExtracter::calcStrokeWidthAndLen(const char* imageData, int* strokeW
 		}
 	}
 
-	if(*(imageData + s_NORMSIZE*s_NORMSIZE - 1) == charColor){	// *(imageData + size*(size - 1) + (size-1))
+	if(*(imageData + s_NORMSIZE*s_NORMSIZE - 1) == charColor){
 		charPixCount++;
 	}
 
@@ -530,18 +530,17 @@ void FeatureExtracter::calcLocDirPropAndMaxLocDir(const char* imageData, int loc
 		}
 	}
 
+	memset(strokeProp, 0, 2*s_GRIDSIZE*4*sizeof(int));
+
 	int temp;
-	int *p1= NULL, *p2 = NULL;
 	for(int i = 0; i<s_GRIDSIZE; i++){
 		for(int j = 0; j<s_GRIDSIZE; j++){
 			temp = pixs[i][j];
 
-			p1 = &(locDir[i][j][0]);
-			p2 = &(total[i][j][0]);
-			p1[LEFT_RIGHT] = (temp == 0)? 0: p2[LEFT_RIGHT] / temp;
-			p1[UP_DOWN] = (temp == 0)? 0: p2[UP_DOWN] / temp;
-			p1[LUP_RDOWN] = (temp == 0)? 0: p2[LUP_RDOWN] / temp;
-			p1[LDOWN_RUP] = (temp == 0)? 0: p2[LDOWN_RUP] / temp;
+			locDir[i][j][LEFT_RIGHT] = (temp == 0)? 0: total[i][j][LEFT_RIGHT] / temp;
+			locDir[i][j][UP_DOWN] = (temp == 0)? 0: total[i][j][UP_DOWN] / temp;
+			locDir[i][j][LUP_RDOWN] = (temp == 0)? 0: total[i][j][LUP_RDOWN] / temp;
+			locDir[i][j][LDOWN_RUP] = (temp == 0)? 0: total[i][j][LDOWN_RUP] / temp;
 
 			temp = maxLocDirCtr[i][j][LEFT_RIGHT];
 			strokeProp[HORIZONTAL][i][LEFT_RIGHT] += temp;
@@ -561,21 +560,18 @@ void FeatureExtracter::calcLocDirPropAndMaxLocDir(const char* imageData, int loc
 		}
 	}
 
-	double *fp = NULL;
 	for(int i = 0; i<s_GRIDSIZE; i++){
 		temp = pixs[i][0] + pixs[i][1] + pixs[i][2] + pixs[i][3];
-		fp = &(strokeProp[HORIZONTAL][i][0]);
-		fp[LEFT_RIGHT] = (temp == 0)? 0: fp[LEFT_RIGHT]/temp;
-		fp[UP_DOWN] = (temp == 0)? 0: fp[UP_DOWN]/temp;
-		fp[LUP_RDOWN] = (temp == 0)? 0: fp[LUP_RDOWN]/temp;
-		fp[LDOWN_RUP] = (temp == 0)? 0: fp[LDOWN_RUP]/temp;
+		strokeProp[HORIZONTAL][i][LEFT_RIGHT] = (temp == 0)? 0: strokeProp[HORIZONTAL][i][LEFT_RIGHT]/temp;
+		strokeProp[HORIZONTAL][i][UP_DOWN] = (temp == 0)? 0: strokeProp[HORIZONTAL][i][UP_DOWN]/temp;
+		strokeProp[HORIZONTAL][i][LUP_RDOWN] = (temp == 0)? 0: strokeProp[HORIZONTAL][i][LUP_RDOWN]/temp;
+		strokeProp[HORIZONTAL][i][LDOWN_RUP] = (temp == 0)? 0: strokeProp[HORIZONTAL][i][LDOWN_RUP]/temp;
 
 		temp = pixs[0][i] + pixs[1][i] + pixs[2][i] + pixs[3][i];
-		fp = &(strokeProp[VERTICAL][i][0]);
-		fp[LEFT_RIGHT] = (temp == 0)? 0: fp[LEFT_RIGHT]/temp;
-		fp[UP_DOWN] = (temp == 0)? 0: fp[UP_DOWN]/temp;
-		fp[LUP_RDOWN] = (temp == 0)? 0: fp[LUP_RDOWN]/temp;
-		fp[LDOWN_RUP] = (temp == 0)? 0: fp[LDOWN_RUP]/temp;
+		strokeProp[VERTICAL][i][LEFT_RIGHT] = (temp == 0)? 0: strokeProp[VERTICAL][i][LEFT_RIGHT]/temp;
+		strokeProp[VERTICAL][i][UP_DOWN] = (temp == 0)? 0: strokeProp[VERTICAL][i][UP_DOWN]/temp;
+		strokeProp[VERTICAL][i][LUP_RDOWN] = (temp == 0)? 0: strokeProp[VERTICAL][i][LUP_RDOWN]/temp;
+		strokeProp[VERTICAL][i][LDOWN_RUP] = (temp == 0)? 0: strokeProp[VERTICAL][i][LDOWN_RUP]/temp;
 	}
 }
 

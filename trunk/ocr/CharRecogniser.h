@@ -2,6 +2,7 @@
 #define _CHARRECOGNISER_H
 
 #include "FontGen.h"
+#include "stdafx.h"
 #include "libsvm-2.85/svm.h"
 
 #include <stdio.h>
@@ -26,9 +27,11 @@ namespace recognise{
 
 		static void buildFeatureLib(generate::FontLib* fontLib, int size);
 
-		void DEBUG_testDistorte(char** samples, char* prototype, int sampleSize){
+#ifdef TEST
+		void TEST_distorteAndNorm(char** samples, char* prototype, int sampleSize){
 			distorteAndNorm(samples, prototype, sampleSize);
 		}
+#endif
 
 	private:
 		static CharRecogniser* s_instance;

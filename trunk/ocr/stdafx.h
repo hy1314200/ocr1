@@ -29,7 +29,7 @@
 #endif
 
 #ifndef SAVE_PROBLEM
-//#define SAVE_PROBLEM
+#define SAVE_PROBLEM
 #endif
 
 #endif

@@ -224,15 +224,15 @@ void unitTest(){
 }
 
 void testApp(){
-// 	FILE* file = fopen("data/font/st.c", "r");
-// 	FontLib* lib = FontGen::genExtFontLib(file, SONGTI);
-// 	//DebugToolkit::displayGreyImage(lib->wideCharArray()->at(0)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-// 	fclose(file);
-// 
-// 	CharRecogniser::buildFeatureLib(lib, 1);
-// 	delete lib;
+ 	FILE* file = fopen("data/font/st.c", "r");
+ 	FontLib* lib = FontGen::genExtFontLib(file, SONGTI);
+ 	//DebugToolkit::displayGreyImage(lib->wideCharArray()->at(0)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+ 	fclose(file);
+ 
+ 	CharRecogniser::buildFeatureLib(lib, 1);
+ 	delete lib;
 
-	testRecognise("image/(9).bmp");
+	//testRecognise("image/(9).bmp");
 }
 
 int main(int argc, char** argv){

@@ -193,56 +193,41 @@ void CharRecogniser::buildFeatureLib(generate::FontLib* fontLib, const int libSi
 	problem->y = new double[count];
 	problem->x = new struct svm_node*[count];
 
-	// 	for(int i = 0; i<count; i++){
-	// 		problem->x[i] = new struct svm_node[count*(featureSize + 1)];
-	// 	}
-	// 
-	// 	tempData = featureData;
-	// 	for(int i = 0; i<count; i++, tempData += featureSize){
-	// 		extracter->scaleFeature(tempData);
-	// 
-	// 		problem->y[i] = fontLib[0].wideCharArray()->at(i/(libSize*sampleSize))->value();
-	// 		for(int j = 0; j<featureSize; j++){
-	// 			problem->x[i][j].index = j;
-	// 			problem->x[i][j].value= tempData[j]; 
-	// 		}
-	// 
-	// 		problem->x[i][featureSize].index = -1;
-	// 	}
-
-	assert(false);
-	FILE* file = fopen("data/classify/problem", "w");
+ 	for(int i = 0; i<count; i++){
+ 		problem->x[i] = new struct svm_node[featureSize + 1];
+ 	}
+ 
  	tempData = featureData;
  	for(int i = 0; i<count; i++, tempData += featureSize){
  		extracter->scaleFeature(tempData);
-  
-  		fprintf(file, "%d", (int)fontLib[0].wideCharArray()->at(i/(libSize*sampleSize))->value());
-  		for(int j = 0; j<featureSize; j++){
-			fprintf(file, " %d:%lf", j, tempData[j]);
-  		}
+
+ 		problem->y[i] = fontLib[0].wideCharArray()->at(i/(libSize*sampleSize))->value();
+		for(int j = 0; j<featureSize; j++){
+ 			problem->x[i][j].index = j;
+ 			problem->x[i][j].value= tempData[j]; 
+ 		}
+ 
+ 		problem->x[i][featureSize].index = -1;
+ 	}
+
+#ifdef SAVE_PROBLEM
+
+	FILE* file = fopen("data/classify/problem", "w");
+	assert(file != NULL);
+
+	for(int i = 0; i<problem->l; i++){
+		fprintf(file, "%d", (int)problem->y[i]);
+
+		for(int j = 0; problem->x[i][j].index != -1; j++){
+			fprintf(file, " %d:%lf", problem->x[i][j].index, problem->x[i][j].value);
+		}
 
 		fprintf(file, "\n");
- 	}
+	}
+
 	fclose(file);
 
-// #ifdef SAVE_PROBLEM
-// 
-// 	FILE* file = fopen("data/test/problem", "w");
-// 	assert(file != NULL);
-// 
-// 	for(int i = 0; i<problem->l; i++){
-// 		fprintf(file, "%d", (int)problem->y[i]);
-// 
-// 		for(int j = 0; problem->x[i][j].index != -1; j++){
-// 			fprintf(file, " %d:%lf", problem->x[i][j].index, problem->x[i][j].value);
-// 		}
-// 
-// 		fprintf(file, "\n");
-// 	}
-// 
-// 	fclose(file);
-// 
-// #endif
+#endif
 
 	trainAndSaveClassifier(problem);
 
@@ -595,33 +580,23 @@ void CharRecogniser::trainAndSaveClassifier(struct svm_problem *prob){
 
 	struct svm_parameter *param = new struct svm_parameter;
 
-	/*
-	param->svm_type = C_SVC;
-	param->kernel_type = RBF;
-	param->gamma = 0.5;
-	param->cache_size = 10;
-	param->eps = 0.001;
-	param->C = 500;
-	param->nr_weight = 0;
-	param->shrinking = 1;
-	param->probability = 1;
-	*/
-	
+
+	// default values
 	param->svm_type = C_SVC;
 	param->kernel_type = RBF;
 	param->degree = 3;
-	param->gamma = 1.0;	// 1/k
+	param->gamma = 0;	// 1/k
 	param->coef0 = 0;
 	param->nu = 0.5;
 	param->cache_size = 100;
-	param->C = 0.001;
+	param->C = 1;
 	param->eps = 1e-3;
 	param->p = 0.1;
 	param->shrinking = 1;
-	param->probability = 1;
-	//param->nr_weight = 2;
-	//param->weight_label = weight_label;
-	//param->weight = weight;
+	param->probability = 0;
+	param->nr_weight = 0;
+	param->weight_label = NULL;
+	param->weight = NULL;
 
 	const char *error = svm_check_parameter(prob, param);
 	if(error != NULL){

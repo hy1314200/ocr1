@@ -1,4 +1,4 @@
 @echo off
-svmtrain -c 4 -e 0.1 -v 5 problem
+svmtrain -c 1 -g 0.0078125 problem
 pause
 @echo on

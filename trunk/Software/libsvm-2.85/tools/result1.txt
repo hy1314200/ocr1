@@ -1,0 +1,5 @@
+grid.py -log2c -5,5,1 -svmtrain E:\Project\VS2005Proj\ocr\Software\libsvm-2.85\windows\svmtrain.exe -gnuplot D:\Software\gnuplot\bin\pgnuplot.exe -v 20 problem
+
+[local] 0.0 -7 99.929  (best c=1.0, g=0.0078125, rate=99.929)
+[local] -3.0 -7 99.929  (best c=1.0, g=0.0078125, rate=99.929)
+[local] 0.0 -7 99.929  (best c=1.0, g=0.0078125, rate=99.929)

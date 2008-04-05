@@ -153,13 +153,13 @@ void CharRecogniser::normalize(char* res, const char* greys, int iWidth, int x, 
 	cvReleaseImage(&dst);
 }
 
-void CharRecogniser::buildFeatureLib(generate::FontLib* fontLib, const int libSize)
+void CharRecogniser::buildFeatureLib(generate::FontLib** fontLib, const int libSize)
 {
-	const int charCount = fontLib[0].size();
+	const int charCount = fontLib[0]->size();
 
 #ifdef DEBUG
 	for(int i = 1; i<libSize; i++){
-		assert(charCount == fontLib[i].size());
+		assert(charCount == fontLib[i]->size());
 	}
 #endif
 
@@ -177,7 +177,7 @@ void CharRecogniser::buildFeatureLib(generate::FontLib* fontLib, const int libSi
 
 	for(int i = 0; i<charCount; i++){
 		for(int j = 0; j<libSize; j++){
-			distorteAndNorm(imageData, fontLib[j].wideCharArray()->at(i)->imageData(), sampleSize);
+			distorteAndNorm(imageData, fontLib[j]->wideCharArray()->at(i)->imageData(), sampleSize);
 
 			for(int k = 0; k<sampleSize; k++, tempData += featureSize){
 				extracter->extractFeature(tempData, imageData[k], true);
@@ -201,7 +201,7 @@ void CharRecogniser::buildFeatureLib(generate::FontLib* fontLib, const int libSi
  	for(int i = 0; i<count; i++, tempData += featureSize){
  		extracter->scaleFeature(tempData);
 
- 		problem->y[i] = fontLib[0].wideCharArray()->at(i/(libSize*sampleSize))->value();
+ 		problem->y[i] = fontLib[0]->wideCharArray()->at(i/(libSize*sampleSize))->value();
 		for(int j = 0; j<featureSize; j++){
  			problem->x[i][j].index = j;
  			problem->x[i][j].value= tempData[j]; 

@@ -25,7 +25,7 @@ namespace recognise{
 		/** @return Reliably, from 0% to 100% */
 		double recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res);
 
-		static void buildFeatureLib(generate::FontLib* fontLib, int size);
+		static void buildFeatureLib(generate::FontLib** fontLib, int size);
 
 #ifdef TEST
 		void TEST_distorteAndNorm(char** samples, char* prototype, int sampleSize){

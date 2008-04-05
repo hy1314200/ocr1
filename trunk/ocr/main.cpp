@@ -28,7 +28,7 @@ void testRecognise(char* path){
 	int width = image->width, height = image->height;
 
 	// need modified DEBUG 
-	cout << "约 " << cvRound(width*1.0f/height) << " 个字" << endl;
+	//cout << "约 " << cvRound(width*1.0f/height) << " 个字" << endl;
 
 	// need modified DEBUG check if it's binarized
 	for(int i = 0; i < width*height; i++){
@@ -43,13 +43,12 @@ void testRecognise(char* path){
 	vector<wchar_t> wordList;
 	int len = OCRToolkit::recognise(data, image->width, image->height, &wordList);
 	
-	cout << "识别出 " << len << " 个汉字\n";
+	printf("识别出 %d 个汉字\n", len);
 
 	setlocale(LC_ALL, "");
 	for(int i = 0; i<len; i++){
-		wprintf(L"%c\n", wordList.at(i));
+		wprintf(L"%c", wordList.at(i));
 	}
-	cout << endl;
 
 	DebugToolkit::displayImage(image);
 }
@@ -224,15 +223,81 @@ void unitTest(){
 }
 
 void testApp(){
- 	FILE* file = fopen("data/font/st.c", "r");
- 	FontLib* lib = FontGen::genExtFontLib(file, SONGTI);
- 	//DebugToolkit::displayGreyImage(lib->wideCharArray()->at(0)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
- 	fclose(file);
- 
- 	CharRecogniser::buildFeatureLib(lib, 1);
- 	delete lib;
+// 	FILE* file1 = fopen("data/font/songti.int", "r");
+// 	FILE* file2 = fopen("data/font/heiti.int", "r");
+// 	FILE* file3 = fopen("data/font/fangsong.int", "r");
+// 	FILE* file4 = fopen("data/font/kaiti.int", "r");
+// 
+//  	FontLib **lib = new FontLib*[4];
+// 	lib[0] = FontGen::genIntFontLib(file1);
+// 	lib[1] = FontGen::genIntFontLib(file2);
+// 	lib[2] = FontGen::genIntFontLib(file3);
+// 	lib[3] = FontGen::genIntFontLib(file4);
 
-	//testRecognise("image/(9).bmp");
+// 	FILE* file1 = fopen("data/font/songti.ext", "r");
+// 	FILE* file2 = fopen("data/font/heiti.ext", "r");
+// 	FILE* file3 = fopen("data/font/fangsong.ext", "r");
+// 	FILE* file4 = fopen("data/font/kaiti.ext", "r");
+// 
+//  	FontLib **lib = new FontLib*[4];
+// 	lib[0] = FontGen::genExtFontLib(file1, SONGTI);
+// 	lib[1] = FontGen::genExtFontLib(file2, HEITI);
+// 	lib[2] = FontGen::genExtFontLib(file3, FANGSONG);
+// 	lib[3] = FontGen::genExtFontLib(file4, KAITI);
+// 
+// 	DebugToolkit::displayGreyImage(lib[0]->wideCharArray()->at(47)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+// 	DebugToolkit::displayGreyImage(lib[1]->wideCharArray()->at(47)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+// 	DebugToolkit::displayGreyImage(lib[2]->wideCharArray()->at(47)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+// 	DebugToolkit::displayGreyImage(lib[3]->wideCharArray()->at(47)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+// 
+// 	fclose(file1);
+// 	fclose(file2);
+// 	fclose(file3);
+// 	fclose(file4);
+//  
+//  	CharRecogniser::buildFeatureLib(lib, 4);
+// 
+// 	for(int i = 0; i<4; i++){
+// 		delete lib[i];
+// 	}
+// 	delete[] lib;
+
+	testRecognise("image/(1).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/(2).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/(3).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/(4).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/(5).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/(6).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/(7).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/(8).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/(9).bmp");
+
+	testRecognise("image/test/(8).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/test/(9).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/test/(10).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/test/(11).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/test/(12).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/test/(13).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/test/(16).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/test/(17).bmp");
+	cout << "\n" << endl;
+	testRecognise("image/test/(19).bmp");
+	cout << "\n" << endl;
 }
 
 int main(int argc, char** argv){

@@ -250,11 +250,11 @@ bool CharDivider::horizontalRejectCalc(const char* greys, int iWidth, int iHeigh
 	}
 
 	// need modified DEBUG
-	cout << "horizontal rejection: ";
-	for(int i = 0; i<iHeight; i++){
-		cout << histagram[i] << " ";
-	}
-	cout << endl;
+// 	cout << "horizontal projection: ";
+// 	for(int i = 0; i<iHeight; i++){
+// 		cout << histagram[i] << " ";
+// 	}
+// 	cout << endl;
 
 	int up, down, center = iHeight/2;
 	up = down = center;	// need modified 默认图像水平中心线必穿过字符
@@ -295,7 +295,7 @@ char* CharDivider::removeBigConnectedComp(const char* greys, int iWidth, int ups
 
 	// need modified: change parameter, looser condition allowed
 	int anchor = (cH + 1)/7;
-	cout << "cH: " << cH << " anchor: " << anchor << endl;
+/*	cout << "cH: " << cH << " anchor: " << anchor << endl;*/
 
 	anchor = (anchor < 2)? 2: anchor;
 
@@ -370,14 +370,14 @@ CharDivider::Scale CharDivider::scale(int fist, int second, InputType type)
 
 		break;
 
-	case STRICT:
-		if(scale > 1.1){
-			res = LEFT_TOOBIG;
-		}else if(scale < 0.9){
-			res = LEFT_TOOSMALL;
-		}
-
-		break;
+// 	case STRICT:
+// 		if(scale > 1.1){
+// 			res = LEFT_TOOBIG;
+// 		}else if(scale < 0.9){
+// 			res = LEFT_TOOSMALL;
+// 		}
+// 
+// 		break;
 
 	case LOOSE:
 		if(scale > 1.3){
@@ -436,11 +436,11 @@ void CharDivider::findUpAndDown(const char* greys, int iWidth, int* X, int* Y, i
 bool CharDivider::divideHelp(const int* histagram, int iWidth, int* cW, int* dW, vector<int>* offList, vector<int>* cWlist, vector<int>* dWlist)
 {
 	// need modified DEBUG
-	cout << "vertical rejection: ";
-	for(int j = 0; j<iWidth; j++){
-		cout << histagram[j] << " ";
-	}
-	cout << endl;
+// 	cout << "vertical projection: ";
+// 	for(int j = 0; j<iWidth; j++){
+// 		cout << histagram[j] << " ";
+// 	}
+// 	cout << endl;
 
 	int i = 0, temp;
 	while(i<iWidth && histagram[i] == 0){ 
@@ -797,7 +797,7 @@ void divide::CharDivider::filterNoise(char* greys, int iWidth, int upside, int d
 		}
 	}
 	
-	cout << "noise count: " << noiseCount << endl;
+	//cout << "noise count: " << noiseCount << endl;
 
 	delete[] buff;
 }

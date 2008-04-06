@@ -279,6 +279,7 @@ void testApp(){
 	testRecognise("image/(8).bmp");
 	cout << "\n" << endl;
 	testRecognise("image/(9).bmp");
+	cout << "\n" << endl;
 
 	testRecognise("image/test/(8).bmp");
 	cout << "\n" << endl;

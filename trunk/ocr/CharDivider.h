@@ -34,7 +34,7 @@ namespace divide{
 		enum InputType{
 			CHINESE = 10,
 			ENGLISH,
-			STRICT,
+			//STRICT,
 			LOOSE
 		};
 

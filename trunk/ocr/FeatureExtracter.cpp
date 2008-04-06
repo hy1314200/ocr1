@@ -530,7 +530,7 @@ void FeatureExtracter::calcLocDirPropAndMaxLocDir(const char* imageData, int loc
 		}
 	}
 
-	memset(strokeProp, 0, 2*s_GRIDSIZE*4*sizeof(int));
+	memset(strokeProp, 0, 2*s_GRIDSIZE*4*sizeof(double));
 
 	int temp;
 	for(int i = 0; i<s_GRIDSIZE; i++){

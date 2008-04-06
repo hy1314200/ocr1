@@ -6,7 +6,7 @@
 #include <iostream>
 #include <algorithm>
 
-const double OCRToolkit::s_SCALETHRESHOLD = 0.5;
+const double OCRToolkit::s_SCALETHRESHOLD = 0.05;
 
 using namespace divide;
 using namespace recognise;

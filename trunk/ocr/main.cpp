@@ -173,7 +173,7 @@ void testFontStore(){
 	fclose(file);
 
 	lib->storeData("data/font/songti.int");
-	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(0)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(150)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 
 	delete lib;
 }
@@ -207,9 +207,9 @@ void unitTest(){
 
 	//	testDistorte();
 	//	testFontGen();
-	//	testFontStore();
+		testFontStore();
 	//	testWChar();
-	testFeature2();
+//	testFeature2();
 	// 	testFilterNoise();
 
 	// 	testRecognise(path);
@@ -280,25 +280,25 @@ void testApp(){
 	cout << "\n" << endl;
 	testRecognise("image/(9).bmp");
 	cout << "\n" << endl;
-
-	testRecognise("image/test/(8).bmp");
-	cout << "\n" << endl;
-	testRecognise("image/test/(9).bmp");
-	cout << "\n" << endl;
-	testRecognise("image/test/(10).bmp");
-	cout << "\n" << endl;
-	testRecognise("image/test/(11).bmp");
-	cout << "\n" << endl;
-	testRecognise("image/test/(12).bmp");
-	cout << "\n" << endl;
-	testRecognise("image/test/(13).bmp");
-	cout << "\n" << endl;
-	testRecognise("image/test/(16).bmp");
-	cout << "\n" << endl;
-	testRecognise("image/test/(17).bmp");
-	cout << "\n" << endl;
-	testRecognise("image/test/(19).bmp");
-	cout << "\n" << endl;
+// 
+// 	testRecognise("image/test/(8).bmp");
+// 	cout << "\n" << endl;
+// 	testRecognise("image/test/(9).bmp");
+// 	cout << "\n" << endl;
+// 	testRecognise("image/test/(10).bmp");
+// 	cout << "\n" << endl;
+// 	testRecognise("image/test/(11).bmp");
+// 	cout << "\n" << endl;
+// 	testRecognise("image/test/(12).bmp");
+// 	cout << "\n" << endl;
+// 	testRecognise("image/test/(13).bmp");
+// 	cout << "\n" << endl;
+// 	testRecognise("image/test/(16).bmp");
+// 	cout << "\n" << endl;
+// 	testRecognise("image/test/(17).bmp");
+// 	cout << "\n" << endl;
+// 	testRecognise("image/test/(19).bmp");
+// 	cout << "\n" << endl;
 }
 
 int main(int argc, char** argv){

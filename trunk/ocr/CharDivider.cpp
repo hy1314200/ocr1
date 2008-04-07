@@ -151,12 +151,18 @@ bool CharDivider::divideChar(char* greys, int iWidth, int iHeight, vector<char*>
 
 			case LEFT_TOOSMALL:
 				if(!isSign(greys, x, y, cWt, cHt)){
-					if(x + cWidth < iWidth && histgram[x + cWidth] == 0){
+					if(x + cWidth < iWidth && histgram[x + cWidth + 1] == 0){	// may be overfit by adding 1
 						int i = 1;
 						while(histgram[x + cWidth - i] == 0){ 
 							i++;
 						}
 						cWt = cWidth-i+1;
+
+						if(scale(cWt, cWidth, CHINESE) != PROPER){
+							needBreak = true;
+
+							break;
+						}
 
 						int tempX, tempY, tempW, tempH;
 						while(count + 1 < size && offList[count + 1] < x + cWt){

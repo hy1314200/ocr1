@@ -224,7 +224,7 @@ void unitTest(){
 }
 
 void testApp(){
-	/*FILE* file1 = fopen("data/font/songti.int", "rb");
+/*	FILE* file1 = fopen("data/font/songti.int", "rb");
 	FILE* file2 = fopen("data/font/heiti.int", "rb");
 	FILE* file3 = fopen("data/font/fangsong.int", "rb");
 	FILE* file4 = fopen("data/font/kaiti.int", "rb");

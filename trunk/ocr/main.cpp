@@ -97,10 +97,10 @@ void testFeature2(){
 	int strokeDensity[2][8];	// stroke density in two directions
 	int peripheral[4][8][2];	// two peripheral features with four directions
 	int locDir[4][4][4];		// local direction contributivity with four regions and four directions
-	double strokeProp[2][4][4];	// stroke proportion in two directions  
+	float strokeProp[2][4][4];	// stroke proportion in two directions  
 	int maxLocDirCtr[4][4][4];	// maximum local direction contributivity
 	int totalBlackJump[2][8];	// black jump distribution in each balanced subvectors  
-	double divBlackJump[2][8];	// black jump distribution in each balanced subvectors divided by the total 
+	float divBlackJump[2][8];	// black jump distribution in each balanced subvectors divided by the total 
 
 	FeatureExtracter* ext = FeatureExtracter::getInstance();
 	//ext->TEST_calcStrokeWidthAndLen(data, &strokeWidth, &totalStrokeLen);
@@ -166,15 +166,15 @@ void testFontGen(){
 }
 
 void testFontStore(){
-	FILE* file = fopen("data/font/songti.ext", "r");
+	FILE* file = fopen("data/font/heiti.ext", "r");
 	assert(file != NULL);
 
-	FontLib* lib = FontGen::genExtFontLib(file, SONGTI);
+	FontLib* lib = FontGen::genExtFontLib(file, HEITI);
 
 	fclose(file);
 
-	lib->storeData("data/font/songti.int");
-	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(43)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	lib->storeData("data/font/heiti.int");
+	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(3818)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 
 	delete lib;
 }
@@ -207,8 +207,8 @@ void unitTest(){
 	sprintf_s(path, "image/test/(%d).bmp", 8);
 
 // 	testDistorte();
- 	testFontGen();
-// 	testFontStore();
+ //	testFontGen();
+ 	testFontStore();
 // 	testWChar();
 // 	testFeature2();
 // 	testFilterNoise();
@@ -224,7 +224,7 @@ void unitTest(){
 }
 
 void testApp(){
-/*	FILE* file1 = fopen("data/font/songti.int", "rb");
+	FILE* file1 = fopen("data/font/songti.int", "rb");
 	FILE* file2 = fopen("data/font/heiti.int", "rb");
 	FILE* file3 = fopen("data/font/fangsong.int", "rb");
 	FILE* file4 = fopen("data/font/kaiti.int", "rb");
@@ -235,10 +235,10 @@ void testApp(){
 	lib[2] = FontGen::genIntFontLib(file3);
 	lib[3] = FontGen::genIntFontLib(file4);
  
-	DebugToolkit::displayGreyImage(lib[0]->wideCharArray()->at(47)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-	DebugToolkit::displayGreyImage(lib[1]->wideCharArray()->at(43)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-	DebugToolkit::displayGreyImage(lib[2]->wideCharArray()->at(44)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-	DebugToolkit::displayGreyImage(lib[3]->wideCharArray()->at(45)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib[0]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib[1]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib[2]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib[3]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
  
  	fclose(file1);
  	fclose(file2);
@@ -250,22 +250,22 @@ void testApp(){
  	for(int i = 0; i<4; i++){
  		delete lib[i];
  	}
- 	delete[] lib;*/
+ 	delete[] lib;
 
-	char str[40];
-	for(int i = 1; i<=9; i++){
-		sprintf(str, "image/(%d).bmp", i);
-
-		testRecognise(str);
-		cout << "\n" << endl;
-	}
-
-	for(int i = 1; i<=18; i++){
-		sprintf(str, "image/test/(%d).bmp", i);
-
-		testRecognise(str);
-		cout << "\n" << endl;
-	}
+// 	char str[40];
+// 	for(int i = 1; i<=9; i++){
+// 		sprintf(str, "image/(%d).bmp", i);
+// 
+// 		testRecognise(str);
+// 		cout << "\n" << endl;
+// 	}
+// 
+// 	for(int i = 1; i<=18; i++){
+// 		sprintf(str, "image/test/(%d).bmp", i);
+// 
+// 		testRecognise(str);
+// 		cout << "\n" << endl;
+// 	}
 }
 
 int main(int argc, char** argv){

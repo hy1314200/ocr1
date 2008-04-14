@@ -48,7 +48,7 @@ double CharRecogniser::recogniseChar(const char* greys, int iWidth, int iHeight,
 
 	normalize(normChar, greys, iWidth, 0, 0, iWidth, iHeight);
 
-	double *scaledFeature = new double[featureSize];
+	float *scaledFeature = new float[featureSize];
 	FeatureExtracter::getInstance()->extractScaledFeature(scaledFeature, normChar);
 
 	struct svm_node *node = new struct svm_node[featureSize+1];
@@ -172,9 +172,10 @@ void CharRecogniser::buildFeatureLib(generate::FontLib** fontLib, const int libS
 		imageData[i] = new char[normSize*normSize];
 	}
 
-	double *featureData = new double[charCount*libSize*sampleSize*featureSize], *tempData = featureData;
+	float *featureData = new float[charCount*libSize*sampleSize*featureSize], *tempData = featureData;
 	FeatureExtracter* extracter = FeatureExtracter::getInstance();
 
+	printf("sample generating process:\n");
 	for(int i = 0; i<charCount; i++){
 		for(int j = 0; j<libSize; j++){
 			distorteAndNorm(imageData, fontLib[j]->wideCharArray()->at(i)->imageData(), sampleSize);
@@ -183,7 +184,12 @@ void CharRecogniser::buildFeatureLib(generate::FontLib** fontLib, const int libS
 				extracter->extractFeature(tempData, imageData[k], true);
 			}
 		}
+
+		if(i%100 == 0){
+			printf("%.2f%% finished\n", i*100*1.0/charCount);
+		}
 	}
+	printf("100%% finished\n");
 
 	extracter->saveData();
 
@@ -193,10 +199,17 @@ void CharRecogniser::buildFeatureLib(generate::FontLib** fontLib, const int libS
 	problem->y = new double[count];
 	problem->x = new struct svm_node*[count];
 
+	printf("\nspace allocation process:\n");
  	for(int i = 0; i<count; i++){
  		problem->x[i] = new struct svm_node[featureSize + 1];
- 	}
- 
+
+		if(i%4000 == 0){
+			printf("%.2f%% finished\n", i*100*1.0/count);
+		}
+	}
+	printf("100%% finished\n");
+
+	printf("\nproblem building process:\n");
  	tempData = featureData;
  	for(int i = 0; i<count; i++, tempData += featureSize){
  		extracter->scaleFeature(tempData);
@@ -207,14 +220,20 @@ void CharRecogniser::buildFeatureLib(generate::FontLib** fontLib, const int libS
  			problem->x[i][j].value= tempData[j]; 
  		}
  
- 		problem->x[i][featureSize].index = -1;
- 	}
+		problem->x[i][featureSize].index = -1;
+
+		if(i%4000 == 0){
+			printf("%.2f%% finished\n", i*100*1.0/count);
+		}
+	}
+	printf("100%% finished\n");
 
 #ifdef SAVE_PROBLEM
 
 	FILE* file = fopen("data/classify/problem", "w");
 	assert(file != NULL);
 
+	printf("\nsaving problem process:\n");
 	for(int i = 0; i<problem->l; i++){
 		fprintf(file, "%d", (int)problem->y[i]);
 
@@ -223,13 +242,19 @@ void CharRecogniser::buildFeatureLib(generate::FontLib** fontLib, const int libS
 		}
 
 		fprintf(file, "\n");
+
+		if(i%4000 == 0){
+			printf("%.2f%% finished\n", i*100*1.0/problem->l);
+		}
 	}
+	printf("100%% finished\n");
 
 	fclose(file);
 
 #endif
 
-	trainAndSaveClassifier(problem);
+	printf("problem saved\n");
+	//trainAndSaveClassifier(problem);
 
 	for(int i = 0; i<count; i++){
 		delete[] problem->x[i];

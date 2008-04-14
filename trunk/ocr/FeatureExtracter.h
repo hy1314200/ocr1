@@ -16,11 +16,11 @@ namespace recognise{
 		static FeatureExtracter* getInstance();
 
 		/** this method can update the max/min value of each dim in feature */
-		void extractFeature(double* data, const char* imageData, bool updateMaxMin = false);
+		void extractFeature(float* data, const char* imageData, bool updateMaxMin = false);
 
-		void extractScaledFeature(double* data, const char* imageData);
+		void extractScaledFeature(float* data, const char* imageData);
 
-		void scaleFeature(double* feature);
+		void scaleFeature(float* feature);
 
 		void saveData();
 
@@ -37,11 +37,11 @@ namespace recognise{
 			calcTransDensAndPeri(imageData, transitions, strokeDensity, peripheral);
 		}
 
-		void TEST_calcLocDirPropAndMaxLocDir(const char* imageData, int locDir[][4][4], double strokeProp[][4][4], int maxLocDirCtr[][4][4]){
+		void TEST_calcLocDirPropAndMaxLocDir(const char* imageData, int locDir[][4][4], float strokeProp[][4][4], int maxLocDirCtr[][4][4]){
 			calcLocDirPropAndMaxLocDir(imageData, locDir, strokeProp, maxLocDirCtr);
 		}
 
-		void TEST_calcBlackJump(const char* imageData, int totalBlackJump[][8], double divBlackJump[][8]){
+		void TEST_calcBlackJump(const char* imageData, int totalBlackJump[][8], float divBlackJump[][8]){
 			calcBlackJump(imageData, totalBlackJump, divBlackJump);
 		}
 #endif
@@ -65,8 +65,8 @@ namespace recognise{
 
 		static FeatureExtracter* s_instance;
 
-		double m_max[s_FEATURESIZE];
-		double m_min[s_FEATURESIZE];
+		float m_max[s_FEATURESIZE];
+		float m_min[s_FEATURESIZE];
 
 		FeatureExtracter(FILE *file);
 		~FeatureExtracter(void){  };
@@ -77,9 +77,9 @@ namespace recognise{
 
 		void calcTransDensAndPeri(const char* imageData, int* transitions, int strokeDensity[][s_STRIPESIZE], int peripheral[][s_STRIPESIZE][2]);
 	
-		void calcLocDirPropAndMaxLocDir(const char* imageData, int locDir[][s_GRIDSIZE][4], double strokeProp[][s_GRIDSIZE][4], int maxLocDirCtr[][s_GRIDSIZE][4]);
+		void calcLocDirPropAndMaxLocDir(const char* imageData, int locDir[][s_GRIDSIZE][4], float strokeProp[][s_GRIDSIZE][4], int maxLocDirCtr[][s_GRIDSIZE][4]);
 	
-		void calcBlackJump(const char* imageData, int totalBlackJump[][s_SUBVCOUNT], double divBlackJump[][s_SUBVCOUNT]);
+		void calcBlackJump(const char* imageData, int totalBlackJump[][s_SUBVCOUNT], float divBlackJump[][s_SUBVCOUNT]);
 
 	};
 

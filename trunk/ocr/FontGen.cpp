@@ -127,11 +127,11 @@ FontGen::_FontLib* FontGen::_FontLib::parseExtFile(FILE* file, Typeface typeface
 	Char* item = NULL;
 
 	while(true){
-		fscanf(file, "%s", temp);
-
-		if(strcmp("#undef", temp) == 0){
+		if(feof(file)){
 			break;
 		}
+
+		fscanf(file, "%s", temp);
 
 		if(strcmp(temp, "struct") == 0){
 
@@ -156,9 +156,15 @@ FontGen::_FontLib* FontGen::_FontLib::parseExtFile(FILE* file, Typeface typeface
 
 			fscanf(file, "%d", &count);
 
+			printf("ext file parsing process:\n");
 			for(int i = 0; i<count; i++){
 				cArray->push_back(_Char::parseExtFile(file, width));
+
+				if(i%500 == 0){
+					printf("%.2f%% finished\n", i*100*1.0/count);
+				}
 			}
+			printf("100%% finished\n");
 		}
 	}
 

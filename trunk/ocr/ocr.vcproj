@@ -114,6 +114,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="cxcore.lib cv.lib highgui.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"

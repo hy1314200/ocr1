@@ -14,6 +14,12 @@ namespace recognise{
 		static const int s_FEATURESIZE = 403;
 
 		static FeatureExtracter* getInstance();
+		static void  release(){
+			if(s_instance != 0){
+				delete s_instance;
+				s_instance = 0;
+			}
+		}
 
 		/** this method can update the max/min value of each dim in feature */
 		void extractFeature(float* data, const char* imageData, bool updateMaxMin = false);

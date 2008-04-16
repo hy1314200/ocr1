@@ -75,7 +75,7 @@ void testFeature1(char* path){
 		memcpy(data + image->width*i, image->imageData + image->widthStep*i, image->width);
 	}
 
-	CharRecogniser* rec = CharRecogniser::getInstance();
+	CharRecogniser* rec = CharRecogniser::buildInstance();
 	rec->recogniseChar(data, image->width, image->height, NULL);
 
 	cvReleaseImage(&image);
@@ -228,7 +228,7 @@ void testDistorte(){
 		memcpy(b+64*i, image->imageData + image->widthStep*i, 64);
 	}
 
-	CharRecogniser::getInstance()->TEST_distorteAndNorm(a, b, 16);
+	CharRecogniser::buildInstance()->TEST_distorteAndNorm(a, b, 16);
 
 	cvReleaseImage(&image);
 
@@ -260,47 +260,47 @@ void unitTest(){
 }
 
 void testApp(){
-	FILE* file1 = fopen("data/font/songti.int", "rb");
-	FILE* file2 = fopen("data/font/heiti.int", "rb");
+	//FILE* file1 = fopen("data/font/songti.int", "rb");
+	//FILE* file2 = fopen("data/font/heiti.int", "rb");
 	//FILE* file3 = fopen("data/font/fangsong.int", "rb");
 	//FILE* file4 = fopen("data/font/kaiti.int", "rb");
 
-	FontLib **lib = new FontLib*[4];
-	lib[0] = FontGen::genIntFontLib(file1);
-	lib[1] = FontGen::genIntFontLib(file2);
+	//FontLib **lib = new FontLib*[4];
+	//lib[0] = FontGen::genIntFontLib(file1);
+	//lib[1] = FontGen::genIntFontLib(file2);
 	//lib[2] = FontGen::genIntFontLib(file3);
 	//lib[3] = FontGen::genIntFontLib(file4);
  
-	DebugToolkit::displayGreyImage(lib[0]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-	DebugToolkit::displayGreyImage(lib[1]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	//DebugToolkit::displayGreyImage(lib[0]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	//DebugToolkit::displayGreyImage(lib[1]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 	//DebugToolkit::displayGreyImage(lib[2]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 	//DebugToolkit::displayGreyImage(lib[3]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
  
- 	fclose(file1);
- 	fclose(file2);
+ 	//fclose(file1);
+ 	//fclose(file2);
  	//fclose(file3);
  	//fclose(file4);
 
 	//CharRecogniser::buildFeatureLib(lib, 4);
-	CharRecogniser::buildFeatureLib(lib, 2);
+	//CharRecogniser::buildInstance()->buildFeatureLib(lib, 2);
 
 // 	for(int i = 0; i<4; i++){
 // 		delete lib[i];
 // 	}
 // 	delete[] lib;
 
-	for(int i = 0; i<2; i++){
-		delete lib[i];
-	}
- 	delete[] lib;
-
-// 	char str[40];
-// 	for(int i = 1; i<=9; i++){ 
-// 		sprintf(str, "image/(%d).bmp", i);
-// 
-// 		testRecognise(str);
-// 		cout << "\n" << endl;
+// 	for(int i = 0; i<2; i++){
+// 		delete lib[i];
 // 	}
+//  	delete[] lib;
+
+	char str[40];
+	for(int i = 1; i<=9; i++){ 
+		sprintf(str, "image/(%d).bmp", i);
+
+		testRecognise(str);
+		cout << "\n" << endl;
+	}
 // 
 // 	for(int i = 1; i<=18; i++){
 // 		sprintf(str, "image/test/(%d).bmp", i);

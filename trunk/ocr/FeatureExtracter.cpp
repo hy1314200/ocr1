@@ -11,13 +11,15 @@ const char* FeatureExtracter::s_filepath = "data/classify/feature.maxmin";
 
 FeatureExtracter::FeatureExtracter(FILE *file){
 	if(file == NULL){
+		cout << "INFO: File \"feature.maxmin\" does not exist, and default value will be evalued to max and min array!" << endl;
+
 		for(int i = 0; i<s_FEATURESIZE; i++){
-			m_max[i] = 0;
-			m_min[i] = 1000; // max number
+			m_max[i] = 1000;
+			m_min[i] = 0; // max number
 		}
 	}else{
 		for(int i = 0; i<s_FEATURESIZE; i++){
-			fscanf(file, "%lf %lf", m_max+i, m_min+i);
+			fscanf(file, "%f %f", m_max+i, m_min+i);
 		}
 	}
 }

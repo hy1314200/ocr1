@@ -268,6 +268,7 @@ void DebugToolkit::readGreyData(uchar* data, const char *name){
 	int width, height;
 
 	FILE *file = fopen(name, "r");
+	assert(file != NULL);
 
 	fscanf(file, "%d %d", &width, &height);
 	
@@ -285,6 +286,7 @@ void DebugToolkit::readGreyData(uchar* data, const char *name){
 
 void DebugToolkit::writeGreyData(uchar* data, const char *name, int width, int height){
 	FILE *file = fopen(name, "w");
+	assert(file != NULL);
 
 	fprintf(file, "%d %d\n", width, height);
 	for(int i = 0; i<height; i++){

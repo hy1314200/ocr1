@@ -14,7 +14,7 @@ namespace recognise{
 	{
 	public:
 		/** The entrance of getting an instance of the OCRToolkit */
-		static CharRecogniser* getInstance();
+		static CharRecogniser* buildInstance();
 		static void  release(){
 			if(s_instance != 0){
 				delete s_instance;
@@ -23,9 +23,11 @@ namespace recognise{
 		}
 
 		/** @return Reliably, from 0% to 100% */
-		double recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res);
+		virtual double recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res) = 0;
 
-		static void buildFeatureLib(generate::FontLib** fontLib, int size);
+		virtual void buildFeatureLib(generate::FontLib** fontLib, int size) = 0;
+
+		virtual bool isAvailable() = 0;
 
 #ifdef TEST
 		void TEST_distorteAndNorm(char** samples, char* prototype, int sampleSize){
@@ -33,17 +35,13 @@ namespace recognise{
 		}
 #endif
 
-	private:
+	protected:
 		static CharRecogniser* s_instance;
-
-		static const char* s_FILEPATH;
 
 		// CvMat* W; used for MDA
 
-		struct svm_model* m_model;
-
-		CharRecogniser(const char* modelFilepath);
-		~CharRecogniser(void);
+		CharRecogniser(/*const char* modelFilepath*/){  };
+		virtual ~CharRecogniser(void){  };
 
 		static void normalize(char* res, const char* greys, int iWidth, int x, int y, int width, int height);
 		
@@ -54,8 +52,50 @@ namespace recognise{
 
 		static void reduceResolution(IplImage* image, int scale, int type = CV_INTER_NN, int threshold = 128);
 
-		static void trainAndSaveClassifier(struct svm_problem *prob);
+	private:
+		static const char* s_CONFPATH;
 
+	};
+
+	class SVMClassifier: public CharRecogniser
+	{
+	public:
+		void buildFeatureLib(generate::FontLib** fontLib, int size);
+
+		SVMClassifier();
+		~SVMClassifier();
+
+		double recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res);
+
+		bool isAvailable(){
+			return m_model != NULL;
+		}
+
+	private:
+		static const char* s_MODELPATH;
+
+		struct svm_model* m_model;
+
+		void trainAndSaveClassifier(struct svm_problem *prob);
+
+	};
+
+	class MNNClassifier: public CharRecogniser
+	{
+	public:
+		void buildFeatureLib(generate::FontLib** fontLib, int size);
+
+		MNNClassifier();
+		~MNNClassifier();
+
+		double recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res);
+
+		bool isAvailable(){
+			return true;
+		};
+
+	private:
+		static const char* s_MODELPATH;
 	};
 
 }

@@ -1,6 +1,7 @@
 #include "Classifier.h"
 #include "FeatureExtracter.h"
 
+#include <algorithm>
 #include <iostream>
 
 using namespace recognise;
@@ -15,7 +16,9 @@ SVMClassifier::SVMClassifier()
 	if(file == NULL){
 		m_model = NULL;
 	}else{
+		printf("loading SVM model...\n");
 		m_model = svm_load_model(s_MODELPATH);
+		printf("100%% finished\n");
 
 		fclose(file);
 	}
@@ -256,6 +259,7 @@ void MNNClassifier::loadFile(FILE *file)
 	int size;
 	fscanf(file, "%d", &size);
 
+	printf("MNN model loading process:\n");
 	for(int i = 0; i<size; i++){
 		proto = new Prototype;
 		proto->data = new float[dim];
@@ -265,7 +269,14 @@ void MNNClassifier::loadFile(FILE *file)
 		for(int j = 0; j<dim; j++){
 			fscanf(file, "%f", proto->data + j);
 		}
+
+		m_lib.push_back(proto);
+
+		if(i%10000 == 0){
+			printf("%.2f%% finished\n", i*100*1.0/size);
+		}
 	}
+	printf("100%% finished\n");
 }
 
 void MNNClassifier::storeFile()
@@ -281,7 +292,7 @@ void MNNClassifier::storeFile()
 		fprintf(file, "%d", (int)m_lib.at(i)->label);
 
 		for(int j = 0; j<dim; j++){
-			fprintf(file, " %f", m_lib.at(i)->data);
+			fprintf(file, " %f", m_lib.at(i)->data[j]);
 		}
 		fprintf(file, "\n");
 	}
@@ -289,6 +300,67 @@ void MNNClassifier::storeFile()
 	fclose(file);
 }
 
+void MNNClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSize)
+{
+	const int charCount = fontLib[0]->size();
+
+#ifdef DEBUG
+	for(int i = 1; i<libSize; i++){
+		assert(charCount == fontLib[i]->size());
+	}
+#endif
+
+	const int sampleSize = 16;
+	const int normSize = FeatureExtracter::s_NORMSIZE;
+	const int featureSize = FeatureExtracter::s_FEATURESIZE;
+
+	char** imageData = new char*[sampleSize];
+	for(int i = 0; i<sampleSize; i++){
+		imageData[i] = new char[normSize*normSize];
+	}
+
+	FeatureExtracter* extracter = FeatureExtracter::getInstance();
+
+	Prototype *proto = NULL;
+	printf("sample generating process:\n");
+	for(int i = 0; i<charCount; i++){
+		for(int j = 0; j<libSize; j++){
+			distorteAndNorm(imageData, fontLib[j]->wideCharArray()->at(i)->imageData(), sampleSize);
+
+			for(int k = 0; k<sampleSize; k++){
+				proto = new Prototype;
+				proto->label = fontLib[j]->wideCharArray()->at(i)->value();
+				proto->data = new float[featureSize];
+
+				extracter->extractFeature(proto->data, imageData[k], true);
+				m_lib.push_back(proto);
+			}
+		}
+
+		if(i%100 == 0){
+			printf("%.2f%% finished\n", i*100*1.0/charCount);
+		}
+	}
+	printf("100%% finished\n");
+
+	extracter->saveData();
+
+	sort(m_lib.begin(), m_lib.end(), compare);
+
+	int size = m_lib.size();
+	for(int i = 0; i<size; i++){
+		extracter->scaleFeature(m_lib.at(i)->data);
+	}
+
+	storeFile();
+	printf("mnn model saved\n");
+
+	for(int i = 0; i<sampleSize; i++){
+		delete[] imageData[i];
+	}
+	delete[] imageData;
+}
+/*
 void MNNClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSize)
 {
 	const int charCount = fontLib[0]->size();
@@ -334,11 +406,86 @@ void MNNClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSi
 
 	extracter->saveData();
 
+	sort(m_lib.begin(), m_lib.end(), compare);
+
+	int size = m_lib.size();
+	for(int i = 0; i<size; i++){
+		extracter->scaleFeature(m_lib.at(i)->data);
+	}
+
 	storeFile();
-}
+	printf("mnn model saved\n");
+}*/
 
 double MNNClassifier::classify(const float *scaledFeature, wchar_t *res)
 {
+	int size = m_lib.size();
+	int dim = FeatureExtracter::s_FEATURESIZE;
 
-	return 0;
+	int index = 0;
+ 	while(m_lib.at(index)->data[0] < scaledFeature[0]){
+ 		++index;	
+ 	}
+
+	const int K = 4;
+
+	float distance2;
+	float max[K], tempMax;
+	for(int i = 0; i<K; i++s){
+		max[i] = 999999;	// max float
+	}
+	int recordOff[K], tempROff;
+
+	float *data = NULL;
+	for( ; index<size; index++){
+		distance2 = 0;
+
+		data = m_lib.at(index)->data;
+		for(int i = 0; i<dim; i++){
+			distance2 += (data[i] - scaledFeature[i])*(data[i] - scaledFeature[i]);
+
+			if(distance2 > max[K-1]){
+				break;
+			}
+		}
+
+		if(distance2 < max[K-1]){
+			max[K-1] = distance2;
+			recordOff[K-1] = index;
+
+			for(int i = 1; i<K; i++){
+				if(max[K-i] < max[K-i-1]){
+					tempMax = max[K-i];
+					tempROff = recordOff[K-i];
+					max[K-i] = max[K-i-1];
+					recordOff[K-i] = recordOff[K-i-1];
+					max[K-i-1] = tempMax;
+					recordOff[K-i-1] = tempROff;
+				}else{
+					break;
+				}
+			}
+		}
+	}
+
+	int offset, recodeCount = 0, count = 1;
+	for(int i = 1; i<K; i++){
+		if(m_lib.at(recordOff[i])->label == m_lib.at(recordOff[i-1])->label){
+			++count;
+		}else{
+			if(count > recodeCount){
+				recodeCou nt = count;
+				offset = recordOff[i-1];
+			}
+		}
+	}
+
+	*res = m_lib.at(recordOff)->label;
+
+	return 1;
+}
+
+bool MNNClassifier::compare(const Prototype* x,const Prototype* y)
+{
+	return x->data[0] < y->data[0];
 }

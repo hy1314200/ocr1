@@ -58,6 +58,8 @@ namespace recognise
 
 		vector<Prototype*> m_lib;
 
+		static bool compare(const Prototype* x,const Prototype* y);
+
 		void loadFile(FILE *file);
 		void storeFile();
 	};

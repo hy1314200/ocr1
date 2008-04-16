@@ -629,7 +629,7 @@ void FeatureExtracter::saveData(){
 	FILE* file = fopen(s_filepath, "w");
 
 	for(int i = 0; i < s_FEATURESIZE; i++){
-		fprintf(file, "%lf %lf\n", m_max[i], m_min[i]);
+		fprintf(file, "%f %f\n", m_max[i], m_min[i]);
 	}
 
 	fclose(file);

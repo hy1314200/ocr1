@@ -159,6 +159,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Classifier.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\DebugToolkit.cpp"
 				>
 			</File>
@@ -194,6 +198,10 @@
 			</File>
 			<File
 				RelativePath=".\CharRecogniser.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Classifier.h"
 				>
 			</File>
 			<File

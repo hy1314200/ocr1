@@ -118,7 +118,7 @@ void CharRecogniser::normalize(char* res, const char* greys, int iWidth, int x, 
 	cvReleaseImage(&dst);
 }
 
-void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin, int sampleSize)
+void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin)
 {
 	int normSize = FeatureExtracter::s_NORMSIZE, count = 0;
 	int x, y, width, height;
@@ -145,7 +145,7 @@ void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin
 
 	/************************************************************************/
 	/* the first group                                                      */
-	/************************************************************************/
+	/************************************************************************
 	cvErode(src, dst, element, 1);
 	cvCopyImage(dst, temp);
 
@@ -177,7 +177,7 @@ void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin
 
 #ifdef DISPLAY_DISTORTION
 	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
-#endif
+#endif*/
 
 	/************************************************************************/
 	/* the second group                                                     */
@@ -339,7 +339,7 @@ void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin
 	delete[] data;	
 	delete[] prototype;
 
-	assert(count == sampleSize);
+	assert(count == s_sampleSize);
 }
 
 void CharRecogniser::findXYWH(char* data, int* x, int* y, int* width, int* height){

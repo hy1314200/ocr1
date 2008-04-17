@@ -228,7 +228,7 @@ void testDistorte(){
 		memcpy(b+64*i, image->imageData + image->widthStep*i, 64);
 	}
 
-	CharRecogniser::buildInstance()->TEST_distorteAndNorm(a, b, 16);
+	CharRecogniser::buildInstance()->TEST_distorteAndNorm(a, b);
 
 	cvReleaseImage(&image);
 
@@ -276,14 +276,14 @@ void testApp(){
 // 	DebugToolkit::displayGreyImage(lib[2]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 // 	DebugToolkit::displayGreyImage(lib[3]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 //  
-//  	fclose(file1);
-//  	fclose(file2);
-//  	fclose(file3);
-//  	fclose(file4);
+// 	fclose(file1);
+// 	fclose(file2);
+// 	fclose(file3);
+// 	fclose(file4);
 // 
-// 	CharRecogniser::buildInstance()->buildFeatureLib(lib, 4);
-// 	//CharRecogniser::buildInstance()->buildFeatureLib(lib, 2);
-// 
+//  	CharRecogniser::buildInstance()->buildFeatureLib(lib, 4);
+// 	CharRecogniser::buildInstance()->buildFeatureLib(lib, 2);
+//  
 // 	for(int i = 0; i<4; i++){
 // 		delete lib[i];
 // 	}
@@ -301,13 +301,13 @@ void testApp(){
 		testRecognise(str);
 		cout << "\n" << endl;
 	}
-// 
-// 	for(int i = 1; i<=18; i++){
-// 		sprintf(str, "image/test/(%d).bmp", i);
-// 
-// 		testRecognise(str);
-// 		cout << "\n" << endl;
-// 	}
+
+	for(int i = 1; i<=18; i++){
+		sprintf(str, "image/test/(%d).bmp", i);
+
+		testRecognise(str);
+		cout << "\n" << endl;
+	}
 }
 
 int main(int argc, char** argv){

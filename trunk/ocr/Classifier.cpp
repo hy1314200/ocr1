@@ -85,24 +85,23 @@ void SVMClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSi
 	}
 #endif
 
-	const int sampleSize = 16;
 	const int normSize = FeatureExtracter::s_NORMSIZE;
 	const int featureSize = FeatureExtracter::s_FEATURESIZE;
 
-	char** imageData = new char*[sampleSize];
-	for(int i = 0; i<sampleSize; i++){
+	char** imageData = new char*[s_sampleSize];
+	for(int i = 0; i<s_sampleSize; i++){
 		imageData[i] = new char[normSize*normSize];
 	}
 
-	float *featureData = new float[charCount*libSize*sampleSize*featureSize], *tempData = featureData;
+	float *featureData = new float[charCount*libSize*s_sampleSize*featureSize], *tempData = featureData;
 	FeatureExtracter* extracter = FeatureExtracter::getInstance();
 
 	printf("sample generating process:\n");
 	for(int i = 0; i<charCount; i++){
 		for(int j = 0; j<libSize; j++){
-			distorteAndNorm(imageData, fontLib[j]->wideCharArray()->at(i)->imageData(), sampleSize);
+			distorteAndNorm(imageData, fontLib[j]->wideCharArray()->at(i)->imageData());
 
-			for(int k = 0; k<sampleSize; k++, tempData += featureSize){
+			for(int k = 0; k<s_sampleSize; k++, tempData += featureSize){
 				extracter->extractFeature(tempData, imageData[k], true);
 			}
 		}
@@ -115,7 +114,7 @@ void SVMClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSi
 
 	extracter->saveData();
 
-	int count = charCount*libSize*sampleSize;
+	int count = charCount*libSize*s_sampleSize;
 	struct svm_problem *problem = new struct svm_problem;
 	problem->l = count;
 	problem->y = new double[count];
@@ -136,7 +135,7 @@ void SVMClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSi
 	for(int i = 0; i<count; i++, tempData += featureSize){
 		extracter->scaleFeature(tempData);
 
-		problem->y[i] = fontLib[0]->wideCharArray()->at(i/(libSize*sampleSize))->value();
+		problem->y[i] = fontLib[0]->wideCharArray()->at(i/(libSize*s_sampleSize))->value();
 		for(int j = 0; j<featureSize; j++){
 			problem->x[i][j].index = j;
 			problem->x[i][j].value= tempData[j]; 
@@ -185,7 +184,7 @@ void SVMClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSi
 	delete[] problem->y;
 	delete problem;
 
-	for(int i = 0; i<sampleSize; i++){
+	for(int i = 0; i<s_sampleSize; i++){
 		delete[] imageData[i];
 	}
 	delete[] imageData;
@@ -310,12 +309,11 @@ void MNNClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSi
 	}
 #endif
 
-	const int sampleSize = 16;
 	const int normSize = FeatureExtracter::s_NORMSIZE;
 	const int featureSize = FeatureExtracter::s_FEATURESIZE;
 
-	char** imageData = new char*[sampleSize];
-	for(int i = 0; i<sampleSize; i++){
+	char** imageData = new char*[s_sampleSize];
+	for(int i = 0; i<s_sampleSize; i++){
 		imageData[i] = new char[normSize*normSize];
 	}
 
@@ -325,9 +323,9 @@ void MNNClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSi
 	printf("sample generating process:\n");
 	for(int i = 0; i<charCount; i++){
 		for(int j = 0; j<libSize; j++){
-			distorteAndNorm(imageData, fontLib[j]->wideCharArray()->at(i)->imageData(), sampleSize);
+			distorteAndNorm(imageData, fontLib[j]->wideCharArray()->at(i)->imageData());
 
-			for(int k = 0; k<sampleSize; k++){
+			for(int k = 0; k<s_sampleSize; k++){
 				proto = new Prototype;
 				proto->label = fontLib[j]->wideCharArray()->at(i)->value();
 				proto->data = new float[featureSize];
@@ -355,7 +353,7 @@ void MNNClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSi
 	storeFile();
 	printf("mnn model saved\n");
 
-	for(int i = 0; i<sampleSize; i++){
+	for(int i = 0; i<s_sampleSize; i++){
 		delete[] imageData[i];
 	}
 	delete[] imageData;
@@ -427,12 +425,12 @@ double MNNClassifier::classify(const float *scaledFeature, wchar_t *res)
  		++index;	
  	}
 
-	const int K = 4;
+	const int K = 7;
 
 	float distance2;
-	float max[K], tempMax;
-	for(int i = 0; i<K; i++s){
-		max[i] = 999999;	// max float
+	float nn[K], tempNN;
+	for(int i = 0; i<K; i++){
+		nn[i] = 999999;	// max float
 	}
 	int recordOff[K], tempROff;
 
@@ -444,22 +442,22 @@ double MNNClassifier::classify(const float *scaledFeature, wchar_t *res)
 		for(int i = 0; i<dim; i++){
 			distance2 += (data[i] - scaledFeature[i])*(data[i] - scaledFeature[i]);
 
-			if(distance2 > max[K-1]){
+			if(distance2 > nn[K-1]){
 				break;
 			}
 		}
 
-		if(distance2 < max[K-1]){
-			max[K-1] = distance2;
+		if(distance2 < nn[K-1]){
+			nn[K-1] = distance2;
 			recordOff[K-1] = index;
 
 			for(int i = 1; i<K; i++){
-				if(max[K-i] < max[K-i-1]){
-					tempMax = max[K-i];
+				if(nn[K-i] < nn[K-i-1]){
+					tempNN = nn[K-i];
 					tempROff = recordOff[K-i];
-					max[K-i] = max[K-i-1];
+					nn[K-i] = nn[K-i-1];
 					recordOff[K-i] = recordOff[K-i-1];
-					max[K-i-1] = tempMax;
+					nn[K-i-1] = tempNN;
 					recordOff[K-i-1] = tempROff;
 				}else{
 					break;
@@ -468,19 +466,45 @@ double MNNClassifier::classify(const float *scaledFeature, wchar_t *res)
 		}
 	}
 
+	tempROff = recordOff[0];	// record the most nearest
+
+	// bubble sort
+	for(int i = 0; i<K-1; i++){
+		for(int j = 0; j<K-i-1; j++){
+			if(m_lib.at(recordOff[j])->label > m_lib.at(recordOff[j+1])->label){
+				tempROff = recordOff[j];
+				recordOff[j] = recordOff[j+1];
+				recordOff[j+1] = tempROff;
+			}
+		}
+	}
+
+	setlocale(LC_ALL, "");
+	for(int i = 0; i<K; i++){
+		cout << m_lib.at(recordOff[i])->label;
+		wprintf(L"%c ", m_lib.at(recordOff[i])->label);
+	}
+	cout << endl;
+
 	int offset, recodeCount = 0, count = 1;
 	for(int i = 1; i<K; i++){
 		if(m_lib.at(recordOff[i])->label == m_lib.at(recordOff[i-1])->label){
 			++count;
 		}else{
-			if(count > recodeCount){
-				recodeCou nt = count;
+			if(count > recodeCount || count == recodeCount && m_lib.at(recordOff[i-1])->label == m_lib.at(tempROff)->label){
+				recodeCount = count;
 				offset = recordOff[i-1];
+
+				count = 1;
 			}
 		}
 	}
+	if(count > recodeCount || count == recodeCount && m_lib.at(recordOff[K-1])->label == m_lib.at(tempROff)->label){
+		recodeCount = count;
+		offset = recordOff[K-1];
+	}
 
-	*res = m_lib.at(recordOff)->label;
+	*res = m_lib.at(offset)->label;
 
 	return 1;
 }

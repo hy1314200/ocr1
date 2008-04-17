@@ -29,12 +29,14 @@ namespace recognise{
 		virtual bool isAvailable() = 0;
 
 #ifdef TEST
-		void TEST_distorteAndNorm(char** samples, char* prototype, int sampleSize){
-			distorteAndNorm(samples, prototype, sampleSize);
+		void TEST_distorteAndNorm(char** samples, char* prototype){
+			distorteAndNorm(samples, prototype);
 		}
 #endif
 
 	protected:
+		static const int s_sampleSize = 13;
+
 		static CharRecogniser* s_instance;
 
 		// CvMat* W; used for MDA
@@ -47,7 +49,7 @@ namespace recognise{
 		static void normalize(char* res, const char* greys, int iWidth, int x, int y, int width, int height);
 		
 		/** used to generate many distorted samples for training */
-		static void distorteAndNorm(char** samples, const char* prototype, int sampleSize);
+		static void distorteAndNorm(char** samples, const char* prototype);
 
 		static void findXYWH(char* data, int* x, int* y, int* width, int* height);
 

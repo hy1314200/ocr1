@@ -321,10 +321,10 @@ char* CharDivider::removeBigConnectedComp(const char* greys, int iWidth, int ups
 	bool found = true;
 	for(int i = 0; i<cH ; i++){
 		for(int j = 0; j<iWidth; j++){
-			if(*(dataErode + iWidth*i + j) == charColor){
-
+			if(*(dataErode + imageErode->widthStep*i + j) == charColor){
 				cvFloodFill(imageErode, cvPoint(j, i), cvScalarAll(backColor));
-				if(*(dataConn + iWidth*i + j) == charColor){
+
+				if(*(dataConn + imageConnected->widthStep*i + j) == charColor){
 					cvFloodFill(imageConnected, cvPoint(j, i), cvScalarAll(backColor));
 				}
 
@@ -452,15 +452,16 @@ bool CharDivider::divideHelp(const int* histagram, int iWidth, int* cW, int* dW,
 	while(i<iWidth && histagram[i] == 0){ 
 		i++; 
 	}
+	if(i == iWidth){
+		return false;
+	}
 
 	while(true){
 		temp = i++;	
 		while(i<iWidth && histagram[i] > 0){
 			i++; 
 		}
-		if(i == iWidth){ 
-			break; 
-		}
+
 		offList->push_back(temp);
 		cWlist->push_back(i - temp);
 
@@ -468,14 +469,10 @@ bool CharDivider::divideHelp(const int* histagram, int iWidth, int* cW, int* dW,
 		while(i<iWidth && histagram[i] == 0){ 
 			i++; 
 		}
-		if(i == iWidth){
+		if(i >= iWidth){
 			break;
 		}
 		dWlist->push_back(i - temp);
-	}
-
-	if(offList->size() == 0){
-		return false;
 	}
 
 	*cW = calcMaxFreqValue(cWlist);

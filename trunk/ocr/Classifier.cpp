@@ -1,4 +1,5 @@
 #include "Classifier.h"
+#include "stdafx.h"
 #include "FeatureExtracter.h"
 
 #include <algorithm>
@@ -421,11 +422,11 @@ double MNNClassifier::classify(const float *scaledFeature, wchar_t *res)
 	int dim = FeatureExtracter::s_FEATURESIZE;
 
 	int index = 0;
- 	while(m_lib.at(index)->data[0] < scaledFeature[0]){
- 		++index;	
- 	}
+//  	while(m_lib.at(index)->data[0] < scaledFeature[0]){
+//  		++index;	
+//  	}
 
-	const int K = 7;
+	const int K = 4;
 
 	float distance2;
 	float nn[K], tempNN;
@@ -468,6 +469,17 @@ double MNNClassifier::classify(const float *scaledFeature, wchar_t *res)
 
 	tempROff = recordOff[0];	// record the most nearest
 
+#ifdef DISPLAY_MNN_CHAR
+
+	setlocale(LC_ALL, "");
+	for(int i = 0; i<K; i++){
+		cout << m_lib.at(recordOff[i])->label;
+		wprintf(L"%c ", m_lib.at(recordOff[i])->label);
+	}
+	cout << endl;
+
+#endif
+
 	// bubble sort
 	for(int i = 0; i<K-1; i++){
 		for(int j = 0; j<K-i-1; j++){
@@ -479,13 +491,6 @@ double MNNClassifier::classify(const float *scaledFeature, wchar_t *res)
 		}
 	}
 
-	setlocale(LC_ALL, "");
-	for(int i = 0; i<K; i++){
-		cout << m_lib.at(recordOff[i])->label;
-		wprintf(L"%c ", m_lib.at(recordOff[i])->label);
-	}
-	cout << endl;
-
 	int offset, recodeCount = 0, count = 1;
 	for(int i = 1; i<K; i++){
 		if(m_lib.at(recordOff[i])->label == m_lib.at(recordOff[i-1])->label){
@@ -494,9 +499,9 @@ double MNNClassifier::classify(const float *scaledFeature, wchar_t *res)
 			if(count > recodeCount || count == recodeCount && m_lib.at(recordOff[i-1])->label == m_lib.at(tempROff)->label){
 				recodeCount = count;
 				offset = recordOff[i-1];
-
-				count = 1;
 			}
+
+			count = 1;
 		}
 	}
 	if(count > recodeCount || count == recodeCount && m_lib.at(recordOff[K-1])->label == m_lib.at(tempROff)->label){

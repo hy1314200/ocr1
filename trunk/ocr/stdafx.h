@@ -22,6 +22,10 @@
 //#define DISPLAY_CONNECTED_IMAGE
 #endif
 
+#ifndef DISPLAY_MNN_CHAR
+//#define DISPLAY_MNN_CHAR
+#endif
+
 
 // method related define
 #ifndef FILTER_NOISE

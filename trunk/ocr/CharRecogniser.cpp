@@ -44,10 +44,12 @@ double CharRecogniser::recogniseChar(const char* greys, int iWidth, int iHeight,
 	float *scaledFeature = new float[featureSize];
 	FeatureExtracter::getInstance()->extractScaledFeature(scaledFeature, normChar);
 
+	double ret = s_instance->classify(scaledFeature, res);
+
 	delete[] normChar;
 	delete[] scaledFeature;
 
-	return s_instance->classify(scaledFeature, res);
+	return ret;
 }
 
 void CharRecogniser::normalize(char* res, const char* greys, int iWidth, int x, int y, int width, int height)

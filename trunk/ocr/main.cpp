@@ -311,7 +311,7 @@ void testApp(){
 }
 
 int main(int argc, char** argv){
-//	testApp();
-	unitTest();
+	testApp();
+//	unitTest();
 	return 0;
 }

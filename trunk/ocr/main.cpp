@@ -174,7 +174,7 @@ void testFontStore(){
 	fclose(file);
 
 	lib->storeData("data/font/songti.int");
-	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(3818)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(2499)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 
 	delete lib;
 
@@ -186,7 +186,7 @@ void testFontStore(){
 	fclose(file);
 
 	lib->storeData("data/font/heiti.int");
-	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(3818)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(2499)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 
 	delete lib;
 
@@ -198,7 +198,7 @@ void testFontStore(){
 	fclose(file);
 
 	lib->storeData("data/font/fangsong.int");
-	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(3818)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(2499)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 
 	delete lib;
 
@@ -210,7 +210,7 @@ void testFontStore(){
 	fclose(file);
 
 	lib->storeData("data/font/kaiti.int");
-	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(3818)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(2499)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 
 	delete lib;
 }
@@ -260,54 +260,54 @@ void unitTest(){
 }
 
 void testApp(){
-// 	FILE* file1 = fopen("data/font/songti.int", "rb");
-// 	FILE* file2 = fopen("data/font/heiti.int", "rb");
-// 	FILE* file3 = fopen("data/font/fangsong.int", "rb");
-// 	FILE* file4 = fopen("data/font/kaiti.int", "rb");
-// 
-// 	FontLib **lib = new FontLib*[4];
-// 	lib[0] = FontGen::genIntFontLib(file1);
-// 	lib[1] = FontGen::genIntFontLib(file2);
-// 	lib[2] = FontGen::genIntFontLib(file3);
-// 	lib[3] = FontGen::genIntFontLib(file4);
-//  
+	FILE* file1 = fopen("data/font/songti.int", "rb");
+	FILE* file2 = fopen("data/font/heiti.int", "rb");
+	FILE* file3 = fopen("data/font/fangsong.int", "rb");
+	FILE* file4 = fopen("data/font/kaiti.int", "rb");
+
+	FontLib **lib = new FontLib*[4];
+	lib[0] = FontGen::genIntFontLib(file1);
+	lib[1] = FontGen::genIntFontLib(file2);
+	lib[2] = FontGen::genIntFontLib(file3);
+	lib[3] = FontGen::genIntFontLib(file4);
+ 
 // 	DebugToolkit::displayGreyImage(lib[0]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 // 	DebugToolkit::displayGreyImage(lib[1]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 // 	DebugToolkit::displayGreyImage(lib[2]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 // 	DebugToolkit::displayGreyImage(lib[3]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 //  
-// 	fclose(file1);
-// 	fclose(file2);
-// 	fclose(file3);
-// 	fclose(file4);
+	fclose(file1);
+	fclose(file2);
+	fclose(file3);
+	fclose(file4);
+
+ 	CharRecogniser::buildInstance()->buildFeatureLib(lib, 4);
+	CharRecogniser::buildInstance()->buildFeatureLib(lib, 2);
+ 
+	for(int i = 0; i<4; i++){
+		delete lib[i];
+	}
+	delete[] lib;
+
+	for(int i = 0; i<2; i++){
+		delete lib[i];
+	}
+ 	delete[] lib;
+
+// 	char str[40];
+// 	for(int i = 1; i<=9; i++){ 
+// 		sprintf(str, "image/(%d).bmp", i);
 // 
-//  	CharRecogniser::buildInstance()->buildFeatureLib(lib, 4);
-// 	CharRecogniser::buildInstance()->buildFeatureLib(lib, 2);
-//  
-// 	for(int i = 0; i<4; i++){
-// 		delete lib[i];
+// 		testRecognise(str);
+// 		cout << "\n" << endl;
 // 	}
-// 	delete[] lib;
-
-// 	for(int i = 0; i<2; i++){
-// 		delete lib[i];
+// 
+// 	for(int i = 1; i<=18; i++){
+// 		sprintf(str, "image/test/(%d).bmp", i);
+// 
+// 		testRecognise(str);
+// 		cout << "\n" << endl;
 // 	}
-//  	delete[] lib;
-
-	char str[40];
-	for(int i = 1; i<=9; i++){ 
-		sprintf(str, "image/(%d).bmp", i);
-
-		testRecognise(str);
-		cout << "\n" << endl;
-	}
-
-	for(int i = 1; i<=18; i++){
-		sprintf(str, "image/test/(%d).bmp", i);
-
-		testRecognise(str);
-		cout << "\n" << endl;
-	}
 }
 
 int main(int argc, char** argv){

@@ -359,62 +359,6 @@ void MNNClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSi
 	}
 	delete[] imageData;
 }
-/*
-void MNNClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSize)
-{
-	const int charCount = fontLib[0]->size();
-
-#ifdef DEBUG
-	for(int i = 1; i<libSize; i++){
-		assert(charCount == fontLib[i]->size());
-	}
-#endif
-
-	const int normSize = FeatureExtracter::s_NORMSIZE;
-	const int featureSize = FeatureExtracter::s_FEATURESIZE;
-
-	Char *src = NULL;
-	Prototype *proto = NULL;
-	char imageData[normSize*normSize];
-	int x, y, width, height;
-
-	FeatureExtracter* extracter = FeatureExtracter::getInstance();
-
-	printf("library building process:\n");
-	for(int i = 0; i<libSize; i++){
-		for(int j = 0; j<charCount; j++){
-			src = fontLib[i]->wideCharArray()->at(j);
-
-			// normal
-			findXYWH(src->imageData(), &x, &y, &width, &height);
-			normalize(imageData, src->imageData(), normSize, x, y, width, height);
-
-			proto = new Prototype;
-			proto->label = src->value();
-			proto->data = new float[featureSize];
-			extracter->extractFeature(proto->data, imageData, true);
-
-			m_lib.push_back(proto);
-
-			if(j%1000 == 0){
-				printf("%.2f%% finished\n", (charCount*i + j)*100*1.0/(charCount*libSize));
-			}
-		}
-	}
-	printf("100%% finished\n");
-
-	extracter->saveData();
-
-	sort(m_lib.begin(), m_lib.end(), compare);
-
-	int size = m_lib.size();
-	for(int i = 0; i<size; i++){
-		extracter->scaleFeature(m_lib.at(i)->data);
-	}
-
-	storeFile();
-	printf("mnn model saved\n");
-}*/
 
 double MNNClassifier::classify(const float *scaledFeature, wchar_t *res)
 {

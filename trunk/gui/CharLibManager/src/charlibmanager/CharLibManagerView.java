@@ -4,6 +4,9 @@
 
 package charlibmanager;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -118,7 +121,7 @@ public class CharLibManagerView extends FrameView {
         jLabel7 = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        appendArea = new javax.swing.JTextArea();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
@@ -261,10 +264,10 @@ public class CharLibManagerView extends FrameView {
 
         jScrollPane1.setName("jScrollPane1"); // NOI18N
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jTextArea1.setName("jTextArea1"); // NOI18N
-        jScrollPane1.setViewportView(jTextArea1);
+        appendArea.setColumns(20);
+        appendArea.setRows(5);
+        appendArea.setName("appendArea"); // NOI18N
+        jScrollPane1.setViewportView(appendArea);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -468,17 +471,24 @@ public class CharLibManagerView extends FrameView {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        String str = checkCharField.getText();
-        if(str.length() == 0){
-            JOptionPane.showMessageDialog(getComponent(), "字符不能为空");
-            return;
-        }
-        
-        boolean existed = Manager.checkExist(str.charAt(0));
-        if(existed){
-            JOptionPane.showMessageDialog(getComponent(), "“" + str + "”" + "存在");
-        }else{
-            JOptionPane.showMessageDialog(getComponent(), "“" + str + "”" + "不存在");
+        try {
+            String str = checkCharField.getText();
+            str = str.replaceAll("\\s", "");
+            
+            if (str.length() == 0) {
+                JOptionPane.showMessageDialog(getComponent(), "字符不能为空");
+                checkCharField.setText("");
+                return;
+            }
+
+            boolean existed = Manager.checkExist(str.charAt(0));
+            if (existed) {
+                JOptionPane.showMessageDialog(getComponent(), "“" + str + "”" + "存在");
+            } else {
+                JOptionPane.showMessageDialog(getComponent(), "“" + str + "”" + "不存在");
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(getComponent(), ex.getMessage());
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -490,22 +500,64 @@ public class CharLibManagerView extends FrameView {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        
+        try {
+            String str = appendArea.getText();
+            str = str.replaceAll("\\s", "");
+
+            if (str.length() == 0) {
+                JOptionPane.showMessageDialog(getComponent(), "字符不能为空");
+                appendArea.setText("");
+                return;
+            }
+
+            StringBuffer exist = new StringBuffer();
+            StringBuffer notValid = new StringBuffer();
+            Manager.appendChars(str, exist, notValid);
+
+            if (exist.length() == 0 && notValid.length() == 0) {
+                JOptionPane.showMessageDialog(getComponent(), "成功添加" + str.length() + "个字符");
+            } else {
+                String show = new String();
+                if (exist.length() > 0) {
+                    show += "这些字符已存在：" + exist.toString() + "\n";
+                }
+                if (notValid.length() > 0) {
+                    show += "无效的输入字符：" + notValid.toString();
+                }
+
+                int valid = str.length() - exist.length() - notValid.length();
+
+                JOptionPane.showMessageDialog(getComponent(), "成功添加" + valid + "个字符\n" + show);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(getComponent(), ex.getMessage());
+        }
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        String temp = checkCharArea.getText();
-        String str = temp.replaceAll("\\s", "");
-        
-        StringBuffer exist = new StringBuffer();
-        StringBuffer notExist = new StringBuffer();
-        Manager.checkExist(str, exist, notExist);
-        
-        existArea.setText(exist.toString());
-        notExistArea.setText(notExist.toString());
-    }//GEN-LAST:event_jButton4ActionPerformed
+        try {
+            String str = checkCharArea.getText();
+            str = str.replaceAll("\\s", "");
+
+            if (str.length() == 0) {
+                JOptionPane.showMessageDialog(getComponent(), "字符不能为空");
+                checkCharArea.setText("");
+                return;
+            }
+
+            StringBuffer exist = new StringBuffer();
+            StringBuffer notExist = new StringBuffer();
+            Manager.checkExist(str, exist, notExist);
+
+            existArea.setText(exist.toString());
+            notExistArea.setText(notExist.toString());//GEN-LAST:event_jButton4ActionPerformed
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(getComponent(), ex.getMessage());
+        }
+    }                                        
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextArea appendArea;
     private javax.swing.JLabel chLabel;
     private javax.swing.JTextArea checkCharArea;
     private javax.swing.JTextField checkCharField;
@@ -532,7 +584,6 @@ public class CharLibManagerView extends FrameView {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JTextArea notExistArea;

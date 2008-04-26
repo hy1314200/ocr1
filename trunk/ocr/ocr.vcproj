@@ -175,6 +175,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LibManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
 				>
 			</File>
@@ -214,6 +218,10 @@
 			</File>
 			<File
 				RelativePath=".\FontGen.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LibManager.h"
 				>
 			</File>
 			<File

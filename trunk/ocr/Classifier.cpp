@@ -6,7 +6,7 @@
 #include <iostream>
 
 using namespace recognise;
-using namespace generate;
+using namespace library;
 
 const char* SVMClassifier::s_MODELPATH = "data/classify/svm/svm.model";
 
@@ -76,7 +76,7 @@ void SVMClassifier::trainAndSaveClassifier(struct svm_problem *prob){
 	delete param;
 }
 
-void SVMClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSize)
+void SVMClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSize)
 {
 	const int charCount = fontLib[0]->size();
 
@@ -100,7 +100,7 @@ void SVMClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSi
 	printf("sample generating process:\n");
 	for(int i = 0; i<charCount; i++){
 		for(int j = 0; j<libSize; j++){
-			distorteAndNorm(imageData, fontLib[j]->wideCharArray()->at(i)->imageData());
+			distorteAndNorm(imageData, fontLib[j]->charArray()->at(i)->imageData());
 
 			for(int k = 0; k<s_sampleSize; k++, tempData += featureSize){
 				extracter->extractFeature(tempData, imageData[k], true);
@@ -136,7 +136,7 @@ void SVMClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSi
 	for(int i = 0; i<count; i++, tempData += featureSize){
 		extracter->scaleFeature(tempData);
 
-		problem->y[i] = fontLib[0]->wideCharArray()->at(i/(libSize*s_sampleSize))->value();
+		problem->y[i] = fontLib[0]->charArray()->at(i/(libSize*s_sampleSize))->value();
 		for(int j = 0; j<featureSize; j++){
 			problem->x[i][j].index = j;
 			problem->x[i][j].value= tempData[j]; 
@@ -300,7 +300,7 @@ void MNNClassifier::storeFile()
 	fclose(file);
 }
 
-void MNNClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSize)
+void MNNClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSize)
 {
 	const int charCount = fontLib[0]->size();
 
@@ -324,11 +324,11 @@ void MNNClassifier::buildFeatureLib(generate::FontLib** fontLib, const int libSi
 	printf("sample generating process:\n");
 	for(int i = 0; i<charCount; i++){
 		for(int j = 0; j<libSize; j++){
-			distorteAndNorm(imageData, fontLib[j]->wideCharArray()->at(i)->imageData());
+			distorteAndNorm(imageData, fontLib[j]->charArray()->at(i)->imageData());
 
 			for(int k = 0; k<s_sampleSize; k++){
 				proto = new Prototype;
-				proto->label = fontLib[j]->wideCharArray()->at(i)->value();
+				proto->label = fontLib[j]->charArray()->at(i)->value();
 				proto->data = new float[featureSize];
 
 				extracter->extractFeature(proto->data, imageData[k], true);

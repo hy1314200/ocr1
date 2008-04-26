@@ -24,7 +24,7 @@ namespace recognise{
 		/** @return Reliably, from 0% to 100% */
 		double recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res);
 
-		virtual void buildFeatureLib(generate::FontLib** fontLib, int size) = 0;
+		virtual void buildFeatureLib(library::FontLib** fontLib, int size) = 0;
 
 		virtual bool isAvailable() = 0;
 

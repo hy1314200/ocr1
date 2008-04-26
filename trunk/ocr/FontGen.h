@@ -7,7 +7,7 @@
 
 using namespace std;
 
-namespace generate{
+namespace library{
 
 	/** now, Fang Song, Song, Kai Ti, Hei Ti, Li Shu is supported */
 	static const int TYPEKIND = 5;
@@ -27,11 +27,9 @@ namespace generate{
 			return m_value;
 		}
 
-		char* imageData(){
+		char *imageData(){
 			return m_imageData;
 		}
-
-		virtual void storeData(FILE* file) = 0;
 
 		virtual ~Char(){
 			delete m_imageData;
@@ -42,9 +40,9 @@ namespace generate{
 		wchar_t m_value;
 
 		/** the binary grey data of this item */
-		char* m_imageData;
+		char *m_imageData;
 
-		Char(wchar_t value, char* imageData){
+		Char(wchar_t value, char *imageData){
 			m_value = value;
 			m_imageData = imageData;
 		};
@@ -53,85 +51,48 @@ namespace generate{
 	class FontLib {
 	public:
 		int size(){
-			return m_wideCharArray->size();
+			return m_charArray->size();
 		}
 
 		Typeface typeface(){
 			return m_typeface;
 		}
 
-		vector<Char*>* thinCharArray(){
-			return m_thinCharArray;
+		vector<Char *> *charArray(){
+			return m_charArray;
 		}
+		
+		static FontLib *genCurrFontLib(Typeface typeface);
 
-		vector<Char*>* wideCharArray(){
-			return m_wideCharArray;
-		}
-
-		virtual bool storeData(const char* filepath) = 0;
+		static FontLib *genSubFontLib(Typeface typeface, vector<wchar_t> *subList);
 
 		virtual ~FontLib();
 
-	protected:
-		Typeface m_typeface;
-
-		/** thin font data: font data of ASCII chars */
-		vector<Char*>* m_thinCharArray;
-
-		/** wide font data: font data of multibytes chars */
-		vector<Char*>* m_wideCharArray;
-
-		FontLib(Typeface typeface, vector<Char*>* thinCharArray, vector<Char*>* wideCharArray){
-			m_typeface = typeface;
-			m_thinCharArray = thinCharArray;
-			m_wideCharArray = wideCharArray;
-		}
-	};
-
-	class FontGen
-	{
-	public:
+	private:
+		
 		class _Char: public Char
 		{
 		public:
-			static _Char* parseExtFile(FILE* file, int widthOfLine);
+			_Char(wchar_t value, char *imageData): Char(value, imageData){  };
 
-			static _Char* parseIntFile(FILE* file);
-
-			void storeData(FILE* file);
-
-		private:
-			_Char(wchar_t value, char* imageData): Char(value, imageData){  };
+			static Char *parseIntFile(FILE *file);
 
 		};
 
-		class _FontLib: public FontLib
-		{
-		public:
-			static _FontLib* parseExtFile(FILE* file, Typeface typeface);
+		static const char *s_maxLibDirPath;
+		static const char *s_currLibDirPath;
 
-			static _FontLib* parseIntFile(FILE* file);
+		Typeface m_typeface;
 
-			bool storeData(const char* filepath);
+		/** wide font data: font data of multibytes chars */
+		vector<Char *> *m_charArray;
 
-		private:
-			_FontLib(Typeface typeface, vector<Char*>* thinCharArray, vector<Char*>* wideCharArray): FontLib(typeface, thinCharArray, wideCharArray){  };
-
-		};
-
-		static FontLib* genExtFontLib(FILE* file, Typeface typeface);
-
-		static FontLib* genIntFontLib(FILE* file);
-
-	private:
-		FontGen(void){ };
-		~FontGen(void){ };
-
-		static bool isThinChar(wchar_t code){
-			return code < 128;
+		FontLib(Typeface typeface, vector<Char*> *charArray){
+			m_typeface = typeface;
+			m_charArray = charArray;
 		}
 
-		static int findCharIndex(vector<Char*>* charArray, wchar_t code);
+		static FontLib *parseIntFile(FILE *file);
 	};
 
 }

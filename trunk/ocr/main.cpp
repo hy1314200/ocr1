@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 
 #include <cxcore.h>
 #include <cv.h>
@@ -16,7 +17,7 @@
 using namespace std;
 using namespace recognise;
 using namespace divide;
-using namespace generate;
+using namespace library;
 
 void testRecognise(char* path){
 	const char* imagePath = path;
@@ -153,66 +154,16 @@ void testWChar(){
 }
 
 void testFontGen(){
-	FILE* file = fopen("data/font/songti.int", "rb");
-	assert(file != NULL);
+	//FILE* file = fopen("data/font/songti.int", "rb");
+	//assert(file != NULL);
 
-	FontLib* lib = FontGen::genIntFontLib(file);
+	FontLib* lib = FontLib::genCurrFontLib(SONGTI);
 
-	fclose(file);
-	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(144)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(46)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-
-	delete lib;
-}
-
-void testFontStore(){
-// 	FILE* file = fopen("data/font/songti.ext", "r");
-// 	assert(file != NULL);
-// 
-// 	FontLib* lib = FontGen::genExtFontLib(file, SONGTI);
-// 
-// 	fclose(file);
-// 
-// 	lib->storeData("data/font/songti.int");
-// 	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(2499)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-// 
-// 	delete lib;
-
-	FILE *file = fopen("data/font/heiti.ext", "r");
-	assert(file != NULL);
-
-	FontLib *lib = FontGen::genExtFontLib(file, HEITI);
-
-	fclose(file);
-
-	lib->storeData("data/font/heiti.int");
-	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(6723)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	//fclose(file);
+	DebugToolkit::displayGreyImage(lib->charArray()->at(144)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	DebugToolkit::displayGreyImage(lib->charArray()->at(46)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
 
 	delete lib;
-// 
-// 	file = fopen("data/font/fangsong.ext", "r");
-// 	assert(file != NULL);
-// 
-// 	lib = FontGen::genExtFontLib(file, FANGSONG);
-// 
-// 	fclose(file);
-// 
-// 	lib->storeData("data/font/fangsong.int");
-// 	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(2499)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-// 
-// 	delete lib;
-// 
-// 	file = fopen("data/font/kaiti.ext", "r");
-// 	assert(file != NULL);
-// 
-// 	lib = FontGen::genExtFontLib(file, KAITI);
-// 
-// 	fclose(file);
-// 
-// 	lib->storeData("data/font/kaiti.int");
-// 	DebugToolkit::displayGreyImage(lib->wideCharArray()->at(2499)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-// 
-// 	delete lib;
 }
 
 void testDistorte(){
@@ -244,7 +195,6 @@ void unitTest(){
 
 // 	testDistorte();
  //	testFontGen();
- 	testFontStore();
 // 	testWChar();
 // 	testFeature2();
 // 	testFilterNoise();
@@ -311,7 +261,16 @@ void testApp(){
 }
 
 int main(int argc, char** argv){
-	testApp();
+	if(argc < 3){
+		cerr << "Usage:" << endl;
+		return 1;
+	}
+
+	if(strcmp(argv[1], "-a") == 0){
+		//appendChars();
+	}
+
+//	testApp();
 //	unitTest();
 	return 0;
 }

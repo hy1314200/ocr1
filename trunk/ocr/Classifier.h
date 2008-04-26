@@ -13,7 +13,7 @@ namespace recognise
 	class SVMClassifier: public CharRecogniser
 	{
 	public:
-		void buildFeatureLib(generate::FontLib** fontLib, int size);
+		void buildFeatureLib(library::FontLib** fontLib, int size);
 
 		SVMClassifier();
 		~SVMClassifier();
@@ -36,7 +36,7 @@ namespace recognise
 	class MNNClassifier: public CharRecogniser
 	{
 	public:
-		void buildFeatureLib(generate::FontLib** fontLib, int size);
+		void buildFeatureLib(library::FontLib** fontLib, int size);
 
 		MNNClassifier();
 		~MNNClassifier();

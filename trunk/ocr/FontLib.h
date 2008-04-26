@@ -1,5 +1,5 @@
-#ifndef _FONTGEN_H
-#define _FONTGEN_H
+#ifndef _FONTLIB_H
+#define _FONTLIB_H
 
 #include <stdio.h>
 #include <vector>
@@ -50,6 +50,11 @@ namespace library{
 
 	class FontLib {
 	public:
+		static const char *s_maxLibDirPath;
+		static const char *s_maxLibFilePath;
+		static const char *s_currLibDirPath;
+		static const char *s_currLibFilePath;
+
 		int size(){
 			return m_charArray->size();
 		}
@@ -61,10 +66,10 @@ namespace library{
 		vector<Char *> *charArray(){
 			return m_charArray;
 		}
+
+		static void genCurrFontLib();
 		
 		static FontLib *genCurrFontLib(Typeface typeface);
-
-		static FontLib *genSubFontLib(Typeface typeface, vector<wchar_t> *subList);
 
 		virtual ~FontLib();
 
@@ -78,9 +83,6 @@ namespace library{
 			static Char *parseIntFile(FILE *file);
 
 		};
-
-		static const char *s_maxLibDirPath;
-		static const char *s_currLibDirPath;
 
 		Typeface m_typeface;
 

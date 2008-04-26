@@ -1,7 +1,7 @@
 #ifndef _CLASSIFIER_H
 #define _CLASSIFIER_H
 
-#include "FontGen.h"
+#include "FontLib.h"
 #include "CharRecogniser.h"
 #include "libsvm-2.85/svm.h"
 

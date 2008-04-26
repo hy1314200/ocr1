@@ -2,7 +2,7 @@
 #define _CHARRECOGNISER_H
 
 #include "stdafx.h"
-#include "FontGen.h"
+#include "FontLib.h"
 
 #include <cxcore.h>
 #include <cv.h>

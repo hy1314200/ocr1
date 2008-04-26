@@ -12,12 +12,15 @@
 #include "OCRToolkit.h"
 #include "FeatureExtracter.h"
 #include "DebugToolkit.h"
-#include "FontGen.h"
+#include "FontLib.h"
+#include "LibManager.h"
+#include "ConfigFile.h"
 
 using namespace std;
 using namespace recognise;
 using namespace divide;
 using namespace library;
+using namespace util;
 
 void testRecognise(char* path){
 	const char* imagePath = path;
@@ -189,9 +192,72 @@ void testDistorte(){
 	delete[] a;
 }
 
+void testApp(){
+	// 	FILE* file1 = fopen("data/font/songti.int", "rb");
+	// 	FILE* file2 = fopen("data/font/heiti.int", "rb");
+	// 	FILE* file3 = fopen("data/font/fangsong.int", "rb");
+	// 	FILE* file4 = fopen("data/font/kaiti.int", "rb");
+	// 
+	// 	FontLib **lib = new FontLib*[4];
+	// 	lib[0] = FontGen::genIntFontLib(file1);
+	// 	lib[1] = FontGen::genIntFontLib(file2);
+	// 	lib[2] = FontGen::genIntFontLib(file3);
+	// 	lib[3] = FontGen::genIntFontLib(file4);
+	//  
+	// // 	DebugToolkit::displayGreyImage(lib[0]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	// // 	DebugToolkit::displayGreyImage(lib[1]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	// // 	DebugToolkit::displayGreyImage(lib[2]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	// // 	DebugToolkit::displayGreyImage(lib[3]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
+	//  
+	// 	fclose(file1);
+	// 	fclose(file2);
+	// 	fclose(file3);
+	// 	fclose(file4);
+	// 
+	//  	CharRecogniser::buildInstance()->buildFeatureLib(lib, 4);
+	// //	CharRecogniser::buildInstance()->buildFeatureLib(lib, 2);
+	//  
+	// 	for(int i = 0; i<4; i++){
+	// 		delete lib[i];
+	// 	}
+	// 	delete[] lib;
+
+	// 	for(int i = 0; i<2; i++){
+	// 		delete lib[i];
+	// 	}
+	//  	delete[] lib;
+
+	char str[40];
+	for(int i = 1; i<=9; i++){ 
+		sprintf(str, "image/(%d).bmp", i);
+
+		testRecognise(str);
+		cout << "\n" << endl;
+	}
+	// 
+	// 	for(int i = 1; i<=18; i++){
+	// 		sprintf(str, "image/test/(%d).bmp", i);
+	// 
+	// 		testRecognise(str);
+	// 		cout << "\n" << endl;
+	// 	}
+}
+
 void unitTest(){
-	char path[20];
-	sprintf_s(path, "image/test/(%d).bmp", 8);
+
+	FILE *file = fopen("haha.txt", "r");
+	try
+	{
+		ConfigFile *config = ConfigFile::parseConfig(file);
+		config->store("heihei.txt");
+	}
+	catch (string &e)
+	{
+		cout << e << endl;
+	}
+
+// 	char path[20];
+// 	sprintf_s(path, "image/test/(%d).bmp", 8);
 
 // 	testDistorte();
  //	testFontGen();
@@ -209,68 +275,19 @@ void unitTest(){
 // 	}
 }
 
-void testApp(){
-// 	FILE* file1 = fopen("data/font/songti.int", "rb");
-// 	FILE* file2 = fopen("data/font/heiti.int", "rb");
-// 	FILE* file3 = fopen("data/font/fangsong.int", "rb");
-// 	FILE* file4 = fopen("data/font/kaiti.int", "rb");
-// 
-// 	FontLib **lib = new FontLib*[4];
-// 	lib[0] = FontGen::genIntFontLib(file1);
-// 	lib[1] = FontGen::genIntFontLib(file2);
-// 	lib[2] = FontGen::genIntFontLib(file3);
-// 	lib[3] = FontGen::genIntFontLib(file4);
-//  
-// // 	DebugToolkit::displayGreyImage(lib[0]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-// // 	DebugToolkit::displayGreyImage(lib[1]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-// // 	DebugToolkit::displayGreyImage(lib[2]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-// // 	DebugToolkit::displayGreyImage(lib[3]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-//  
-// 	fclose(file1);
-// 	fclose(file2);
-// 	fclose(file3);
-// 	fclose(file4);
-// 
-//  	CharRecogniser::buildInstance()->buildFeatureLib(lib, 4);
-// //	CharRecogniser::buildInstance()->buildFeatureLib(lib, 2);
-//  
-// 	for(int i = 0; i<4; i++){
-// 		delete lib[i];
-// 	}
-// 	delete[] lib;
-
-// 	for(int i = 0; i<2; i++){
-// 		delete lib[i];
-// 	}
-//  	delete[] lib;
-
-	char str[40];
-	for(int i = 1; i<=9; i++){ 
-		sprintf(str, "image/(%d).bmp", i);
-
-		testRecognise(str);
-		cout << "\n" << endl;
-	}
-// 
-// 	for(int i = 1; i<=18; i++){
-// 		sprintf(str, "image/test/(%d).bmp", i);
-// 
-// 		testRecognise(str);
-// 		cout << "\n" << endl;
-// 	}
-}
-
 int main(int argc, char** argv){
+	unitTest();
+#if 0
 	if(argc < 3){
 		cerr << "Usage:" << endl;
 		return 1;
 	}
 
 	if(strcmp(argv[1], "-a") == 0){
-		//appendChars();
+		LibManager::appendChars(argv[2]);
 	}
+#endif
 
 //	testApp();
-//	unitTest();
 	return 0;
 }

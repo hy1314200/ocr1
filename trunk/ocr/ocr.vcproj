@@ -163,6 +163,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ConfigFile.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\DebugToolkit.cpp"
 				>
 			</File>
@@ -171,7 +175,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\FontGen.cpp"
+				RelativePath=".\FontLib.cpp"
 				>
 			</File>
 			<File
@@ -209,6 +213,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ConfigFile.h"
+				>
+			</File>
+			<File
 				RelativePath=".\DebugToolkit.h"
 				>
 			</File>
@@ -217,7 +225,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\FontGen.h"
+				RelativePath=".\FontLib.h"
 				>
 			</File>
 			<File

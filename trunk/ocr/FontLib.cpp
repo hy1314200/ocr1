@@ -1,4 +1,4 @@
-#include "FontGen.h"
+#include "FontLib.h"
 #include "OCRToolkit.h"
 #include "DebugToolkit.h"
 
@@ -8,7 +8,10 @@
 using namespace std;
 using namespace library;
 
+const char *FontLib::s_maxLibDirPath = "data/font/max";
+const char *FontLib::s_maxLibFilePath = "data/font/max/library";
 const char *FontLib::s_currLibDirPath = "data/font/curr";
+const char *FontLib::s_currLibFilePath = "data/font/curr/library";
 
 FontLib::~FontLib(){
 	int size = m_charArray->size();
@@ -67,6 +70,15 @@ FontLib* FontLib::parseIntFile(FILE* file)
 	}
 
 	return new FontLib(typeface, cArray);
+}
+
+void FontLib::genCurrFontLib()
+{
+	genCurrFontLib(SONGTI);
+	genCurrFontLib(HEITI);
+	genCurrFontLib(FANGSONG);
+	genCurrFontLib(KAITI);
+	genCurrFontLib(LISHU);
 }
 
 FontLib* FontLib::genCurrFontLib(Typeface typeface)

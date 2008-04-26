@@ -1,4 +1,5 @@
 #include "LibManager.h"
+#include "FontLib.h"
 
 #include <iostream>
 #include <fstream>
@@ -7,10 +8,6 @@
 
 using namespace std;
 using namespace library;
-
-const char *LibManager::s_maxLibPath = "data/font/maxLib";
-
-const char *LibManager::s_currLibPath = "data/font/currLib";
 
 void LibManager::appendChars(const char *appendFilePath)
 {
@@ -21,7 +18,7 @@ void LibManager::appendChars(const char *appendFilePath)
 	wchar_t wc;
 	vector<wchar_t> exist, notValid;
 
-	wifstream wmaxifs(s_maxLibPath);
+	wifstream wmaxifs(FontLib::s_maxLibFilePath);
 	while(!wmaxifs.eof()){
 		wmaxifs >> wc;
 
@@ -29,7 +26,7 @@ void LibManager::appendChars(const char *appendFilePath)
 	}
 	wmaxifs.close();
 
-	wifstream wcurrifs(s_currLibPath);
+	wifstream wcurrifs(FontLib::s_currLibFilePath);
 	while(!wcurrifs.eof()){
 		wcurrifs >> wc;
 
@@ -56,23 +53,24 @@ void LibManager::appendChars(const char *appendFilePath)
 	wappifs.close();
 
 	int len = exist.size();
-	cout << "exist=";
+	cout << "exist = ";
 	for(int i = 0; i<len; i++){
 		wcout << exist[i];
 	}
 
 	len = notValid.size();
-	cout << "not valid=";
+	cout << "not valid = ";
 	for(int i = 0; i<len; i++){
 		wcout << notValid[i];
 	}
 
-	wofstream wcurrofs(s_currLibPath);
+	wofstream wcurrofs(FontLib::s_currLibFilePath);
 	for(wchar_t i = 0; i<chUnicodeSize; i++){
 		if(currbs.test(i)){
 			wcurrofs << s_chUnicBegin + i;
 		}
 	}
+	wcurrofs.close();
 
-	//FontGen::genSubFontLib(charList);
+	FontLib::genCurrFontLib();
 }

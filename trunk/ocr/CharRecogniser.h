@@ -24,7 +24,7 @@ namespace recognise{
 		/** @return Reliably, from 0% to 100% */
 		double recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res);
 
-		virtual void buildFeatureLib(library::FontLib** fontLib, int size) = 0;
+		void trainClassifier();
 
 		virtual bool isAvailable() = 0;
 
@@ -44,6 +44,8 @@ namespace recognise{
 		CharRecogniser(/*const char* modelFilepath*/){  };
 		virtual ~CharRecogniser(void){  };
 
+		virtual void buildFeatureLib(library::FontLib** fontLib, int size) = 0;
+
 		virtual double classify(const float *feature, wchar_t *res) = 0;
 
 		static void normalize(char* res, const char* greys, int iWidth, int x, int y, int width, int height);
@@ -54,9 +56,6 @@ namespace recognise{
 		static void findXYWH(char* data, int* x, int* y, int* width, int* height);
 
 		static void reduceResolution(IplImage* image, int scale, int type = CV_INTER_NN, int threshold = 128);
-
-	private:
-		static const char* s_CONFPATH;
 
 	};
 

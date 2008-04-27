@@ -5,9 +5,15 @@
 
 using namespace util;
 
-ConfigFile *ConfigFile::parseConfig(FILE *file) throw (string)
+ConfigFile *ConfigFile::parseConfig(const char *filePath) throw (string)
 {
-	ifstream ifs(file);
+	ifstream ifs(filePath);
+	if(!ifs){
+		stringstream ss;
+		ss << "ERROR: can not find config file \"" << filePath << "\"";
+
+		throw ss.str();
+	}
 
 	string temp, key, value;
 	string::size_type offset1, offset2, offset3;
@@ -36,11 +42,13 @@ ConfigFile *ConfigFile::parseConfig(FILE *file) throw (string)
 			throw ss.str();
 		}
 
-		offset3 = temp.find_last_not_of(" ", offset1, offset2 - offset1);
+		for(offset3 = offset2-1; offset3 >= offset1 && temp[offset3] == ' '; offset3--){   }
+		//offset3 = temp.find_last_not_of(" ", offset1, offset2 - offset1); // something wrong with unicode
 		key.assign(temp, offset1, offset3-offset1+1);
 
 		offset1 = temp.find_first_not_of(" ", offset2+1);
-		offset2 = temp.find_last_not_of(" ");
+		for(offset2 = temp.size()-1; offset3 >= 0 && temp[offset3] == ' '; offset3--){   }
+		//offset2 = temp.find_last_not_of(" "); // something wrong with unicode
 		value.assign(temp, offset1, offset2-offset1+1);
 
 		if(config->put(key, value) == false){
@@ -61,21 +69,6 @@ bool ConfigFile::put(string key, string value)
 	res = m_config.insert(pair<string ,string>(key, value));
 
 	return res.second;
-}
-
-void ConfigFile::putForce(string key, string value)
-{
-	m_config[key] = value;
-}
-
-string ConfigFile::get(string key){
-	map<string, string>::iterator itr = m_config.find(key);
-
-	if(itr == m_config.end()){
-		return string();
-	}
-
-	return itr->second;
 }
 
 void ConfigFile::store(const char *filePath)

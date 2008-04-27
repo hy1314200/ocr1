@@ -53,7 +53,6 @@ namespace recognise{
 #endif
 
 	private:
-		static const char* s_filepath;
 
 		enum Direction{ NORTH = 0, SOUTH, WEST, EAST };
 

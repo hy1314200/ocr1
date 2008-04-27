@@ -1,11 +1,3 @@
-#include <iostream>
-#include <string>
-#include <cstring>
-
-#include <cxcore.h>
-#include <cv.h>
-#include <highgui.h>
-
 #include "OCRToolkit.h"
 #include "CharDivider.h"
 #include "CharRecogniser.h"
@@ -15,6 +7,15 @@
 #include "FontLib.h"
 #include "LibManager.h"
 #include "ConfigFile.h"
+#include "GlobalCofig.h"
+
+#include <iostream>
+#include <string>
+#include <cstring>
+
+#include <cxcore.h>
+#include <cv.h>
+#include <highgui.h>
 
 using namespace std;
 using namespace recognise;
@@ -23,52 +24,19 @@ using namespace library;
 using namespace util;
 
 void testRecognise(char* path){
-	const char* imagePath = path;
-	IplImage* image = cvLoadImage(imagePath, CV_LOAD_IMAGE_GRAYSCALE);
-
-	//DebugToolkit::displayImage(image);
-
-	char* data = image->imageData;
-	int width = image->width, height = image->height;
-
-	// need modified DEBUG 
-	//cout << "约 " << cvRound(width*1.0f/height) << " 个字" << endl;
-
-	// need modified DEBUG check if it's binarized
-	for(int i = 0; i < width*height; i++){
-		if(data[i] != 0 && data[i] != (char)255){
-			cout << "\"" << imagePath << "\" is not binarized\n";
-
-			system("pause");
-			return;
-		}
-	}
-
 	vector<wchar_t> wordList;
-	int len = OCRToolkit::recognise(data, image->width, image->height, &wordList);
+	OCRToolkit::recognise(path, wordList);
 	
+	int len = wordList.size();
 	printf("识别出 %d 个汉字\n", len);
 
-	setlocale(LC_ALL, "");
+	wcout.imbue(locale("chs"));
 	for(int i = 0; i<len; i++){
-		wprintf(L"%c", wordList.at(i));
+		wcout << wordList.at(i);
 	}
 
+	IplImage *image = cvLoadImage(path);
 	DebugToolkit::displayImage(image);
-}
-
-void binarize(const char* path){
-	IplImage* image = cvLoadImage(path, CV_LOAD_IMAGE_GRAYSCALE);
-
-	char* data = image->imageData;
-	int size = image->width*image->height;
-
-	for(int i = 0; i<size; i++){
-		data[i] = (data[i] >= 0)? 0: (char)255; 
-	}
-
-	cvSaveImage(path, image);
-	cvReleaseImage(&image);
 }
 
 void testFeature1(char* path){
@@ -79,8 +47,8 @@ void testFeature1(char* path){
 		memcpy(data + image->width*i, image->imageData + image->widthStep*i, image->width);
 	}
 
-	CharRecogniser* rec = CharRecogniser::buildInstance();
-	rec->recogniseChar(data, image->width, image->height, NULL);
+	vector<wchar_t> wordList;
+	OCRToolkit::recognise(data, image->width, image->height, wordList);
 
 	cvReleaseImage(&image);
 	delete[] data;
@@ -156,19 +124,6 @@ void testWChar(){
 	wprintf(L"%s\n", str);
 }
 
-void testFontGen(){
-	//FILE* file = fopen("data/font/songti.int", "rb");
-	//assert(file != NULL);
-
-	FontLib* lib = FontLib::genCurrFontLib(SONGTI);
-
-	//fclose(file);
-	DebugToolkit::displayGreyImage(lib->charArray()->at(144)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-	DebugToolkit::displayGreyImage(lib->charArray()->at(46)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-
-	delete lib;
-}
-
 void testDistorte(){
 	IplImage* image = cvLoadImage("ctrl_s.bmp", 0);
 
@@ -193,40 +148,6 @@ void testDistorte(){
 }
 
 void testApp(){
-	// 	FILE* file1 = fopen("data/font/songti.int", "rb");
-	// 	FILE* file2 = fopen("data/font/heiti.int", "rb");
-	// 	FILE* file3 = fopen("data/font/fangsong.int", "rb");
-	// 	FILE* file4 = fopen("data/font/kaiti.int", "rb");
-	// 
-	// 	FontLib **lib = new FontLib*[4];
-	// 	lib[0] = FontGen::genIntFontLib(file1);
-	// 	lib[1] = FontGen::genIntFontLib(file2);
-	// 	lib[2] = FontGen::genIntFontLib(file3);
-	// 	lib[3] = FontGen::genIntFontLib(file4);
-	//  
-	// // 	DebugToolkit::displayGreyImage(lib[0]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-	// // 	DebugToolkit::displayGreyImage(lib[1]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-	// // 	DebugToolkit::displayGreyImage(lib[2]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-	// // 	DebugToolkit::displayGreyImage(lib[3]->wideCharArray()->at(3/*818*/)->imageData(), Char::s_CHARSIZE, Char::s_CHARSIZE);
-	//  
-	// 	fclose(file1);
-	// 	fclose(file2);
-	// 	fclose(file3);
-	// 	fclose(file4);
-	// 
-	//  	CharRecogniser::buildInstance()->buildFeatureLib(lib, 4);
-	// //	CharRecogniser::buildInstance()->buildFeatureLib(lib, 2);
-	//  
-	// 	for(int i = 0; i<4; i++){
-	// 		delete lib[i];
-	// 	}
-	// 	delete[] lib;
-
-	// 	for(int i = 0; i<2; i++){
-	// 		delete lib[i];
-	// 	}
-	//  	delete[] lib;
-
 	char str[40];
 	for(int i = 1; i<=9; i++){ 
 		sprintf(str, "image/(%d).bmp", i);
@@ -234,21 +155,21 @@ void testApp(){
 		testRecognise(str);
 		cout << "\n" << endl;
 	}
-	// 
-	// 	for(int i = 1; i<=18; i++){
-	// 		sprintf(str, "image/test/(%d).bmp", i);
-	// 
-	// 		testRecognise(str);
-	// 		cout << "\n" << endl;
-	// 	}
+
+	/*
+	for(int i = 1; i<=18; i++){
+		sprintf(str, "image/test/(%d).bmp", i);
+
+		testRecognise(str);
+		cout << "\n" << endl;
+	}*/
 }
 
 void unitTest(){
 
-	FILE *file = fopen("haha.txt", "r");
 	try
 	{
-		ConfigFile *config = ConfigFile::parseConfig(file);
+		ConfigFile *config = ConfigFile::parseConfig("haha.txt");
 		config->store("heihei.txt");
 	}
 	catch (string &e)
@@ -275,19 +196,52 @@ void unitTest(){
 // 	}
 }
 
+void printUsage(){
+	cerr << "Usage:" << endl;
+}
+
 int main(int argc, char** argv){
-	unitTest();
-#if 0
-	if(argc < 3){
-		cerr << "Usage:" << endl;
+	//unitTest();
+#if 1
+	if(argc < 2){
+		printUsage();
 		return 1;
 	}
 
-	if(strcmp(argv[1], "-a") == 0){
+	if(strcmp(argv[1], "-train") == 0){
+
+		OCRToolkit::trainClassifier();
+	}else if(strcmp(argv[1], "-a") == 0){
+		if(argc < 3){
+			printUsage();
+			return 1;
+		}
+
 		LibManager::appendChars(argv[2]);
+	}else if(strcmp(argv[1], "-r") == 0){
+		if(argc < 3){
+			printUsage();
+			return 1;
+		}
+
+		vector<wchar_t> res;
+		IplImage *image = OCRToolkit::recognise(argv[2], res);
+
+		int len = res.size();
+		cout << "识别出" << len << "个汉字\n";
+
+		wcout.imbue(locale("chs"));
+		for(int i = 0; i<len; i++){
+			wcout << res.at(i);
+		}
+
+		if(image != NULL){
+			DebugToolkit::displayImage(image);
+			cvReleaseImage(&image);
+		}
 	}
 #endif
 
-//	testApp();
+	//testApp();
 	return 0;
 }

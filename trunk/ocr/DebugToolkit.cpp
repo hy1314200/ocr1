@@ -214,7 +214,7 @@ bool DebugToolkit::isBinarized(const char* imageData, int width, int height){
 	return isBinarized;
 }
 
-bool DebugToolkit::isBinarized(IplImage* image){
+bool DebugToolkit::isBinarized(const IplImage* image){
 	char charColor = OCRToolkit::s_CHARACTERCOLOR;
 	char backColor = OCRToolkit::s_BACKGROUNDCOLOR;
 

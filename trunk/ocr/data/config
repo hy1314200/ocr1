@@ -1,0 +1,27 @@
+classifier = mnn
+
+typeface.songti = true
+typeface.heiti = true
+typeface.fangsong = true
+typeface.kaiti = true
+typeface.lishu = false
+
+path.dir.maxlib = data/font/max
+path.dir.currlib = data/font/max
+path.file.maxlib = data/font/max/library
+path.file.currlib = data/font/max/library
+path.file.model.svm = data/classify/svm/svm.model
+path.file.model.mnn = data/classify/mnn/mnn.model
+path.file.feature.maxmin = data/classify/feature.maxmin
+
+filename.songti = songti.int
+filename.heiti = heiti.int
+filename.fangsong = fangsong.int
+filename.kaiti = kaiti.int
+filename.lishu = lishu.int
+
+library.songti = true
+library.heiti = true
+library.fangsong = true
+library.kaiti = true
+library.lishu = false

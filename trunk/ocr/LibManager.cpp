@@ -1,5 +1,7 @@
 #include "LibManager.h"
 #include "FontLib.h"
+#include "ConfigFile.h"
+#include "GlobalCofig.h"
 
 #include <iostream>
 #include <fstream>
@@ -8,66 +10,89 @@
 
 using namespace std;
 using namespace library;
+using namespace util;
 
 void LibManager::appendChars(const char *appendFilePath)
 {
-	const int chUnicodeSize = s_chUnicBegin - s_chUnicEnd;
+	ConfigFile *config = GlobalCofig::getConfigFile();
+
+	const wchar_t chUnicodeSize = s_chUnicBegin - s_chUnicEnd;
 	bitset<chUnicodeSize> maxbs;
 	bitset<chUnicodeSize> currbs;
 
-	wchar_t wc;
+	wstring str;
 	vector<wchar_t> exist, notValid;
+	int size;
 
-	wifstream wmaxifs(FontLib::s_maxLibFilePath);
-	while(!wmaxifs.eof()){
-		wmaxifs >> wc;
-
-		maxbs.set(wc - s_chUnicBegin);
+	// maxLib
+	wifstream wmaxifs(config->get("path.file.maxlib").c_str());
+	wmaxifs.imbue(locale("chs"));
+	wmaxifs >> str;
+	
+	size = str.size();
+	for(int i = 0; i<size; i++){
+		maxbs.set(str[i] - s_chUnicBegin);
 	}
 	wmaxifs.close();
 
-	wifstream wcurrifs(FontLib::s_currLibFilePath);
-	while(!wcurrifs.eof()){
-		wcurrifs >> wc;
+	// currLib
+	wifstream wcurrifs(config->get("path.file.currlib").c_str());
+	if(wcurrifs){
+		wcurrifs.imbue(locale("chs"));
+		wcurrifs >> str;
 
-		currbs.set(wc - s_chUnicBegin);
+		size = str.size();
+		for(int i = 0; i<size; i++){
+			currbs.set(str[i] - s_chUnicBegin);
+		}
+		wcurrifs.close();
 	}
-	wcurrifs.close();
 
+	// append
 	wifstream wappifs(appendFilePath);
-	while(!wappifs.eof()){
-		wappifs >> wc;
+	wappifs.imbue(locale("chs"));
+	wappifs >> str;
 
-		if(wc < s_chUnicBegin || wc > s_chUnicEnd || maxbs.test(wc) == false){
-			notValid.push_back(wc);
+	size = str.size();
+	for(int i = 0; i<size; i++){
+		if(str[i] < s_chUnicBegin || str[i] > s_chUnicEnd || maxbs.test(str[i] - s_chUnicBegin) == false){
+			notValid.push_back(str[i]);
 			continue;
 		}
 
-		if(currbs.test(wc)){
-			exist.push_back(wc);
+		if(currbs.test(str[i] - s_chUnicBegin)){
+			exist.push_back(str[i]);
 			continue;
 		}
 
-		currbs.set(wc - s_chUnicBegin);
+		currbs.set(str[i] - s_chUnicBegin);
 	}
 	wappifs.close();
 
-	int len = exist.size();
-	cout << "exist = ";
-	for(int i = 0; i<len; i++){
-		wcout << exist[i];
+	wcout.imbue(locale("chs"));
+	size = exist.size();
+	if(size > 0){
+		cout << "exist=";
+		for(int i = 0; i<size; i++){
+			wcout << exist[i];
+		}
+		cout << endl;
 	}
 
-	len = notValid.size();
-	cout << "not valid = ";
-	for(int i = 0; i<len; i++){
-		wcout << notValid[i];
+	size = notValid.size();
+	if(size > 0){
+		cout << "not valid=";
+		for(int i = 0; i<size; i++){
+			wcout << notValid[i];
+		}
+		cout << endl;
 	}
 
-	wofstream wcurrofs(FontLib::s_currLibFilePath);
+	wofstream wcurrofs(config->get("path.file.currlib").c_str());
+	wcurrofs.imbue(locale("chs"));
 	for(wchar_t i = 0; i<chUnicodeSize; i++){
 		if(currbs.test(i)){
-			wcurrofs << s_chUnicBegin + i;
+			wcurrofs << (wchar_t)(s_chUnicBegin + i);
 		}
 	}
 	wcurrofs.close();

@@ -1,17 +1,16 @@
 #include "FontLib.h"
 #include "OCRToolkit.h"
 #include "DebugToolkit.h"
+#include "GlobalCofig.h"
+#include "ConfigFile.h"
 
 #include <string>
+#include <sstream>
+#include <fstream>
 #include <cv.h>
 
 using namespace std;
 using namespace library;
-
-const char *FontLib::s_maxLibDirPath = "data/font/max";
-const char *FontLib::s_maxLibFilePath = "data/font/max/library";
-const char *FontLib::s_currLibDirPath = "data/font/curr";
-const char *FontLib::s_currLibFilePath = "data/font/curr/library";
 
 FontLib::~FontLib(){
 	int size = m_charArray->size();
@@ -72,48 +71,154 @@ FontLib* FontLib::parseIntFile(FILE* file)
 	return new FontLib(typeface, cArray);
 }
 
-void FontLib::genCurrFontLib()
+void FontLib::retrieveFilePath(Typeface typeface, const char *dir, string &filePath)
 {
-	genCurrFontLib(SONGTI);
-	genCurrFontLib(HEITI);
-	genCurrFontLib(FANGSONG);
-	genCurrFontLib(KAITI);
-	genCurrFontLib(LISHU);
-}
+	ConfigFile *config = GlobalCofig::getConfigFile();
 
-FontLib* FontLib::genCurrFontLib(Typeface typeface)
-{
-	string dirPath(s_currLibDirPath);
-	string filePath;
+	stringstream ss;
 
+	ss << dir;
 	switch(typeface)
 	{
 	case SONGTI:
-		filePath += dirPath + "/songti.int";
+		ss << "/" << config->get("filename.songti");
 		break;
 
 	case HEITI:
-		filePath += dirPath + "/heiti.int";
+		ss << "/" << config->get("filename.heiti");
 		break;
 
 	case FANGSONG:
-		filePath += dirPath + "/fangsong.int";
-	    break;
+		ss << "/" << config->get("filename.fangsong");
+		break;
 
 	case KAITI:
-		filePath += dirPath + "/kaiti.int";
-	    break;
+		ss << "/" << config->get("filename.kaiti");
+		break;
 
 	case LISHU:
-		filePath = dirPath + "/lishu.int";
+		ss << "/" << config->get("filename.lishu");
 		break;
 
 	default:
-	    assert(false);
+		assert(false);
 	}
 
-	FILE *file = fopen(filePath.c_str(), "r");
+	filePath = ss.str();
+}
+
+
+void FontLib::genCurrFontLib()
+{
+	ConfigFile *config = GlobalCofig::getConfigFile();
+
+	wstring wstr;
+	wifstream wifs(config->get("path.dir.currlib").c_str());
+
+	wifs.imbue(locale("chs"));
+	getline(wifs, wstr);
+	wifs.close();
+
+	string filePath;
+	FILE *file = NULL;
+	for(int i = 0; i<s_TYPEKIND; i++){
+		retrieveFilePath((Typeface)i, config->get("path.dir.maxlib").c_str(), filePath);
+
+		file = fopen(filePath.c_str(), "rb");
+		assert(file);
+
+		buildSubset(file, wstr);
+
+		fclose(file);
+	}
+}
+
+FontLib *FontLib::genFontLib(Typeface typeface)
+{
+	ConfigFile *config = GlobalCofig::getConfigFile();
+
+	string filePath;
+	retrieveFilePath(typeface, config->get("path.dir.currlib").c_str(), filePath);
+
+	FILE *file = fopen(filePath.c_str(), "rb");
 	assert(file);
 
-	return FontLib::parseIntFile(file);
+	return parseIntFile(file);
+}
+
+void FontLib::buildSubset(FILE *file, wstring subset)
+{
+	FontLib *maxLib = parseIntFile(file);
+
+	int offset = 0, size = subset.size();
+	FontLib *subLib = new FontLib(maxLib->typeface());
+	vector<Char *> *maxlist = maxLib->charArray(), *sublist = subLib->charArray();
+
+	for(vector<Char *>::iterator itr = maxlist->begin(); offset < size && itr != maxlist->end(); itr++){
+		wchar_t a1 = subset[offset], a2 = (*itr)->value();
+		if(subset[offset] == (*itr)->value()){
+			sublist->push_back((*itr)->clone());
+			
+			++offset;
+		}
+	}
+
+	subLib->storeData();
+
+	delete subLib;
+	delete maxLib;
+}
+
+void Char::storeData(FILE* file)
+{
+	char charColor = OCRToolkit::s_CHARACTERCOLOR;
+	char backColor = OCRToolkit::s_BACKGROUNDCOLOR;
+
+	fwrite(&m_value, sizeof(wchar_t), 1, file);
+
+	int offset = 0, count = s_CHARSIZE*s_CHARSIZE/8;
+	char temp;
+
+	for(int i = 0; i<count; i++){
+		temp = 0;
+
+		for(int j = 0; j < 8; j++, offset++){
+			temp = temp << 1;
+
+			if(*(m_imageData + offset) == charColor){
+				temp |= 1;
+			}
+		}
+
+		fwrite(&temp, sizeof(char), 1, file);
+	}
+}
+
+bool FontLib::storeData()
+{
+	ConfigFile *config = GlobalCofig::getConfigFile();
+
+	string filePath;
+	retrieveFilePath(m_typeface, config->get("path.dir.currlib").c_str(), filePath);
+	return storeData(filePath.c_str());
+}
+
+bool FontLib::storeData(const char* filepath){
+	FILE* file = fopen(filepath, "wb");
+	if(file == NULL){
+		return false;
+	}
+
+	fwrite(&m_typeface, sizeof(Typeface), 1, file);
+
+	int size = m_charArray->size();
+	fwrite(&size, sizeof(int), 1, file);
+
+	for(int i = 0; i<size; i++){
+		m_charArray->at(i)->storeData(file);
+	}
+
+	fclose(file);
+
+	return true;
 }

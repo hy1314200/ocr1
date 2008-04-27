@@ -1,13 +1,15 @@
 #include "FeatureExtracter.h"
 #include "OCRToolkit.h"
 #include "DebugToolkit.h"
+#include "ConfigFile.h"
+#include "GlobalCofig.h"
 
 #include <iostream>
 
 using namespace recognise;
+using namespace util;
 
 FeatureExtracter* FeatureExtracter::s_instance = NULL;
-const char* FeatureExtracter::s_filepath = "data/classify/feature.maxmin";
 
 FeatureExtracter::FeatureExtracter(FILE *file){
 	if(file == NULL){
@@ -25,8 +27,9 @@ FeatureExtracter::FeatureExtracter(FILE *file){
 }
 
 FeatureExtracter* FeatureExtracter::getInstance(){
+
 	if(s_instance == 0){
-		FILE* file = fopen(s_filepath, "r");
+		FILE* file = fopen(GlobalCofig::getConfigFile()->get("path.file.feature.maxmin").c_str(), "r");
 
 		if(file != NULL){
 			s_instance = new FeatureExtracter(file);
@@ -626,7 +629,7 @@ void FeatureExtracter::calcBlackJump(const char* imageData, int totalBlackJump[]
 }
 
 void FeatureExtracter::saveData(){
-	FILE* file = fopen(s_filepath, "w");
+	FILE* file = fopen(GlobalCofig::getConfigFile()->get("path.file.feature.maxmin").c_str(), "w");
 
 	for(int i = 0; i < s_FEATURESIZE; i++){
 		fprintf(file, "%f %f\n", m_max[i], m_min[i]);

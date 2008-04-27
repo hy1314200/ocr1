@@ -3,34 +3,61 @@
 #include "OCRToolkit.h"
 #include "Classifier.h"
 #include "FeatureExtracter.h"
+#include "GlobalCofig.h"
+#include "ConfigFile.h"
+#include "FontLib.h"
 
 using namespace recognise;
+using namespace util;
+using namespace library;
 
-CharRecogniser* CharRecogniser::s_instance = 0;
-const char* CharRecogniser::s_CONFPATH = "data/classify/config";
+CharRecogniser* CharRecogniser::s_instance = NULL;
 
 CharRecogniser* CharRecogniser::buildInstance(){
 	if(s_instance == 0){
-		FILE* file = fopen(s_CONFPATH, "r");
-		if(file == NULL){
-			return NULL;
-		}
+		ConfigFile *config = GlobalCofig::getConfigFile();
 
-		char type[10];
-		fscanf(file, "%s", type);
+		string classifier = config->get("classifier");
 
-		if(strcmp(type, "svm") == 0){
+		if(classifier == "svm"){
 			s_instance = new SVMClassifier();
-		}else if(strcmp(type, "mnn") == 0){
+		}else if(classifier == "mnn"){
 			s_instance = new MNNClassifier();
 		}else{
 			assert(false);
 		}
-
-		fclose(file);
 	}
 
 	return s_instance;
+}
+
+void CharRecogniser::trainClassifier()
+{
+	ConfigFile *config = GlobalCofig::getConfigFile();
+
+	FontLib *lib[FontLib::s_TYPEKIND];
+
+	int offset = 0;
+	if(config->getBool("library.songti")){
+		lib[offset++] = FontLib::genFontLib(FontLib::SONGTI);
+	}
+	if(config->getBool("library.heiti")){
+		lib[offset++] = FontLib::genFontLib(FontLib::HEITI);
+	}
+	if(config->getBool("library.fangsong")){
+		lib[offset++] = FontLib::genFontLib(FontLib::FANGSONG);
+	}
+	if(config->getBool("library.kaiti")){
+		lib[offset++] = FontLib::genFontLib(FontLib::KAITI);
+	}
+	if(config->getBool("library.lishu")){
+		lib[offset++] = FontLib::genFontLib(FontLib::LISHU);
+	}
+
+	buildFeatureLib(lib, offset);
+
+	// check in case that library typeface changed in the future
+	assert(FontLib::s_TYPEKIND == 5);
 }
 
 double CharRecogniser::recogniseChar(const char* greys, int iWidth, int iHeight, wchar_t* res)

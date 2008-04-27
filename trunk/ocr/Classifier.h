@@ -25,8 +25,6 @@ namespace recognise
 		}
 
 	private:
-		static const char* s_MODELPATH;
-
 		struct svm_model* m_model;
 
 		void trainAndSaveClassifier(struct svm_problem *prob);
@@ -52,8 +50,6 @@ namespace recognise
 			wchar_t label;
 			float *data;
 		} Prototype;
-
-		static const char* s_MODELPATH;
 
 		vector<Prototype*> m_lib;
 

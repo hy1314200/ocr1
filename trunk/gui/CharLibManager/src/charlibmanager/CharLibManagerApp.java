@@ -4,6 +4,8 @@
 
 package charlibmanager;
 
+import javax.swing.JOptionPane;
+import manager.Manager;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 
@@ -16,7 +18,15 @@ public class CharLibManagerApp extends SingleFrameApplication {
      * At startup create and show the main frame of the application.
      */
     @Override protected void startup() {
-        show(new CharLibManagerView(this));
+        CharLibManagerView view = new CharLibManagerView(this);        
+        try {
+            Manager.boundView(view);
+            Manager.loadCurrLib();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view.getComponent(), ex.getMessage());
+        }
+        
+        show(view);
     }
 
     /**

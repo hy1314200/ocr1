@@ -1,6 +1,8 @@
 #include "Classifier.h"
 #include "stdafx.h"
 #include "FeatureExtracter.h"
+#include "GlobalCofig.h"
+#include "ConfigFile.h"
 
 #include <algorithm>
 #include <iostream>
@@ -8,17 +10,17 @@
 using namespace recognise;
 using namespace library;
 
-const char* SVMClassifier::s_MODELPATH = "data/classify/svm/svm.model";
-
 SVMClassifier::SVMClassifier()
 {
-	FILE *file = fopen(s_MODELPATH, "r");
+	ConfigFile *config = GlobalCofig::getConfigFile();
+
+	FILE *file = fopen(config->get("path.file.model.svm").c_str(), "r");
 
 	if(file == NULL){
 		m_model = NULL;
 	}else{
 		printf("loading SVM model...\n");
-		m_model = svm_load_model(s_MODELPATH);
+		m_model = svm_load_model(config->get("path.file.model.svm").c_str());
 		printf("100%% finished\n");
 
 		fclose(file);
@@ -69,7 +71,7 @@ void SVMClassifier::trainAndSaveClassifier(struct svm_problem *prob){
 
 	struct svm_model *model = svm_train(prob, param);
 
-	svm_save_model(s_MODELPATH, model);
+	svm_save_model(GlobalCofig::getConfigFile()->get("path.file.model.svm").c_str(), model);
 
 	svm_destroy_model(model);
 
@@ -175,8 +177,8 @@ void SVMClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 
 #endif
 
-	printf("problem saved\n");
-	//trainAndSaveClassifier(problem);
+	trainAndSaveClassifier(problem);
+	printf("\nfinish svm training\n");
 
 	for(int i = 0; i<count; i++){
 		delete[] problem->x[i];
@@ -228,11 +230,9 @@ double SVMClassifier::classify(const float *scaledFeature, wchar_t *res)
 	return maxProb;
 }
 
-const char* MNNClassifier::s_MODELPATH = "data/classify/mnn/mnn.model";
-
 MNNClassifier::MNNClassifier()
 {
-	FILE *file = fopen(s_MODELPATH, "r");
+	FILE *file = fopen(GlobalCofig::getConfigFile()->get("path.file.model.mnn").c_str(), "r");
 
 	if(file != NULL){
 		loadFile(file);
@@ -281,7 +281,9 @@ void MNNClassifier::loadFile(FILE *file)
 
 void MNNClassifier::storeFile()
 {
-	FILE *file = fopen(s_MODELPATH, "w");
+	ConfigFile *config = GlobalCofig::getConfigFile();
+
+	FILE *file = fopen(config->get("path.file.model.mnn").c_str(), "w");
 	assert(file);
 
 	int dim = FeatureExtracter::s_FEATURESIZE;

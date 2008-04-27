@@ -179,6 +179,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GlobalCofig.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LibManager.cpp"
 				>
 			</File>
@@ -226,6 +230,10 @@
 			</File>
 			<File
 				RelativePath=".\FontLib.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GlobalCofig.h"
 				>
 			</File>
 			<File

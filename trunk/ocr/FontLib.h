@@ -9,16 +9,6 @@ using namespace std;
 
 namespace library{
 
-	/** now, Fang Song, Song, Kai Ti, Hei Ti, Li Shu is supported */
-	static const int TYPEKIND = 5;
-	enum Typeface{
-		SONGTI = 0,
-		FANGSONG,
-		KAITI,
-		HEITI,
-		LISHU
-	};
-
 	class Char {
 	public:
 		static  const int s_CHARSIZE = 64;
@@ -35,6 +25,16 @@ namespace library{
 			delete m_imageData;
 		}
 
+		Char *clone()
+		{
+			char *imageData = new char[s_CHARSIZE*s_CHARSIZE];
+			memcpy(imageData, m_imageData, s_CHARSIZE*s_CHARSIZE);
+
+			return new Char(m_value, imageData);
+		}
+
+		void storeData(FILE* file);
+
 	protected:
 		/** the unicode value of this item */
 		wchar_t m_value;
@@ -50,10 +50,15 @@ namespace library{
 
 	class FontLib {
 	public:
-		static const char *s_maxLibDirPath;
-		static const char *s_maxLibFilePath;
-		static const char *s_currLibDirPath;
-		static const char *s_currLibFilePath;
+		/** now, Song, Hei Ti, Fang Song, Kai Ti, Li Shu is supported */
+		static const int s_TYPEKIND = 5;
+		enum Typeface{
+			SONGTI = 0,
+			HEITI,
+			FANGSONG,
+			KAITI,
+			LISHU
+		};
 
 		int size(){
 			return m_charArray->size();
@@ -69,9 +74,13 @@ namespace library{
 
 		static void genCurrFontLib();
 		
-		static FontLib *genCurrFontLib(Typeface typeface);
+		static FontLib *genFontLib(Typeface typeface);
 
 		virtual ~FontLib();
+
+		// store to currLibDir
+		bool storeData();
+		bool storeData(const char* filepath);
 
 	private:
 		
@@ -81,7 +90,6 @@ namespace library{
 			_Char(wchar_t value, char *imageData): Char(value, imageData){  };
 
 			static Char *parseIntFile(FILE *file);
-
 		};
 
 		Typeface m_typeface;
@@ -89,12 +97,22 @@ namespace library{
 		/** wide font data: font data of multibytes chars */
 		vector<Char *> *m_charArray;
 
+		static FontLib *parseIntFile(FILE *file);
+
+		static void buildSubset(FILE *file, wstring subset);
+
+		static void retrieveFilePath(Typeface typeface, const char *dir, string &filePath);
+
+		FontLib(Typeface typeface)
+		{
+			m_typeface = typeface;
+			m_charArray = new vector<Char *>;
+		}
+
 		FontLib(Typeface typeface, vector<Char*> *charArray){
 			m_typeface = typeface;
 			m_charArray = charArray;
 		}
-
-		static FontLib *parseIntFile(FILE *file);
 	};
 
 }

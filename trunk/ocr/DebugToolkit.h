@@ -29,7 +29,7 @@ public:
 
 	static bool isBinarized(const char* imageData, int width, int height);
 	
-	static bool isBinarized(IplImage* image);
+	static bool isBinarized(const IplImage* image);
 
 	static void binarize(uchar* imageData, long size, uchar threshold);
 

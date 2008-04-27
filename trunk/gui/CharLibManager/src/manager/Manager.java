@@ -5,13 +5,14 @@
 
 package manager;
 
+import charlibmanager.CharLibManagerView;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.Arrays;
 
 /**
@@ -20,46 +21,57 @@ import java.util.Arrays;
  */
 public class Manager {
     
-    private static final String currLibPath = "data/font/library";
-    
-    //private final String finalLibPath = "data/font/finalLib";
+    private static final String currLibPath = "data/font/curr/library";
     
     private static final String tempDirPath = "tmp";
     
     private static final String appendFileName = "append";
     
-    private static final String notValidFileName = "notValid";
+    private static String library = new String();
     
-    private static char[] library = null;
+    private static CharLibManagerView view;
+
+    public static void boundView(CharLibManagerView tview) {
+        view = tview;
+    }
 
     public static boolean checkExist(char c) throws Exception {
-        if(library == null){
-            loadCurrLib();
-        }
-        
-        int index = Arrays.binarySearch(library, c);        
+        int index = Arrays.binarySearch(library.toCharArray(), c);
         return index >= 0;
     }
 
-    private static void appendCharsHelp(StringBuffer notValid) throws Exception {
-        BufferedReader reader = null;
+    private static void appendCharsHelp(StringBuffer exist, StringBuffer notValid) throws Exception {
         try {
             checkDir(tempDirPath);
-            String cmd = "ocr -a " + tempDirPath + "/" + appendFileName + " > " + tempDirPath + "/" + notValidFileName;
-            Process child = Runtime.getRuntime().exec(cmd);
-            child.waitFor();
-            copyAppendFileAndUpdate();
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(tempDirPath + "/" + notValidFileName)));
-            notValid.append(reader.readLine());
-
+            String cmd = "E:/Project/VS2005Proj/ocr/ocr/ocr.exe -a " + tempDirPath + "/" + appendFileName;
+            Process process = Runtime.getRuntime().exec(cmd);
+            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String buffer;
+            while ((buffer = reader.readLine()) != null) {
+                System.out.println(buffer);
+                
+                if(buffer.indexOf("exist") != -1){
+                    exist.append(buffer.substring(buffer.indexOf("=") + 1));                
+                }else if(buffer.indexOf("not valid") != -1){            
+                    notValid.append(buffer.substring(buffer.indexOf("=") + 1));
+                }else{
+                    throw new Exception("ocr.exe 执行出错");
+                }
+            }
             reader.close();
+            
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new Exception("ocr.exe 执行出错");
+            }
+
+            loadCurrLib();
         } catch (InterruptedException ex) {
-            throw new Exception("程序运行中断，添加失败");
-        } catch (FileNotFoundException ex) {
-            throw new Exception("找不到文件 " + tempDirPath + "/" + appendFileName + "，添加失败");
+            throw new Exception("ocr.exe 运行中断，添加失败");
         } catch (IOException ex) {
             throw new Exception("输入输出流出错，添加失败");
-        }
+        } 
     }
 
     private static void checkDir(String tempDirPath) {
@@ -69,36 +81,23 @@ public class Manager {
         }
     }
 
-    private static void copyAppendFileAndUpdate() throws Exception {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(tempDirPath + "/" + appendFileName)));
-            FileOutputStream fos = new FileOutputStream(currLibPath);
-            fos.write(reader.readLine().getBytes());
-
-            reader.close();
-            fos.close();
-
-            loadCurrLib();
-        } catch (FileNotFoundException ex) {
-            throw new Exception("找不到文件 " + tempDirPath + "/" + appendFileName + "，添加失败");            
-        }catch (IOException ex) {
-            throw new Exception("输入输出流出错，添加失败");
-        } 
-    }
-
-    private static void loadCurrLib() throws Exception {
+    public static void loadCurrLib() throws Exception {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(currLibPath)));
-            library = reader.readLine().toCharArray();
+            library = reader.readLine();
+            Arrays.sort(library.toCharArray());
 
             reader.close();
-        } catch (FileNotFoundException ex) {
-            throw new Exception("找不到文件 " + currLibPath);
+        } catch (FileNotFoundException ex) {            
+            // currunt library size is 0
         } catch (IOException ex) {
             throw new Exception("输入输出流出错");
         } 
+        
+        if(view != null){
+            view.updateCharNum(library.length());
+        }
     }
     
     private static String trimAndOrder(String str){
@@ -119,8 +118,10 @@ public class Manager {
         
         return sb.toString();
     }
-    
-    private static void checkExistWithoutOrder(String str, StringBuffer exist, StringBuffer notExist) throws Exception {        
+
+    public static void checkExist(String str, StringBuffer exist, StringBuffer notExist) throws Exception{
+        str = trimAndOrder(str);
+        
         int len = str.length();
         char[] array = str.toCharArray();
         for (int i = 0; i < len; i++) {
@@ -135,28 +136,21 @@ public class Manager {
             }
         }
     }
-
-    public static void checkExist(String str, StringBuffer exist, StringBuffer notExist) throws Exception{
-        str = trimAndOrder(str);
-        checkExistWithoutOrder(str, exist, notExist);
-    }
     
     public static void appendChars(String str, StringBuffer exist, StringBuffer notValid) throws Exception {
-
-        FileOutputStream fos = null;
+        PrintWriter writer = null;
         try {
-            str = trimAndOrder(str);
-            checkExistWithoutOrder(str, exist, null);
             checkDir(tempDirPath);
             File file = new File(tempDirPath, appendFileName);
             if (!file.exists()) {
                 file.createNewFile();
             }
-            fos = new FileOutputStream(file);
-            fos.write(str.getBytes());
-            fos.close();
+            writer = new PrintWriter(file);
+            
+            writer.print(str);
+            writer.close();
 
-            appendCharsHelp(notValid);
+            appendCharsHelp(exist, notValid);
         } catch (IOException ex) {
             throw new Exception("输入输出流出错");
         } 

@@ -1,4 +1,5 @@
-
+#ifndef _LIBMANAGER_H
+#define _LIBMANAGER_H
 
 namespace library{
 
@@ -16,3 +17,5 @@ namespace library{
 	};
 
 }
+
+#endif

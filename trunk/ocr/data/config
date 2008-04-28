@@ -2,8 +2,8 @@ classifier = mnn
 
 typeface.songti = true
 typeface.heiti = true
-typeface.fangsong = true
-typeface.kaiti = true
+typeface.fangsong = false
+typeface.kaiti = false
 typeface.lishu = false
 
 path.dir.maxlib = data/font/max
@@ -19,9 +19,3 @@ filename.heiti = heiti.int
 filename.fangsong = fangsong.int
 filename.kaiti = kaiti.int
 filename.lishu = lishu.int
-
-library.songti = true
-library.heiti = true
-library.fangsong = true
-library.kaiti = true
-library.lishu = false

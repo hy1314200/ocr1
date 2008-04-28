@@ -19,9 +19,23 @@ namespace util
 		
 		bool put(string key, string value);
 
-		void putForce(string key, string value)
+		void putByForce(string key, string value)
 		{
 			m_config[key] = value;
+		}
+
+		bool exist(string key)
+		{
+			return get(key).length() > 0;
+		}
+
+		bool change(string key, string value)
+		{
+			if(!exist(key)){
+				return false;
+			}
+
+			putByForce(key, value);
 		}
 
 		string get(string key)

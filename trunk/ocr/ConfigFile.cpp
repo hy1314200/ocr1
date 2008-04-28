@@ -34,6 +34,12 @@ ConfigFile *ConfigFile::parseConfig(const char *filePath) throw (string)
 		}
 
 		offset2 = temp.find_first_of("=");
+		if(offset1 == offset2){
+			stringstream ss;
+			ss << "ERROR: at line " << line << ": key should not be null";
+
+			throw ss.str();
+		}
 
 		if(offset2 == string::npos || temp.find_first_of("=", offset2+1) != string::npos){
 			stringstream ss;
@@ -47,7 +53,14 @@ ConfigFile *ConfigFile::parseConfig(const char *filePath) throw (string)
 		key.assign(temp, offset1, offset3-offset1+1);
 
 		offset1 = temp.find_first_not_of(" ", offset2+1);
-		for(offset2 = temp.size()-1; offset3 >= 0 && temp[offset3] == ' '; offset3--){   }
+		if(offset1 == string::npos){
+			stringstream ss;
+			ss << "ERROR: at line " << line << ": value should not be null";
+
+			throw ss.str();
+		}
+
+		for(offset2 = temp.size()-1; offset2 >= 0 && temp[offset2] == ' '; offset2--){   }
 		//offset2 = temp.find_last_not_of(" "); // something wrong with unicode
 		value.assign(temp, offset1, offset2-offset1+1);
 

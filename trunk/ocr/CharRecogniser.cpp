@@ -38,19 +38,19 @@ void CharRecogniser::trainClassifier()
 	FontLib *lib[FontLib::s_TYPEKIND];
 
 	int offset = 0;
-	if(config->getBool("library.songti")){
+	if(config->getBool("typeface.songti")){
 		lib[offset++] = FontLib::genFontLib(FontLib::SONGTI);
 	}
-	if(config->getBool("library.heiti")){
+	if(config->getBool("typeface.heiti")){
 		lib[offset++] = FontLib::genFontLib(FontLib::HEITI);
 	}
-	if(config->getBool("library.fangsong")){
+	if(config->getBool("typeface.fangsong")){
 		lib[offset++] = FontLib::genFontLib(FontLib::FANGSONG);
 	}
-	if(config->getBool("library.kaiti")){
+	if(config->getBool("typeface.kaiti")){
 		lib[offset++] = FontLib::genFontLib(FontLib::KAITI);
 	}
-	if(config->getBool("library.lishu")){
+	if(config->getBool("typeface.lishu")){
 		lib[offset++] = FontLib::genFontLib(FontLib::LISHU);
 	}
 

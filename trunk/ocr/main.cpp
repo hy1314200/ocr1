@@ -196,15 +196,17 @@ void unitTest(){
 // 	}
 }
 
-void printUsage(){
-	cerr << "Usage:" << endl;
-}
-
 int main(int argc, char** argv){
 	//unitTest();
 #if 1
+	const char *usage = 
+"usage:character -train|(-a filepath)|(-r filepath)\n\
+	-train train classifier from current library\n\
+	-a append library characters\n\
+	-r recognise character image\n";
+
 	if(argc < 2){
-		printUsage();
+		cerr << usage;
 		return 1;
 	}
 
@@ -213,14 +215,14 @@ int main(int argc, char** argv){
 		OCRToolkit::trainClassifier();
 	}else if(strcmp(argv[1], "-a") == 0){
 		if(argc < 3){
-			printUsage();
+			cerr << usage;
 			return 1;
 		}
 
 		LibManager::appendChars(argv[2]);
 	}else if(strcmp(argv[1], "-r") == 0){
 		if(argc < 3){
-			printUsage();
+			cerr << usage;
 			return 1;
 		}
 

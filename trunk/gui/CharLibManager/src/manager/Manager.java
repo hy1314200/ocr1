@@ -10,10 +10,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import javax.swing.JTextArea;
 
 /**
  *
@@ -27,6 +29,8 @@ public class Manager {
     
     private static final String appendFileName = "append";
     
+    private static final String trainedFileName = "needTrain";
+    
     private static String library = new String();
     
     private static CharLibManagerView view;
@@ -39,18 +43,66 @@ public class Manager {
         int index = Arrays.binarySearch(library.toCharArray(), c);
         return index >= 0;
     }
+    
+    public static boolean needTrain(){
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(trainedFileName)); 
+            
+            if(Boolean.valueOf(reader.readLine()) == true){
+                reader.close();
+                
+                return true;
+            }
+        } catch(IOException ex) {
+            enableTrain(false);
+        }
+        
+        return false;
+    }
+
+    public static void enableTrain(boolean enable) {
+        File file = new File(trainedFileName);
+        
+        try {
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            
+            PrintWriter writer = new PrintWriter(file);
+            if(enable){
+                writer.print("true");
+            }else{
+                writer.print("false");
+            }
+            writer.close();
+        } catch(IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static String getLibrary() {
+        return library;
+    }
+
+    public static void recogniseImage(String text, JTextArea displayArea) {
+        String cmd = "E:/Project/VS2005/ocr/ocr/ocr.exe -r " + text;
+        
+        new Thread(new CmdThread(cmd, displayArea)).start();
+    }
+
+    public static void trainClassifier(JTextArea displayArea) {
+        new Thread(new CmdThread("E:/Project/VS2005/ocr/ocr/ocr.exe -train", displayArea)).start();
+    }
 
     private static void appendCharsHelp(StringBuffer exist, StringBuffer notValid) throws Exception {
         try {
             checkDir(tempDirPath);
-            String cmd = "E:/Project/VS2005Proj/ocr/ocr/ocr.exe -a " + tempDirPath + "/" + appendFileName;
+            String cmd = "E:/Project/VS2005/ocr/ocr/ocr.exe -a " + tempDirPath + "/" + appendFileName;
             Process process = Runtime.getRuntime().exec(cmd);
             
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String buffer;
-            while ((buffer = reader.readLine()) != null) {
-                System.out.println(buffer);
-                
+            while ((buffer = reader.readLine()) != null) {                
                 if(buffer.indexOf("exist") != -1){
                     exist.append(buffer.substring(buffer.indexOf("=") + 1));                
                 }else if(buffer.indexOf("not valid") != -1){            

@@ -113,7 +113,7 @@ void FontLib::genCurrFontLib()
 	ConfigFile *config = GlobalCofig::getConfigFile();
 
 	wstring wstr;
-	wifstream wifs(config->get("path.dir.currlib").c_str());
+	wifstream wifs(config->get("path.file.currlib").c_str());
 
 	wifs.imbue(locale("chs"));
 	getline(wifs, wstr);

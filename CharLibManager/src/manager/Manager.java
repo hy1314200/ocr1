@@ -8,8 +8,6 @@ package manager;
 import charlibmanager.CharLibManagerView;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -84,20 +82,24 @@ public class Manager {
         return library;
     }
 
+    public static void recogniseImage(File file, JTextArea displayArea) {
+        recogniseImage(file.getAbsolutePath(), displayArea);
+    }
+
     public static void recogniseImage(String text, JTextArea displayArea) {
-        String cmd = "E:/Project/VS2005/ocr/ocr/ocr.exe -r " + text;
+        String cmd = "E:/Project/VS2005/ocr/ocr/release/ocr.exe -r " + text;
         
         new Thread(new CmdThread(cmd, displayArea)).start();
     }
 
     public static void trainClassifier(JTextArea displayArea) {
-        new Thread(new CmdThread("E:/Project/VS2005/ocr/ocr/ocr.exe -train", displayArea)).start();
+        new Thread(new CmdThread("E:/Project/VS2005/ocr/ocr/release/ocr.exe -train", displayArea)).start();
     }
 
     private static void appendCharsHelp(StringBuffer exist, StringBuffer notValid) throws Exception {
         try {
             checkDir(tempDirPath);
-            String cmd = "E:/Project/VS2005/ocr/ocr/ocr.exe -a " + tempDirPath + "/" + appendFileName;
+            String cmd = "E:/Project/VS2005/ocr/ocr/release/ocr.exe -a " + tempDirPath + "/" + appendFileName;
             Process process = Runtime.getRuntime().exec(cmd);
             
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -134,15 +136,21 @@ public class Manager {
     }
 
     public static void loadCurrLib() throws Exception {
-        BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(currLibPath)));
-            library = reader.readLine();
-            Arrays.sort(library.toCharArray());
-
-            reader.close();
-        } catch (FileNotFoundException ex) {            
-            // currunt library size is 0
+            File file = new File(currLibPath);
+            if (!file.exists()) {
+                library = new String();
+            } else {
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                library = reader.readLine();
+                reader.close();
+                
+                if(library == null){
+                    library = new String();
+                }else if(library.length() > 2){
+                    Arrays.sort(library.toCharArray());
+                }
+            }
         } catch (IOException ex) {
             throw new Exception("输入输出流出错");
         } 

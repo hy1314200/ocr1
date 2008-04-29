@@ -206,7 +206,7 @@ int main(int argc, char** argv){
 	-r recognise character image\n";
 
 	if(argc < 2){
-		cerr << usage;
+		cout << usage;
 		return 1;
 	}
 
@@ -215,31 +215,40 @@ int main(int argc, char** argv){
 		OCRToolkit::trainClassifier();
 	}else if(strcmp(argv[1], "-a") == 0){
 		if(argc < 3){
-			cerr << usage;
+			cout << usage;
 			return 1;
 		}
 
 		LibManager::appendChars(argv[2]);
 	}else if(strcmp(argv[1], "-r") == 0){
 		if(argc < 3){
-			cerr << usage;
+			cout << usage;
 			return 1;
 		}
 
 		vector<wchar_t> res;
-		IplImage *image = OCRToolkit::recognise(argv[2], res);
-
-		int len = res.size();
-		cout << "识别出" << len << "个汉字\n";
-
+		IplImage *image = NULL;
 		wcout.imbue(locale("chs"));
-		for(int i = 0; i<len; i++){
-			wcout << res.at(i);
-		}
 
-		if(image != NULL){
-			DebugToolkit::displayImage(image);
-			cvReleaseImage(&image);
+		for(int i = 2; i<argc; i++){
+			res.clear();
+
+			image = OCRToolkit::recognise(argv[i], res);
+			if(image == NULL){
+				continue;
+			}
+
+			int len = res.size();
+			cout << "识别出" << len << "个汉字\n";
+			for(int i = 0; i<len; i++){
+				wcout << res.at(i);
+			}
+			cout << "\n" << endl;
+
+			if(image != NULL){
+				DebugToolkit::displayImage(image);
+				cvReleaseImage(&image);
+			}
 		}
 	}
 #endif

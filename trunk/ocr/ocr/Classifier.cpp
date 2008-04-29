@@ -64,7 +64,7 @@ void SVMClassifier::trainAndSaveClassifier(struct svm_problem *prob){
 
 	const char *error = svm_check_parameter(prob, param);
 	if(error != NULL){
-		cerr << "ERROR: " << error << endl;
+		cout << "ERROR: " << error << endl;
 
 		exit(-1);
 	}

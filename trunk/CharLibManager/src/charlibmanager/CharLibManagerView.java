@@ -11,12 +11,7 @@ import org.jdesktop.application.FrameView;
 import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JDialog;
@@ -636,38 +631,37 @@ public class CharLibManagerView extends FrameView {
 
             StringBuffer exist = new StringBuffer();
             StringBuffer notValid = new StringBuffer();
+            
             Manager.appendChars(str, exist, notValid);
 
-            if (exist.length() == 0 && notValid.length() == 0) {
-                JOptionPane.showMessageDialog(getComponent(), "成功添加" + str.length() + "个字符");
-                
+            int valid = str.length() - exist.length() - notValid.length();
+            String show = "成功添加" + valid + "个字符";
+            
+            final int disLen = 20;
+            String temp = null;
+            if (exist.length() > 0) {
+                if (exist.length() > disLen) {
+                    temp = exist.substring(0, disLen) + "... 共" + exist.length() + "个";
+                } else {
+                    temp = exist.toString();
+                }
+
+                show += "\n以下字符已存在：" + temp;
+            }
+            if (notValid.length() > 0) {
+                if (notValid.length() > disLen) {
+                    temp = notValid.substring(0, disLen) + "... 共" + notValid.length() + "个";
+                } else {
+                    temp = notValid.toString();
+                }
+                show += "\n无效的输入字符：" + temp;
+            }
+
+            JOptionPane.showMessageDialog(getComponent(), show);
+
+            if (valid > 0) {
                 trainButton.setEnabled(true);
                 Manager.enableTrain(true);
-            } else {
-                String show = new String();
-                final int disLen = 20;
-                String temp = null;
-                if (exist.length() > 0) {
-                    if(exist.length() > disLen){
-                        temp = exist.substring(0, disLen) + "... 共" + exist.length() + "个";
-                    }else{
-                        temp = exist.toString();
-                    }
-                    
-                    show += "以下字符已存在：" + temp + "\n";
-                }
-                if (notValid.length() > 0) {
-                    if(notValid.length() > disLen){
-                        temp = notValid.substring(0, disLen) + "... 共" + notValid.length() + "个";
-                    }else{
-                        temp = notValid.toString();
-                    }
-                    show += "无效的输入字符：" + temp;
-                }
-
-                int valid = str.length() - exist.length() - notValid.length();
-
-                JOptionPane.showMessageDialog(getComponent(), "成功添加" + valid + "个字符\n" + show);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(getComponent(), ex.getMessage());
@@ -716,10 +710,12 @@ public class CharLibManagerView extends FrameView {
             return;
         }
 
+        displayArea.setText("正在加载分类器模型，请稍候...");
         Manager.recogniseImage(filePathField.getText(), displayArea);
   	}//GEN-LAST:event_recogniseButtonActionPerformed
 
     private void trainButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_trainButtonActionPerformed
+        displayArea.setText("正在训练，请稍候...");
         Manager.trainClassifier(displayArea);
         
         trainButton.setEnabled(false);

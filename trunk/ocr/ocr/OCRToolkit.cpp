@@ -32,7 +32,7 @@ void OCRToolkit::recognise(char* greys, int iWidth, int iHeight, vector<wchar_t>
 	CharRecogniser* recogniser = CharRecogniser::buildInstance();
 
 	if(!recogniser->isAvailable()){
-		cerr << "ERROR: Classifier data file is not exist, please train it before classifying!" << endl;
+		cout << "ERROR: Classifier data file is not exist, please train it before classifying!" << endl;
 
 		return;
 	}
@@ -59,9 +59,13 @@ void OCRToolkit::recognise(char* greys, int iWidth, int iHeight, vector<wchar_t>
 IplImage *OCRToolkit::recognise(const char *filePath, vector<wchar_t> &res)
 {
 	IplImage* image = cvLoadImage(filePath, CV_LOAD_IMAGE_GRAYSCALE);
+	if(image == NULL){
+		cout << "ERROR: can not find file \"" << filePath << "\"" << endl;
+		return NULL;
+	}
 
 	if(!DebugToolkit::isBinarized(image)){
-		cerr << "ERROR: \"" << filePath << "\" is not binarized\n";
+		cout << "ERROR: \"" << filePath << "\" is not binarized\n";
 
 		cvReleaseImage(&image);
 		return NULL;

@@ -1,1 +1,0 @@
-grid.py -log2c -5,5,1 -svmtrain E:\Project\VS2005\ocr\Software\libsvm-2.85\windows\svmtrain.exe -gnuplot D:\Software\gnuplot\bin\pgnuplot.exe -v 20 -m 2500 problem

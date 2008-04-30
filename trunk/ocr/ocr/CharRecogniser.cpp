@@ -68,8 +68,16 @@ double CharRecogniser::recogniseChar(const char* greys, int iWidth, int iHeight,
 
 	normalize(normChar, greys, iWidth, 0, 0, iWidth, iHeight);
 
+#ifdef DISPLAY_NORM_CHAR
+	DebugToolkit::displayGreyImage(normChar, normSize, normSize);
+#endif
+
 	float *scaledFeature = new float[featureSize];
 	FeatureExtracter::getInstance()->extractScaledFeature(scaledFeature, normChar);
+
+// 	for(int i = 0; i<featureSize; i++){
+// 		std::cout << scaledFeature[i] << std::endl;
+// 	}
 
 	double ret = s_instance->classify(scaledFeature, res);
 

@@ -200,10 +200,11 @@ int main(int argc, char** argv){
 	//unitTest();
 #if 1
 	const char *usage = 
-"usage:character -train|(-a filepath)|(-r filepath)\n\
+"usage:character -train|(-a filepath)|(-r filepath)|(-b filepath)\n\
 	-train train classifier from current library\n\
 	-a append library characters\n\
-	-r recognise character image\n";
+	-r recognise character image\n\
+	-b binarize input image\n";
 
 	if(argc < 2){
 		cout << usage;
@@ -227,14 +228,14 @@ int main(int argc, char** argv){
 		}
 
 		vector<wchar_t> res;
-		IplImage *image = NULL;
 		wcout.imbue(locale("chs"));
+		bool success;
 
 		for(int i = 2; i<argc; i++){
 			res.clear();
 
-			image = OCRToolkit::recognise(argv[i], res);
-			if(image == NULL){
+			success = OCRToolkit::recognise(argv[i], res);
+			if(!success){
 				continue;
 			}
 
@@ -244,12 +245,19 @@ int main(int argc, char** argv){
 				wcout << res.at(i);
 			}
 			cout << "\n" << endl;
-
-			if(image != NULL){
-				DebugToolkit::displayImage(image);
-				cvReleaseImage(&image);
-			}
 		}
+	}else if(strcmp(argv[1], "-b") == 0){
+		if(argc < 3){
+			cout << usage;
+			return 1;
+		}
+
+		IplImage *image = cvLoadImage(argv[2], CV_LOAD_IMAGE_GRAYSCALE);
+		DebugToolkit::binarize(image, 128);
+
+		cvSaveImage(argv[2], image);
+
+		cvReleaseImage(&image);
 	}
 #endif
 

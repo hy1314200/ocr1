@@ -56,19 +56,19 @@ void OCRToolkit::recognise(char* greys, int iWidth, int iHeight, vector<wchar_t>
 	return;
 }
 
-IplImage *OCRToolkit::recognise(const char *filePath, vector<wchar_t> &res)
+ bool OCRToolkit::recognise(const char *filePath, vector<wchar_t> &res)
 {
 	IplImage* image = cvLoadImage(filePath, CV_LOAD_IMAGE_GRAYSCALE);
 	if(image == NULL){
 		cout << "ERROR: can not find file \"" << filePath << "\"" << endl;
-		return NULL;
+		return false;
 	}
 
 	if(!DebugToolkit::isBinarized(image)){
-		cout << "ERROR: \"" << filePath << "\" is not binarized\n";
+		cout << "ERROR: \"" << filePath << "\" is not binarized" << endl;
 
 		cvReleaseImage(&image);
-		return NULL;
+		return false;
 	}
 
 	int width = image->width, height = image->height;
@@ -80,5 +80,16 @@ IplImage *OCRToolkit::recognise(const char *filePath, vector<wchar_t> &res)
 
 	recognise(data, image->width, image->height, res);
 
-	return image;
+#ifdef DISPLAY_DIVIDED_CHAR_IN_TOTAL
+	DebugToolkit::displayGreyImage(data, image->width, image->height);
+#endif
+
+#ifdef DISPLAY_ORIGIN_IMAGE
+	DebugToolkit::displayImage(image);
+#endif
+
+	cvReleaseImage(&image);
+	delete[] data;
+
+	return true;
 }

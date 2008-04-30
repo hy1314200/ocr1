@@ -5,8 +5,6 @@
 #include "CharRecogniser.h"
 #include "libsvm-2.85/svm.h"
 
-#include <stdio.h>
-
 namespace recognise
 {
 

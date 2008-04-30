@@ -710,12 +710,10 @@ public class CharLibManagerView extends FrameView {
             return;
         }
 
-        displayArea.setText("正在加载分类器模型，请稍候...");
         Manager.recogniseImage(filePathField.getText(), displayArea);
   	}//GEN-LAST:event_recogniseButtonActionPerformed
 
     private void trainButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_trainButtonActionPerformed
-        displayArea.setText("正在训练，请稍候...");
         Manager.trainClassifier(displayArea);
         
         trainButton.setEnabled(false);

@@ -1,4 +1,4 @@
-classifier = mnn
+classifier = svm
 
 typeface.songti = true
 typeface.heiti = true

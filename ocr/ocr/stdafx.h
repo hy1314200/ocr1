@@ -10,6 +10,18 @@
 #endif
 
 // display define
+#ifndef DISPLAY_DIVIDED_CHAR_IN_TOTAL
+#define DISPLAY_DIVIDED_CHAR_IN_TOTAL
+#endif
+
+#ifndef DISPLAY_ORIGIN_IMAGE
+//#define DISPLAY_ORIGIN_IMAGE
+#endif
+
+#ifndef DISPLAY_NORM_CHAR
+#define DISPLAY_NORM_CHAR
+#endif
+
 #ifndef DISPLAY_DIVIDED_CHAR
 //#define DISPLAY_DIVIDED_CHAR
 #endif

@@ -32,7 +32,7 @@ public:
 	*
 	* @return the length of the recognized character array
 	*/
-	static IplImage *recognise(const char *filePath, vector<wchar_t> &res);
+	static bool recognise(const char *filePath, vector<wchar_t> &res);
 
 	/**
 	* train the specified classifier

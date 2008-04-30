@@ -6,7 +6,9 @@
 
 #include <algorithm>
 #include <iostream>
+#include <iomanip>
 
+using namespace std;
 using namespace recognise;
 using namespace library;
 
@@ -19,9 +21,9 @@ SVMClassifier::SVMClassifier()
 	if(file == NULL){
 		m_model = NULL;
 	}else{
-		printf("loading SVM model...\n");
+		cout << "loading SVM model..." << endl;
 		m_model = svm_load_model(config->get("path.file.model.svm").c_str());
-		printf("100%% finished\n");
+		cout << "100% finished" << endl;
 
 		fclose(file);
 	}
@@ -99,7 +101,7 @@ void SVMClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 	float *featureData = new float[charCount*libSize*s_sampleSize*featureSize], *tempData = featureData;
 	FeatureExtracter* extracter = FeatureExtracter::getInstance();
 
-	printf("sample generating process:\n");
+	cout << "sample generating process:" << endl;
 	for(int i = 0; i<charCount; i++){
 		for(int j = 0; j<libSize; j++){
 			distorteAndNorm(imageData, fontLib[j]->charArray()->at(i)->imageData());
@@ -110,10 +112,10 @@ void SVMClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 		}
 
 		if(i%100 == 0){
-			printf("%.2f%% finished\n", i*100*1.0/charCount);
+			cout << setprecision(2) << i*100*1.0/charCount << "% finished" << endl;
 		}
 	}
-	printf("100%% finished\n");
+	cout << "100% finished" << endl;
 
 	extracter->saveData();
 
@@ -123,17 +125,17 @@ void SVMClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 	problem->y = new double[count];
 	problem->x = new struct svm_node*[count];
 
-	printf("\nspace allocation process:\n");
+	cout << "\nspace allocation process:" << endl;
 	for(int i = 0; i<count; i++){
 		problem->x[i] = new struct svm_node[featureSize + 1];
 
 		if(i%4000 == 0){
-			printf("%.2f%% finished\n", i*100*1.0/count);
+			cout << setprecision(2) << i*100*1.0/count << "% finished" << endl;
 		}
 	}
-	printf("100%% finished\n");
+	cout << "100% finished" << endl;
 
-	printf("\nproblem building process:\n");
+	cout << "\nproblem building process:" << endl;
 	tempData = featureData;
 	for(int i = 0; i<count; i++, tempData += featureSize){
 		extracter->scaleFeature(tempData);
@@ -147,17 +149,17 @@ void SVMClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 		problem->x[i][featureSize].index = -1;
 
 		if(i%4000 == 0){
-			printf("%.2f%% finished\n", i*100*1.0/count);
+			cout << setprecision(2) << i*100*1.0/count << "% finished" << endl;
 		}
 	}
-	printf("100%% finished\n");
+	cout << "100% finished\n" << endl;
 
 #ifdef SAVE_PROBLEM
 
 	FILE* file = fopen("data/classify/svm/problem", "w");
 	assert(file != NULL);
 
-	printf("\nsaving problem process:\n");
+	cout << "\nsaving problem process:" << endl;
 	for(int i = 0; i<problem->l; i++){
 		fprintf(file, "%d", (int)problem->y[i]);
 
@@ -168,17 +170,17 @@ void SVMClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 		fprintf(file, "\n");
 
 		if(i%4000 == 0){
-			printf("%.2f%% finished\n", i*100*1.0/problem->l);
+			cout << setprecision(2) << i*100*1.0/problem->l << "% finished" << endl;
 		}
 	}
-	printf("100%% finished\n");
+	cout << "100% finished\n" << endl;
 
 	fclose(file);
 
 #endif
 
 	trainAndSaveClassifier(problem);
-	printf("\nfinish svm training\n");
+	cout << "\nfinish svm training" << endl;
 
 	for(int i = 0; i<count; i++){
 		delete[] problem->x[i];
@@ -259,7 +261,7 @@ void MNNClassifier::loadFile(FILE *file)
 	int size;
 	fscanf(file, "%d", &size);
 
-	printf("MNN model loading process:\n");
+	cout << "MNN model loading process:" << endl;
 	for(int i = 0; i<size; i++){
 		proto = new Prototype;
 		proto->data = new float[dim];
@@ -273,10 +275,10 @@ void MNNClassifier::loadFile(FILE *file)
 		m_lib.push_back(proto);
 
 		if(i%10000 == 0){
-			printf("%.2f%% finished\n", i*100*1.0/size);
+			cout << setprecision(2) << i*100*1.0/size << "% finished" << endl;
 		}
 	}
-	printf("100%% finished\n");
+	cout << "100% finished" << endl;
 }
 
 void MNNClassifier::storeFile()
@@ -323,7 +325,7 @@ void MNNClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 	FeatureExtracter* extracter = FeatureExtracter::getInstance();
 
 	Prototype *proto = NULL;
-	printf("sample generating process:\n");
+	cout << "sample generating process:" << endl;
 	for(int i = 0; i<charCount; i++){
 		for(int j = 0; j<libSize; j++){
 			distorteAndNorm(imageData, fontLib[j]->charArray()->at(i)->imageData());
@@ -339,10 +341,10 @@ void MNNClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 		}
 
 		if(i%100 == 0){
-			printf("%.2f%% finished\n", i*100*1.0/charCount);
+			cout << setprecision(2) << i*100*1.0/charCount << "% finished" << endl;
 		}
 	}
-	printf("100%% finished\n");
+	cout << "100% finished" << endl;
 
 	extracter->saveData();
 
@@ -354,7 +356,7 @@ void MNNClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 	}
 
 	storeFile();
-	printf("mnn model saved\n");
+	cout << "mnn model saved" << endl;
 
 	for(int i = 0; i<s_sampleSize; i++){
 		delete[] imageData[i];

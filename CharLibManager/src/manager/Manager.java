@@ -52,30 +52,10 @@ public class Manager {
                 return true;
             }
         } catch(IOException ex) {
-            enableTrain(false);
+            ex.printStackTrace();
         }
         
         return false;
-    }
-
-    public static void enableTrain(boolean enable) {
-        File file = new File(trainedFileName);
-        
-        try {
-            if(!file.exists()){
-                file.createNewFile();
-            }
-            
-            PrintWriter writer = new PrintWriter(file);
-            if(enable){
-                writer.print("true");
-            }else{
-                writer.print("false");
-            }
-            writer.close();
-        } catch(IOException ex) {
-            ex.printStackTrace();
-        }
     }
 
     public static String getLibrary() {

@@ -41,6 +41,7 @@ class CmdThread implements Runnable {
                 }
 
                 display.append(buffer + "\n");
+                display.setCaretPosition(display.getText().length());
             }
             reader.close();
         } catch (IOException ex) {

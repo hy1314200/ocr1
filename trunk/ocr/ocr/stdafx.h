@@ -23,7 +23,7 @@
 #endif
 
 #ifndef DISPLAY_DIVIDED_CHAR
-//#define DISPLAY_DIVIDED_CHAR
+#define DISPLAY_DIVIDED_CHAR
 #endif
 
 #ifndef DISPLAY_DISTORTION

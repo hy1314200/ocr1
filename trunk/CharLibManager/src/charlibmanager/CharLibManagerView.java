@@ -30,10 +30,6 @@ public class CharLibManagerView extends FrameView {
         super(app);
 
         initComponents();
-        
-        if(Manager.needTrain()){
-            trainButton.setEnabled(true);
-        }
 
         // status bar initialization - message timeout, idle icon and busy animation, etc
         ResourceMap resourceMap = getResourceMap();
@@ -128,7 +124,6 @@ public class CharLibManagerView extends FrameView {
         jButton3 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         appendArea = new javax.swing.JTextArea();
-        trainButton = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         filePathField = new javax.swing.JTextField();
         jButton5 = new javax.swing.JButton();
@@ -283,15 +278,6 @@ public class CharLibManagerView extends FrameView {
         appendArea.setName("appendArea"); // NOI18N
         jScrollPane1.setViewportView(appendArea);
 
-        trainButton.setText(resourceMap.getString("trainButton.text")); // NOI18N
-        trainButton.setEnabled(false);
-        trainButton.setName("trainButton"); // NOI18N
-        trainButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                trainButtonActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -302,10 +288,8 @@ public class CharLibManagerView extends FrameView {
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
-                        .addComponent(jButton3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(trainButton)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 112, Short.MAX_VALUE)
+                        .addComponent(jButton3)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -314,7 +298,6 @@ public class CharLibManagerView extends FrameView {
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
-                    .addComponent(trainButton)
                     .addComponent(jButton3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 103, Short.MAX_VALUE)
@@ -660,8 +643,7 @@ public class CharLibManagerView extends FrameView {
             JOptionPane.showMessageDialog(getComponent(), show);
 
             if (valid > 0) {
-                trainButton.setEnabled(true);
-                Manager.enableTrain(true);
+                Manager.trainClassifier(displayArea);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(getComponent(), ex.getMessage());
@@ -691,15 +673,18 @@ public class CharLibManagerView extends FrameView {
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        JFileChooser chooser = new JFileChooser(filePathField.getText());
+        String path = filePathField.getText().trim();
+        if(path.length() == 0){
+            path = new File(".").getAbsolutePath();
+        }
+        
+        JFileChooser chooser = new JFileChooser(path);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);        
-        int result = chooser.showDialog(null, "识别图像");
+        int result = chooser.showDialog(null, "选择图像");
 
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = chooser.getSelectedFile();
             filePathField.setText(file.getAbsolutePath());
-            
-            recogniseButton.doClick();
         }
     }//GEN-LAST:event_jButton5ActionPerformed
 
@@ -712,13 +697,6 @@ public class CharLibManagerView extends FrameView {
 
         Manager.recogniseImage(filePathField.getText(), displayArea);
   	}//GEN-LAST:event_recogniseButtonActionPerformed
-
-    private void trainButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_trainButtonActionPerformed
-        Manager.trainClassifier(displayArea);
-        
-        trainButton.setEnabled(false);
-        Manager.enableTrain(false);
-}//GEN-LAST:event_trainButtonActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         String lib = Manager.getLibrary();
@@ -781,7 +759,6 @@ public class CharLibManagerView extends FrameView {
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
     private javax.swing.JPanel statusPanel;
-    private javax.swing.JButton trainButton;
     // End of variables declaration//GEN-END:variables
 
     private final Timer messageTimer;

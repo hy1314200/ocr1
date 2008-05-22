@@ -67,7 +67,7 @@ public class Manager {
     }
 
     public static void recogniseImage(String text, JTextArea displayArea) {
-        String cmd = "E:/Project/VS2005/ocr/ocr/release/ocr.exe -r " + text;
+        String cmd = "E:/Project/VS2005/ocr/ocr/release/ocr.exe -r " + text; 
         
         new Thread(new CmdThread(cmd, displayArea)).start();
     }

@@ -95,6 +95,7 @@ bool CharDivider::divideChar(char* greys, int iWidth, int iHeight, vector<char*>
 
 			case LEFT_TOOBIG:
 				if(cWt < 2*cWidth){
+					// 如果块左边界到第一个波谷的距离不大于块宽的一般，则更新x，否则更新cWt
 					int* temp = new int[cWt];
 					for(int i = 0; i<cWt; i++){
 						temp[0] = 0;
@@ -368,7 +369,7 @@ CharDivider::Scale CharDivider::scale(int fist, int second, InputType type)
 		break;
 
 	case ENGLISH:
-		if(scale > 1){
+		if(scale > 1.39){
 			res = LEFT_TOOBIG;
 		}else if(scale < 0.1){
 			res = LEFT_TOOSMALL;

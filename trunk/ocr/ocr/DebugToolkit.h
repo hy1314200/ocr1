@@ -20,7 +20,7 @@ public:
 	}
 
 	/** display the histogram recorded int the float array "data" with width "width" and save it when press ctrl+s */
-	static void showHistogram(const float *data, int width, int wait = 0);
+	static void showNormHistogram(const float *data, int width, int wait = 0);
 
 	static void printGreyImage(const char* data, int width, int height);
 

@@ -19,11 +19,11 @@
 #endif
 
 #ifndef DISPLAY_NORM_CHAR
-#define DISPLAY_NORM_CHAR
+//#define DISPLAY_NORM_CHAR
 #endif
 
 #ifndef DISPLAY_DIVIDED_CHAR
-#define DISPLAY_DIVIDED_CHAR
+//#define DISPLAY_DIVIDED_CHAR
 #endif
 
 #ifndef DISPLAY_DISTORTION

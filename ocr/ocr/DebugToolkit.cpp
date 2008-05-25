@@ -299,7 +299,7 @@ void DebugToolkit::writeGreyData(uchar* data, const char *name, int width, int h
 	fclose(file);
 }
 
-void DebugToolkit::showHistogram(const float *fdata, int width, int wait){
+void DebugToolkit::showNormHistogram(const float *fdata, int width, int wait){
 	int height = width * 2 / 3; 
 
 	IplImage *image = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
@@ -311,21 +311,24 @@ void DebugToolkit::showHistogram(const float *fdata, int width, int wait){
 		times[i] = fdata[i] * height;
 		max = (max > times[i])? max: times[i];
 	}
+
 	float count = height * 4 / (5 * max);
+	int widthStep = image->widthStep;
 	for(int i = 0; i<width; i++){
 		int j = 0;
 		int temp = cvRound(times[i]*count);
 		for( ; j<temp; j++){
-			*(imageData + (height - j - 1) * width + i) = 0;
+			*(imageData + (height - j - 1) * widthStep + i) = 0;
 		}
 		for( ; j<height; j++){
-			*(imageData + (height - j - 1) * width + i) = 255;
+			*(imageData + (height - j - 1) * widthStep + i) = 255;
 		}
 	}
 
 	displayImage(image, wait);
 
 	delete[] times;
+	cvReleaseImage(&image);
 }
 
 void DebugToolkit::normalizeAndShowHist(const int *data, int width, int wait){
@@ -340,7 +343,7 @@ void DebugToolkit::normalizeAndShowHist(const int *data, int width, int wait){
 		fdata[i] = data[i]*0.1f / count;
 	}
 
-	showHistogram(fdata, width, wait);
+	showNormHistogram(fdata, width, wait);
 
 	delete[] fdata;
 }

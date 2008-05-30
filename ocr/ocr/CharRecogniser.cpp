@@ -155,7 +155,7 @@ void CharRecogniser::normalize(char* res, const char* greys, int iWidth, int x, 
 	cvReleaseImage(&dst);
 }
 
-void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin)
+void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin, FontLib::Typeface typeface)
 {
 	int normSize = FeatureExtracter::s_NORMSIZE, count = 0;
 	int x, y, width, height;
@@ -230,15 +230,17 @@ void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin
 #endif
 
 	// scale 1, CV_INTER_NN, threshold 128
-	cvCopyImage(temp, dst);
-	reduceResolution(dst, 1);
+	if(typeface != FontLib::HEITI){
+		cvCopyImage(temp, dst);
+		reduceResolution(dst, 1);
 
-	findXYWH(data, &x, &y, &width, &height);
-	normalize(samples[count++], data, normSize, x, y, width, height);
+		findXYWH(data, &x, &y, &width, &height);
+		normalize(samples[count++], data, normSize, x, y, width, height);
 
 #ifdef DISPLAY_DISTORTION
-	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+		DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
 #endif
+	}
 
 	// scale 2, CV_INTER_NN, threshold 128
 	cvCopyImage(temp, dst);
@@ -251,7 +253,7 @@ void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin
 	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
 #endif
 
-	// scale 3, CV_INTER_NN, threshold 128
+	/*// scale 3, CV_INTER_NN, threshold 128
 	cvCopyImage(temp, dst);
 	reduceResolution(dst, 3);
 
@@ -260,111 +262,117 @@ void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin
 
 #ifdef DISPLAY_DISTORTION
 	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
-#endif
+#endif*/
 
 	// scale 4, CV_INTER_LINEAR, threshold 110
-	cvCopyImage(temp, dst);
-	reduceResolution(dst, 4, CV_INTER_LINEAR, 110);
+	if(typeface == FontLib::HEITI){
+		cvCopyImage(temp, dst);
+		reduceResolution(dst, 4, CV_INTER_LINEAR, 110);
 
-	findXYWH(data, &x, &y, &width, &height);
-	normalize(samples[count++], data, normSize, x, y, width, height);
+		findXYWH(data, &x, &y, &width, &height);
+		normalize(samples[count++], data, normSize, x, y, width, height);
 
 #ifdef DISPLAY_DISTORTION
-	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+		DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
 #endif
+	}
 
 	/************************************************************************/
 	/* the third group                                                      */
 	/************************************************************************/
-	cvDilate(src, dst);
-	cvCopyImage(dst, temp);
+	if(typeface != FontLib::HEITI){
+		cvDilate(src, dst);
+		cvCopyImage(dst, temp);
 
-	// normal
-	findXYWH(data, &x, &y, &width, &height);
-	normalize(samples[count++], data, normSize, x, y, width, height);
-
-#ifdef DISPLAY_DISTORTION
-	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
-#endif
-
-	// scale 2, CV_INTER_NN, threshold 128
-	cvCopyImage(temp, dst);
-	reduceResolution(dst, 2);
-
-	findXYWH(data, &x, &y, &width, &height);
-	normalize(samples[count++], data, normSize, x, y, width, height);
+		// normal
+		findXYWH(data, &x, &y, &width, &height);
+		normalize(samples[count++], data, normSize, x, y, width, height);
 
 #ifdef DISPLAY_DISTORTION
-	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+		DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
 #endif
 
-	// scale 3, CV_INTER_NN, threshold 128
-	cvCopyImage(temp, dst);
-	reduceResolution(dst, 3);
+		// scale 2, CV_INTER_NN, threshold 128
+		cvCopyImage(temp, dst);
+		reduceResolution(dst, 2);
 
-	findXYWH(data, &x, &y, &width, &height);
-	normalize(samples[count++], data, normSize, x, y, width, height);
+		findXYWH(data, &x, &y, &width, &height);
+		normalize(samples[count++], data, normSize, x, y, width, height);
 
 #ifdef DISPLAY_DISTORTION
-	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+		DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
 #endif
 
-	// scale 4, CV_INTER_NN, threshold 128
-	cvCopyImage(temp, dst);
-	reduceResolution(dst, 4, CV_INTER_LINEAR);
+		// scale 3, CV_INTER_NN, threshold 128
+		cvCopyImage(temp, dst);
+		reduceResolution(dst, 3);
 
-	findXYWH(data, &x, &y, &width, &height);
-	normalize(samples[count++], data, normSize, x, y, width, height);
+		findXYWH(data, &x, &y, &width, &height);
+		normalize(samples[count++], data, normSize, x, y, width, height);
 
 #ifdef DISPLAY_DISTORTION
-	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+		DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
 #endif
+
+		/*// scale 4, CV_INTER_NN, threshold 128
+		cvCopyImage(temp, dst);
+		reduceResolution(dst, 4, CV_INTER_LINEAR);
+
+		findXYWH(data, &x, &y, &width, &height);
+		normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+		DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif*/
+	}
 
 	/************************************************************************/
 	/* the fourth group                                                     */
 	/************************************************************************/
-	cvCopyImage(src, temp);
+	if(typeface == FontLib::HEITI){
+		cvCopyImage(src, temp);
 
-	// normal
-	findXYWH(prototype, &x, &y, &width, &height);
-	normalize(samples[count++], prototype, normSize, x, y, width, height);
-
-#ifdef DISPLAY_DISTORTION
-	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
-#endif
-
-	// scale 1, CV_INTER_NN, threshold 128
-	cvCopyImage(temp, dst);
-	reduceResolution(dst, 1);
-
-	findXYWH(data, &x, &y, &width, &height);
-	normalize(samples[count++], data, normSize, x, y, width, height);
+		// normal
+		findXYWH(prototype, &x, &y, &width, &height);
+		normalize(samples[count++], prototype, normSize, x, y, width, height);
 
 #ifdef DISPLAY_DISTORTION
-	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+		DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
 #endif
 
-	// scale 2, CV_INTER_NN, threshold 128
-	cvCopyImage(temp, dst);
-	reduceResolution(dst, 2);
+		/*// scale 1, CV_INTER_NN, threshold 128
+		cvCopyImage(temp, dst);
+		reduceResolution(dst, 1);
 
-	findXYWH(data, &x, &y, &width, &height);
-	normalize(samples[count++], data, normSize, x, y, width, height);
+		findXYWH(data, &x, &y, &width, &height);
+		normalize(samples[count++], data, normSize, x, y, width, height);
 
 #ifdef DISPLAY_DISTORTION
-	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
-#endif
+		DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif*/
 
-	// scale 3, CV_INTER_NN, threshold 128
-	cvCopyImage(temp, dst);
-	reduceResolution(dst, 3, CV_INTER_LINEAR, 100);
+		// scale 2, CV_INTER_NN, threshold 128
+		cvCopyImage(temp, dst);
+		reduceResolution(dst, 2);
 
-	findXYWH(data, &x, &y, &width, &height);
-	normalize(samples[count++], data, normSize, x, y, width, height);
+		findXYWH(data, &x, &y, &width, &height);
+		normalize(samples[count++], data, normSize, x, y, width, height);
 
 #ifdef DISPLAY_DISTORTION
-	DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+		DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
 #endif
+
+		// scale 3, CV_INTER_NN, threshold 128
+		cvCopyImage(temp, dst);
+		reduceResolution(dst, 3, CV_INTER_LINEAR, 100);
+
+		findXYWH(data, &x, &y, &width, &height);
+		normalize(samples[count++], data, normSize, x, y, width, height);
+
+#ifdef DISPLAY_DISTORTION
+		DebugToolkit::displayGreyImage(samples[count-1], normSize, normSize);
+#endif
+	}
 
 	cvReleaseImageHeader(&src);
 	cvReleaseImageHeader(&dst);

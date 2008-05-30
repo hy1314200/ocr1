@@ -104,7 +104,7 @@ void SVMClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 	cout << "sample generating process:" << endl;
 	for(int i = 0; i<charCount; i++){
 		for(int j = 0; j<libSize; j++){
-			distorteAndNorm(imageData, fontLib[j]->charArray()->at(i)->imageData());
+			distorteAndNorm(imageData, fontLib[j]->charArray()->at(i)->imageData(), fontLib[j]->typeface());
 
 			for(int k = 0; k<s_sampleSize; k++, tempData += featureSize){
 				extracter->extractFeature(tempData, imageData[k], true);
@@ -328,7 +328,7 @@ void MNNClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 	cout << "sample generating process:" << endl;
 	for(int i = 0; i<charCount; i++){
 		for(int j = 0; j<libSize; j++){
-			distorteAndNorm(imageData, fontLib[j]->charArray()->at(i)->imageData());
+			distorteAndNorm(imageData, fontLib[j]->charArray()->at(i)->imageData(), fontLib[j]->typeface());
 
 			for(int k = 0; k<s_sampleSize; k++){
 				proto = new Prototype;

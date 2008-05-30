@@ -7,6 +7,8 @@
 #include <cxcore.h>
 #include <cv.h>
 
+using namespace library;
+
 namespace recognise{
 
 	class CharRecogniser
@@ -29,13 +31,13 @@ namespace recognise{
 		virtual bool isAvailable() = 0;
 
 #ifdef TEST
-		void TEST_distorteAndNorm(char** samples, char* prototype){
-			distorteAndNorm(samples, prototype);
+		void TEST_distorteAndNorm(char** samples, char* prototype, FontLib::Typeface typeface){
+			distorteAndNorm(samples, prototype, typeface);
 		}
 #endif
 
 	protected:
-		static const int s_sampleSize = 13;
+		static const int s_sampleSize = 6;
 
 		static CharRecogniser* s_instance;
 
@@ -51,7 +53,7 @@ namespace recognise{
 		static void normalize(char* res, const char* greys, int iWidth, int x, int y, int width, int height);
 		
 		/** used to generate many distorted samples for training */
-		static void distorteAndNorm(char** samples, const char* prototype);
+		static void distorteAndNorm(char** samples, const char* prototype, FontLib::Typeface typeface);
 
 		static void findXYWH(char* data, int* x, int* y, int* width, int* height);
 

@@ -176,9 +176,8 @@ void CharRecogniser::distorteAndNorm(char** samples, const char* prototypeOrigin
 	*/
 	IplConvKernel* element = cvCreateStructuringElementEx( 2, 2, 0, 0, CV_SHAPE_ELLIPSE, 0 );
 
-#ifdef DISPLAY_DISTORTION
-	DebugToolkit::displayImage(src);
-#endif
+	// display the source image
+	// DebugToolkit::displayImage(src);
 
 	/************************************************************************/
 	/* the first group                                                      */

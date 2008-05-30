@@ -27,7 +27,7 @@
 #endif
 
 #ifndef DISPLAY_DISTORTION
-//#define DISPLAY_DISTORTION
+#define DISPLAY_DISTORTION
 #endif
 
 #ifndef DISPLAY_CONNECTED_IMAGE

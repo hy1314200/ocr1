@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory=""
-				CommandArguments="-r image\e1.bmp"
+				CommandArguments="-train"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"

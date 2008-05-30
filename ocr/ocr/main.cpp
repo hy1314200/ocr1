@@ -202,7 +202,7 @@ int main(int argc, char** argv){
 
 #if 1
 	const char *usage = 
-"usage:character -train|(-a filepath)|(-r filepath)|(-b filepath)\n\
+"usage:ocr -train|(-a filepath)|(-r filepath)|(-b filepath)\n\
 	-train train classifier from current library\n\
 	-a append library characters\n\
 	-r recognise character image\n\

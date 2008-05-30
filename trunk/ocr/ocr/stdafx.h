@@ -34,8 +34,8 @@
 //#define DISPLAY_CONNECTED_IMAGE
 #endif
 
-#ifndef DISPLAY_MNN_CHAR
-//#define DISPLAY_MNN_CHAR
+#ifndef DISPLAY_KNN_CHAR
+//#define DISPLAY_KNN_CHAR
 #endif
 
 

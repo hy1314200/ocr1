@@ -35,8 +35,8 @@ void testRecognise(char* path){
 		wcout << wordList.at(i);
 	}
 
-	IplImage *image = cvLoadImage(path);
-	DebugToolkit::displayImage(image);
+	//IplImage *image = cvLoadImage(path);
+	//DebugToolkit::displayImage(image);
 }
 
 void testFeature1(char* path){
@@ -124,7 +124,7 @@ void testWChar(){
 	wprintf(L"%s\n", str);
 }
 
-void testDistorte(){
+void testDistorte(FontLib::Typeface typeface){
 	IplImage* image = cvLoadImage("ctrl_s.bmp", 0);
 
 	char b[64*64], **a = new char*[16];
@@ -137,7 +137,7 @@ void testDistorte(){
 		memcpy(b+64*i, image->imageData + image->widthStep*i, 64);
 	}
 
-	CharRecogniser::buildInstance()->TEST_distorteAndNorm(a, b);
+	CharRecogniser::buildInstance()->TEST_distorteAndNorm(a, b, typeface);
 
 	cvReleaseImage(&image);
 
@@ -149,20 +149,20 @@ void testDistorte(){
 
 void testApp(){
 	char str[40];
-	for(int i = 1; i<=9; i++){ 
+	/*for(int i = 1; i<=9; i++){ 
 		sprintf(str, "image/(%d).bmp", i);
 
 		testRecognise(str);
 		cout << "\n" << endl;
 	}
-
-	/*
+*/
+	
 	for(int i = 1; i<=18; i++){
 		sprintf(str, "image/test/(%d).bmp", i);
 
 		testRecognise(str);
 		cout << "\n" << endl;
-	}*/
+	}
 }
 
 void unitTest(){
@@ -198,6 +198,8 @@ void unitTest(){
 
 int main(int argc, char** argv){
 	//unitTest();
+	//testApp()
+
 #if 1
 	const char *usage = 
 "usage:character -train|(-a filepath)|(-r filepath)|(-b filepath)\n\
@@ -261,6 +263,5 @@ int main(int argc, char** argv){
 	}
 #endif
 
-	//testApp();
 	return 0;
 }

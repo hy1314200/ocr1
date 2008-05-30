@@ -29,13 +29,13 @@ namespace recognise
 
 	};
 
-	class MNNClassifier: public CharRecogniser
+	class KNNClassifier: public CharRecogniser
 	{
 	public:
 		void buildFeatureLib(library::FontLib** fontLib, int size);
 
-		MNNClassifier();
-		~MNNClassifier();
+		KNNClassifier();
+		~KNNClassifier();
 
 		double classify(const float *scaledFeature, wchar_t *res);
 

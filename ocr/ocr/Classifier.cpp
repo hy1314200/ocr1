@@ -232,7 +232,7 @@ double SVMClassifier::classify(const float *scaledFeature, wchar_t *res)
 	return maxProb;
 }
 
-MNNClassifier::MNNClassifier()
+KNNClassifier::KNNClassifier()
 {
 	FILE *file = fopen(GlobalCofig::getConfigFile()->get("path.file.model.mnn").c_str(), "r");
 
@@ -243,7 +243,7 @@ MNNClassifier::MNNClassifier()
 	}
 }
 
-MNNClassifier::~MNNClassifier(void)
+KNNClassifier::~KNNClassifier(void)
 {
 	int size = m_lib.size();
 	for(int i = 0; i<size; i++){
@@ -253,7 +253,7 @@ MNNClassifier::~MNNClassifier(void)
 	}
 }
 
-void MNNClassifier::loadFile(FILE *file)
+void KNNClassifier::loadFile(FILE *file)
 {
 	int dim = FeatureExtracter::s_FEATURESIZE;
 	Prototype* proto = NULL;
@@ -261,7 +261,7 @@ void MNNClassifier::loadFile(FILE *file)
 	int size;
 	fscanf(file, "%d", &size);
 
-	cout << "MNN model loading process:" << endl;
+	cout << "KNN model loading process:" << endl;
 	for(int i = 0; i<size; i++){
 		proto = new Prototype;
 		proto->data = new float[dim];
@@ -281,7 +281,7 @@ void MNNClassifier::loadFile(FILE *file)
 	cout << "100% finished" << endl;
 }
 
-void MNNClassifier::storeFile()
+void KNNClassifier::storeFile()
 {
 	ConfigFile *config = GlobalCofig::getConfigFile();
 
@@ -304,7 +304,7 @@ void MNNClassifier::storeFile()
 	fclose(file);
 }
 
-void MNNClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSize)
+void KNNClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSize)
 {
 	const int charCount = fontLib[0]->size();
 
@@ -364,7 +364,7 @@ void MNNClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 	delete[] imageData;
 }
 
-double MNNClassifier::classify(const float *scaledFeature, wchar_t *res)
+double KNNClassifier::classify(const float *scaledFeature, wchar_t *res)
 {
 	int size = m_lib.size();
 	int dim = FeatureExtracter::s_FEATURESIZE;
@@ -417,7 +417,7 @@ double MNNClassifier::classify(const float *scaledFeature, wchar_t *res)
 
 	tempROff = recordOff[0];	// record the most nearest
 
-#ifdef DISPLAY_MNN_CHAR
+#ifdef DISPLAY_KNN_CHAR
 
 	setlocale(LC_ALL, "");
 	for(int i = 0; i<K; i++){
@@ -462,7 +462,7 @@ double MNNClassifier::classify(const float *scaledFeature, wchar_t *res)
 	return 1;
 }
 
-bool MNNClassifier::compare(const Prototype* x,const Prototype* y)
+bool KNNClassifier::compare(const Prototype* x,const Prototype* y)
 {
 	return x->data[0] < y->data[0];
 }

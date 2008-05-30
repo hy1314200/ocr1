@@ -21,7 +21,7 @@ CharRecogniser* CharRecogniser::buildInstance(){
 
 		if(classifier == "svm"){
 			s_instance = new SVMClassifier();
-		}else if(classifier == "mnn"){
+		}else if(classifier == "knn"){
 			s_instance = new KNNClassifier();
 		}else{
 			assert(false);

@@ -11,7 +11,7 @@ path.dir.currlib = data/font/curr
 path.file.maxlib = data/font/max/library
 path.file.currlib = data/font/curr/library
 path.file.model.svm = data/classify/svm/svm.model
-path.file.model.mnn = data/classify/mnn/mnn.model
+path.file.model.knn = data/classify/knn/knn.model
 path.file.feature.maxmin = data/classify/feature.maxmin
 
 filename.songti = songti.int

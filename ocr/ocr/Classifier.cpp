@@ -234,7 +234,7 @@ double SVMClassifier::classify(const float *scaledFeature, wchar_t *res)
 
 KNNClassifier::KNNClassifier()
 {
-	FILE *file = fopen(GlobalCofig::getConfigFile()->get("path.file.model.mnn").c_str(), "r");
+	FILE *file = fopen(GlobalCofig::getConfigFile()->get("path.file.model.knn").c_str(), "r");
 
 	if(file != NULL){
 		loadFile(file);
@@ -285,7 +285,7 @@ void KNNClassifier::storeFile()
 {
 	ConfigFile *config = GlobalCofig::getConfigFile();
 
-	FILE *file = fopen(config->get("path.file.model.mnn").c_str(), "w");
+	FILE *file = fopen(config->get("path.file.model.knn").c_str(), "w");
 	assert(file);
 
 	int dim = FeatureExtracter::s_FEATURESIZE;
@@ -356,7 +356,7 @@ void KNNClassifier::buildFeatureLib(library::FontLib** fontLib, const int libSiz
 	}
 
 	storeFile();
-	cout << "mnn model saved" << endl;
+	cout << "knn model saved" << endl;
 
 	for(int i = 0; i<s_sampleSize; i++){
 		delete[] imageData[i];

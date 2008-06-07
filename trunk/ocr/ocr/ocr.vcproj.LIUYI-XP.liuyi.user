@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory=""
-				CommandArguments="-r image/e2.bmp"
+				CommandArguments="-a tmp/append"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"

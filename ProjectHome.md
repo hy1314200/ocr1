@@ -1,0 +1,1 @@
+Recognise the characters embedded in the binary grey picture
